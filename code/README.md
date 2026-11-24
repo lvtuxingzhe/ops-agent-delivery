@@ -1,7 +1,6 @@
 # 运维 Agent 平台 · 工程代码
 
-> 本文件是 `code/` 的唯一入口：目录职责、启动方式、自检命令和敏感文件边界。
-> 项目入口见 `../README.md`，文档索引见 `../docs/00-索引.md`。
+> 本文件是代码目录的入口：目录职责、启动方式、自检命令和敏感文件边界。
 
 ## 先看这里
 
@@ -9,7 +8,6 @@
 - 后台默认 `http://127.0.0.1:8000`，前端默认 `http://127.0.0.1:5173`，worker 不暴露端口。
 - Windows 本机开发优先用 `code/ops/dev-stack.ps1`；容器方式见下面的“Compose”。
 - `.env`、`secrets.encrypted.env*`、`var/secrets/` 是敏感文件，不提交、不移动。
-- 阶段验收历史已移到 `../docs/01-当前基线/阶段验收记录.md`，本文件只保留当前状态。
 
 ## 代码目录职责
 
@@ -27,7 +25,7 @@
 | `scripts/` | 自检脚本（`selftests/`） | — |
 | `var/` | 模型、工具、上传、审计归档、密钥 | **运行数据，禁止整体搬走** |
 
-依赖、构建产物和运行数据都已被忽略；清理前先看 `../docs/03-设计与方案/代码目录整理方案-2026-11-23.md`。
+依赖、构建产物和运行数据都已被忽略。清理前先看目录表里标为“不进 Git”的内容，不要整体搬走 `var/`。
 
 ## 四个进程分别是什么
 
@@ -106,43 +104,15 @@ python scripts/selftests/selftest_live.py --desktop  # 四个进程 + 桌面窗�
 ./backend/.venv/Scripts/python.exe scripts/selftests/selftest_model_builder.py  # 模型装配
 ```
 
-当前结果：
+运行后以命令输出为准，不要使用过期结果；失败项按脚本提示逐条处理。
 
-| 检查 | 结果 | 说明 |
-|---|---|---|
-| `selftest.py` | PASS 29 / FAIL 3 / SKIP 1 | 3 个失败在未改动的后端文件里：硬编码地址、变量缩写、函数缺说明 |
-| `selftest_samples.py` | PASS 26 / FAIL 0 | 四类样例、零连接、只读检查全部通过 |
-| `selftest_model_builder.py` | PASS 16 / FAIL 0 | 三种协议装配、零联网、密钥不落到 `repr` |
-| `selftest_live.py` | 本次未重跑 | 会启动四个进程；迁移后的 `ROOT/BACKEND/FRONTEND/DESKTOP/WORKER` 路径已验证 |
+## 运维手册
 
-阶段验收的旧数字不要拿来当当前结果；历史记录见 `../docs/01-当前基线/阶段验收记录.md`。
-
-## 日常运维与详细操作
-
-| 内容 | 位置 |
-|---|---|
-| 审计维护、接口限流、数据库引导、MinIO、基础设施 | `../docs/05-运维手册/本地开发与运维.md` |
-| Electron 打包、代码签名、打包后自检 | `../docs/06-交付与发布/桌面打包与签名.md` |
-| 执行许可、SSH 远程执行、真实模型联调、队列执行 | `../docs/03-设计与方案/跨平台命令执行工具.md` |
-| 代码结构和模块关系 | `../docs/03-设计与方案/代码说明书.md` |
-| 开发规则和目录规则 | `../docs/03-设计与方案/开发规范.md` |
+本仓库只包含代码，不含运维手册、设计文档和截图；涉及审计维护、MinIO、桌面打包、执行许可与真实模型联调时，请结合部署环境中的内部资料操作。
 
 ## CI 与监控
 
-CI 在仓库根 `.github/workflows/ci.yml` 执行：
-
-```bash
-python -m pytest -q \
-  --cov=backend/app --cov=packages --cov=worker/tools \
-  --cov-report=term-missing --cov-fail-under=30
-python -m ruff check backend worker packages tests
-python -m mypy
-
-cd frontend
-npm ci
-npm run typecheck
-npm run build
-```
+本仓库当前未启用 GitHub Actions：workflow 文件位于 `code/.github/workflows`，而 GitHub 只读取仓库根目录的 `.github/workflows`。需要启用时，把 workflow 移到根目录并调整其中的路径。
 
 监控接口：
 
@@ -170,4 +140,4 @@ curl -H "X-Metrics-Token: $METRICS_TOKEN" http://127.0.0.1:8000/api/metrics
 3. 排查侧工具注册表有没有混进写工具？
 4. 每一步能不能在审计里按 `trace_id` 查到？
 
-具体判断标准见 `../docs/03-设计与方案/开发规范.md`。
+判断标准就是上面这 4 条。
