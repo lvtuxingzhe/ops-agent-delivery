@@ -18,7 +18,7 @@ def _write_known_hosts(tmp_path, address, key):
 
 def _base(path, policy="strict", **extra):
     return {
-        "address": "10.0.0.1", "port": 22, "user": "root",
+        "address": "192.0.2.1", "port": 22, "user": "root",
         "password_enc": "x", "host_key_policy": policy,
         "host_key_file": str(path), **extra,
     }
@@ -38,14 +38,14 @@ def test_strict_missing_file_blocks_before_connect(tmp_path):
 
 
 def test_strict_unregistered_host_blocks_before_connect(tmp_path):
-    path = _write_known_hosts(tmp_path, "10.0.0.2", _key())
+    path = _write_known_hosts(tmp_path, "192.0.2.2", _key())
     result = ssh_exec.run_ssh(_base(path), ["hostname"])
     assert result["reason"] == "ssh_host_key_untrusted"
     assert result["exit_code"] is None
 
 
 def test_prompt_unregistered_only_probes_and_returns_fingerprint(tmp_path, monkeypatch):
-    path = _write_known_hosts(tmp_path, "10.0.0.2", _key())
+    path = _write_known_hosts(tmp_path, "192.0.2.2", _key())
     key = _key()
     monkeypatch.setattr(ssh_exec, "_probe_host_key", lambda *_: key)
 
@@ -61,7 +61,7 @@ def test_prompt_unregistered_only_probes_and_returns_fingerprint(tmp_path, monke
 
 
 def test_prompt_probe_failure_is_reported(tmp_path, monkeypatch):
-    path = _write_known_hosts(tmp_path, "10.0.0.2", _key())
+    path = _write_known_hosts(tmp_path, "192.0.2.2", _key())
 
     def _fail(*_args, **_kwargs):
         raise TimeoutError("nope")
@@ -72,7 +72,7 @@ def test_prompt_probe_failure_is_reported(tmp_path, monkeypatch):
 
 
 def test_registered_but_changed_key_is_mismatch(tmp_path, monkeypatch):
-    path = _write_known_hosts(tmp_path, "10.0.0.1", _key())
+    path = _write_known_hosts(tmp_path, "192.0.2.1", _key())
     actual = _key()
 
     class _Client:
@@ -100,5 +100,5 @@ def test_off_requires_explicit_ack(tmp_path, monkeypatch):
 
 
 def test_host_token_formats_non_default_port():
-    assert ssh_exec._host_token("10.0.0.1", 22) == "10.0.0.1"
-    assert ssh_exec._host_token("10.0.0.1", 2222) == "[10.0.0.1]:2222"
+    assert ssh_exec._host_token("192.0.2.1", 22) == "192.0.2.1"
+    assert ssh_exec._host_token("192.0.2.1", 2222) == "[192.0.2.1]:2222"

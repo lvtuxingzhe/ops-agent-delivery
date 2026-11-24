@@ -6,6 +6,6 @@ tags: [edge]
 input:
   guard: approval_hash
   template_id: tpl-51980cecc6
-  host: vm-150
+  host: host-150
 expected:
   error_code: plan_hash_mismatch

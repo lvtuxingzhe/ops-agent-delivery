@@ -140,8 +140,8 @@
           "tool_calls": 10,
           "latency_ms": 17096,
           "guard_ok": true,
-          "root_cause": "1. 直接原因：容器 app 启动后立即以退出码 1 终止，日志只有一行 \"starting app\" 便结束，说明容器启动命令本身执行失败，而非运行中崩溃（证据 k8s:3、k8s:4、k8s:5）。\n2. 触发链：kubelet 创建并启动容器 → 进程立即非零退出 → 容器终止原因记为 Error → kubelet 按退避策略反复重建，累计 5 次启动、9 次 Back-off 告警，最终进入 CrashLoopBackOff 等待（证据 k8s:6-event/6、k8s:6-event/8、k8s:6-event/9）。\n3. 影响范围：Deployment crash-app 期望 1 副本但 ready/available 均为空，Available=False（MinimumReplicasUnavailable），Pod READY 0/1；命名空间内无 Service/Endpoints，故障不扩散到对外访问（证据 k8s:2、k8s:1、k8s:8、k8s:9）。\n4. 旁证与排除：镜像拉取成功、节点 vm-154 Ready 且无资源压力，可排除镜像拉取失败与",
-          "summary": "现象已确认：crash-app 的 Pod 容器反复以退出码 1 终止，重启 4 次后进入 CrashLoopBackOff，Deployment 报 MinimumReplicasUnavailable，READY 0/1。围绕三个假设取证：镜像拉取失败、节点资源/调度问题、容器内应用自身启动即退出。事件显示镜像 busybox:1.36 已成功拉取并多次创建、启动容器，节点 vm-154 Ready 且无内存/磁盘/PID 压力，因此前两个假设被排除；而容器日志每次只有一行 \"starting app\" 后即退出，退出码 1，指向容器启动命令本身执行失败。由于无法读取 Pod 模板中的 command/args 与探针配置，具体是哪条命令或参数导致退出尚未确定，根因只能定位到「容器启动命令执行失败」这一层。",
+          "root_cause": "1. 直接原因：容器 app 启动后立即以退出码 1 终止，日志只有一行 \"starting app\" 便结束，说明容器启动命令本身执行失败，而非运行中崩溃（证据 k8s:3、k8s:4、k8s:5）。\n2. 触发链：kubelet 创建并启动容器 → 进程立即非零退出 → 容器终止原因记为 Error → kubelet 按退避策略反复重建，累计 5 次启动、9 次 Back-off 告警，最终进入 CrashLoopBackOff 等待（证据 k8s:6-event/6、k8s:6-event/8、k8s:6-event/9）。\n3. 影响范围：Deployment crash-app 期望 1 副本但 ready/available 均为空，Available=False（MinimumReplicasUnavailable），Pod READY 0/1；命名空间内无 Service/Endpoints，故障不扩散到对外访问（证据 k8s:2、k8s:1、k8s:8、k8s:9）。\n4. 旁证与排除：镜像拉取成功、节点 host-154 Ready 且无资源压力，可排除镜像拉取失败与",
+          "summary": "现象已确认：crash-app 的 Pod 容器反复以退出码 1 终止，重启 4 次后进入 CrashLoopBackOff，Deployment 报 MinimumReplicasUnavailable，READY 0/1。围绕三个假设取证：镜像拉取失败、节点资源/调度问题、容器内应用自身启动即退出。事件显示镜像 busybox:1.36 已成功拉取并多次创建、启动容器，节点 host-154 Ready 且无内存/磁盘/PID 压力，因此前两个假设被排除；而容器日志每次只有一行 \"starting app\" 后即退出，退出码 1，指向容器启动命令本身执行失败。由于无法读取 Pod 模板中的 command/args 与探针配置，具体是哪条命令或参数导致退出尚未确定，根因只能定位到「容器启动命令执行失败」这一层。",
           "invalid_citation_count": 10,
           "invalid_citations": [
             "k8s:1",
@@ -1358,8 +1358,8 @@
       "tool_calls": 10,
       "latency_ms": 17096,
       "guard_ok": true,
-      "root_cause": "1. 直接原因：容器 app 启动后立即以退出码 1 终止，日志只有一行 \"starting app\" 便结束，说明容器启动命令本身执行失败，而非运行中崩溃（证据 k8s:3、k8s:4、k8s:5）。\n2. 触发链：kubelet 创建并启动容器 → 进程立即非零退出 → 容器终止原因记为 Error → kubelet 按退避策略反复重建，累计 5 次启动、9 次 Back-off 告警，最终进入 CrashLoopBackOff 等待（证据 k8s:6-event/6、k8s:6-event/8、k8s:6-event/9）。\n3. 影响范围：Deployment crash-app 期望 1 副本但 ready/available 均为空，Available=False（MinimumReplicasUnavailable），Pod READY 0/1；命名空间内无 Service/Endpoints，故障不扩散到对外访问（证据 k8s:2、k8s:1、k8s:8、k8s:9）。\n4. 旁证与排除：镜像拉取成功、节点 vm-154 Ready 且无资源压力，可排除镜像拉取失败与",
-      "summary": "现象已确认：crash-app 的 Pod 容器反复以退出码 1 终止，重启 4 次后进入 CrashLoopBackOff，Deployment 报 MinimumReplicasUnavailable，READY 0/1。围绕三个假设取证：镜像拉取失败、节点资源/调度问题、容器内应用自身启动即退出。事件显示镜像 busybox:1.36 已成功拉取并多次创建、启动容器，节点 vm-154 Ready 且无内存/磁盘/PID 压力，因此前两个假设被排除；而容器日志每次只有一行 \"starting app\" 后即退出，退出码 1，指向容器启动命令本身执行失败。由于无法读取 Pod 模板中的 command/args 与探针配置，具体是哪条命令或参数导致退出尚未确定，根因只能定位到「容器启动命令执行失败」这一层。",
+      "root_cause": "1. 直接原因：容器 app 启动后立即以退出码 1 终止，日志只有一行 \"starting app\" 便结束，说明容器启动命令本身执行失败，而非运行中崩溃（证据 k8s:3、k8s:4、k8s:5）。\n2. 触发链：kubelet 创建并启动容器 → 进程立即非零退出 → 容器终止原因记为 Error → kubelet 按退避策略反复重建，累计 5 次启动、9 次 Back-off 告警，最终进入 CrashLoopBackOff 等待（证据 k8s:6-event/6、k8s:6-event/8、k8s:6-event/9）。\n3. 影响范围：Deployment crash-app 期望 1 副本但 ready/available 均为空，Available=False（MinimumReplicasUnavailable），Pod READY 0/1；命名空间内无 Service/Endpoints，故障不扩散到对外访问（证据 k8s:2、k8s:1、k8s:8、k8s:9）。\n4. 旁证与排除：镜像拉取成功、节点 host-154 Ready 且无资源压力，可排除镜像拉取失败与",
+      "summary": "现象已确认：crash-app 的 Pod 容器反复以退出码 1 终止，重启 4 次后进入 CrashLoopBackOff，Deployment 报 MinimumReplicasUnavailable，READY 0/1。围绕三个假设取证：镜像拉取失败、节点资源/调度问题、容器内应用自身启动即退出。事件显示镜像 busybox:1.36 已成功拉取并多次创建、启动容器，节点 host-154 Ready 且无内存/磁盘/PID 压力，因此前两个假设被排除；而容器日志每次只有一行 \"starting app\" 后即退出，退出码 1，指向容器启动命令本身执行失败。由于无法读取 Pod 模板中的 command/args 与探针配置，具体是哪条命令或参数导致退出尚未确定，根因只能定位到「容器启动命令执行失败」这一层。",
       "invalid_citation_count": 10,
       "invalid_citations": [
         "k8s:1",

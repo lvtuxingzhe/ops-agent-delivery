@@ -109,7 +109,7 @@
       "count": null,
       "involved_object": "Pod/crash-app-5fcc6f64bf-q8bz8",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-hard-dual/crash-app-5fcc6f64bf-q8bz8 to vm-154",
+      "message": "Successfully assigned eval-hard-dual/crash-app-5fcc6f64bf-q8bz8 to host-154",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -117,7 +117,7 @@
       "count": null,
       "involved_object": "Pod/api-v2-78fc574455-pgsvd",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-hard-dual/api-v2-78fc574455-pgsvd to vm-154",
+      "message": "Successfully assigned eval-hard-dual/api-v2-78fc574455-pgsvd to host-154",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -260,7 +260,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -297,7 +297,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -334,7 +334,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -371,7 +371,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -420,7 +420,7 @@
         "pod-template-hash": "78fc574455"
       },
       "name": "api-v2-78fc574455-pgsvd",
-      "node": "vm-154",
+      "node": "host-154",
       "node_selector": {},
       "phase": "Running",
       "pod_ip": "10.42.3.6",
@@ -505,7 +505,7 @@
         "pod-template-hash": "5fcc6f64bf"
       },
       "name": "crash-app-5fcc6f64bf-q8bz8",
-      "node": "vm-154",
+      "node": "host-154",
       "node_selector": {},
       "phase": "Running",
       "pod_ip": "10.42.3.5",

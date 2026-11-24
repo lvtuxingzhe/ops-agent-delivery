@@ -117,7 +117,7 @@ async def _run_case(case: dict[str, Any], fixture_dir: Path,
         "title": str(case.get("title") or ""),
         "description": str(case.get("description") or ""),
         "target_scope": {
-            "cluster": "vm-152",
+            "cluster": "host-152",
             "namespace": str(case.get("namespace") or instance.namespace),
         },
     }
@@ -424,10 +424,10 @@ def main() -> None:
         action="store_true",
         help="评测前通过集群主机实时重采快照；命名空间已清理时保留静态快照",
     )
-    parser.add_argument("--refresh-host", default="vm-152")
+    parser.add_argument("--refresh-host", default="host-152")
     parser.add_argument("--model-config", default="", help="按配置 key 选模型，默认取默认配置")
     parser.add_argument("--model-name", default="", help="覆盖配置里的 model_name")
-    parser.add_argument("--cluster", default="vm-152", help="报告里标注的快照来源集群")
+    parser.add_argument("--cluster", default="host-152", help="报告里标注的快照来源集群")
     parser.add_argument("--resume", action="store_true", help="从输出文件旁的 .partial 检查点续跑")
     args = parser.parse_args()
     if args.output is None:

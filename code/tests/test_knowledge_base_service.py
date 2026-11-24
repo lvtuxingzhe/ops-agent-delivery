@@ -13,17 +13,17 @@ from app.services import knowledge_base_service as kb
 from app.services.knowledge_base import aggregate
 
 
-def _deploy_row(task_id: str, *, title: str = "在 vm-150 上部署 keepalived",
+def _deploy_row(task_id: str, *, title: str = "在 host-150 上部署 keepalived",
                 outcome: str = "failed", reason: str = "verify_expect_mismatch",
                 updated: str = "2026-11-17T08:00:00+00:00") -> dict:
     return {
-        "id": task_id, "title": title, "description": "在 vm-150 上部署 keepalived",
+        "id": task_id, "title": title, "description": "在 host-150 上部署 keepalived",
         "outcome": outcome, "reason_code": reason, "stage": "deployment",
         "updated_at": updated,
         "created_at": datetime.fromisoformat(updated),
         "plan": {
             "template_id": "tpl-1", "template_version": 2,
-            "host_os_family": "rhel", "host": "vm-150",
+            "host_os_family": "rhel", "host": "host-150",
             "summary": "yum 安装 keepalived 并启动服务",
             "operations": [{"argv": ["yum", "install", "-y", "keepalived"]}],
             "verify": [{"argv": ["systemctl", "is-active", "keepalived"]}],
@@ -38,7 +38,7 @@ def _deploy_row(task_id: str, *, title: str = "在 vm-150 上部署 keepalived",
     }
 
 
-def _investigation_row(task_id: str, *, title: str = "vm-150 上 nginx 无法启动",
+def _investigation_row(task_id: str, *, title: str = "host-150 上 nginx 无法启动",
                        updated: str = "2026-11-17T08:00:00+00:00") -> dict:
     return {
         "id": task_id, "title": title,
@@ -109,7 +109,7 @@ def test_dedupe_collapses_exact_duplicates():
 
 def test_dedupe_keeps_one_card_per_topic():
     """同主题但摘要不同的记录，默认只展示最新一条。"""
-    title = "排查 vm-150 CPU 使用率"
+    title = "排查 host-150 CPU 使用率"
     entries = [
         {
             "id": f"inv-{index}",
@@ -133,7 +133,7 @@ def test_dedupe_keeps_one_card_per_topic():
 
 def test_dedupe_hard_cap_is_three():
     """需要保留多条时，硬上限仍然是 3 条。"""
-    title = "排查 vm-150 CPU 使用率"
+    title = "排查 host-150 CPU 使用率"
     entries = [
         {
             "id": f"inv-{index}",
@@ -177,18 +177,18 @@ def test_dedupe_never_drops_manual_entries():
 
 def test_topic_key_normalizes_query_phrasing():
     """同一主机的同一对象，不同问法要落到同一个主题键。"""
-    summary = "在 vm-150 的 Prometheus 负载指标范围内，负载处于低位"
+    summary = "在 host-150 的 Prometheus 负载指标范围内，负载处于低位"
     assert kb._topic_key("查看150的负载", summary) == "150负载"
     assert kb._topic_key("给我看看150机器的负载", summary) == "150负载"
     assert kb._topic_key("查一下150分负载情况", summary) == "150负载"
     assert kb._topic_key("查看150主机有哪些服务", summary) == "150服务"
-    assert kb._topic_key("150 机器 CPU 使用率排查", "目标主机 10.0.0.150") == "150cpu使用率"
+    assert kb._topic_key("150 机器 CPU 使用率排查", "目标主机 192.0.2.150") == "150cpu使用率"
     assert kb._topic_key("查看150的负载", "没有主机信息") == ""
 
 
 def test_dedupe_merges_same_topic_with_different_phrasing():
     """同主机同对象、问法不同的记录只留一条。"""
-    summary = "在 vm-150 的 Prometheus 负载指标范围内，负载处于低位，未发现异常"
+    summary = "在 host-150 的 Prometheus 负载指标范围内，负载处于低位，未发现异常"
     entries = [
         {
             "id": f"inv-{index}", "kind": "investigation", "title": title,
@@ -210,7 +210,7 @@ def test_dedupe_merges_same_topic_with_different_phrasing():
 
 def test_dedupe_does_not_merge_different_objects():
     """同一主机但对象不同（CPU 和负载）不能合并。"""
-    summary = "在 vm-150 的 Prometheus 指标范围内，未发现异常"
+    summary = "在 host-150 的 Prometheus 指标范围内，未发现异常"
     entries = [
         {
             "id": "inv-cpu", "kind": "investigation", "title": "查看150的CPU使用率",

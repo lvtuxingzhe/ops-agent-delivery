@@ -21,7 +21,7 @@ def _task() -> dict:
         "created_at": "2026-11-19T09:00:00+08:00",
         "closed_at": "2026-11-19T10:10:00+08:00",
         "plan": {
-            "host": "vm-150",
+            "host": "host-150",
             "platform": "linux",
             "host_os_family": "rhel",
             "template_id": "restart-crond",

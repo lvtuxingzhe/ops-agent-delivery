@@ -960,7 +960,7 @@ const {
           v-model="commentBody"
           maxlength="2000"
           rows="3"
-          placeholder="例如：已核对 vm-150 的磁盘增长，建议先清理 /var/log。"
+          placeholder="例如：已核对 host-150 的磁盘增长，建议先清理 /var/log。"
           @keydown.ctrl.enter.prevent="submitComment"
         />
         <div class="comment-actions">

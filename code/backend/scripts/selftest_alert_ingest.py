@@ -27,7 +27,7 @@ from app.services import alert_ingest  # noqa: E402
 
 SOURCE_KEY = "selftest-Prometheus"
 ALERTNAME = "SelftestAlertIngest"
-HOST = "vm-150"
+HOST = "host-150"
 FAKE_TASK_ID = str(uuid.uuid4())
 RESULTS: list[tuple[str, bool, str]] = []
 
@@ -71,9 +71,9 @@ def main() -> int:
                     """,
                     (
                         FAKE_TASK_ID, f"selftest-{uuid.uuid4()}",
-                        "[告警] SelftestAlertIngest @ vm-150",
+                        "[告警] SelftestAlertIngest @ host-150",
                         "自检任务，不进队列",
-                        '{"host_id":"vm-150"}', actor_id,
+                        '{"host_id":"host-150"}', actor_id,
                         '{"source":"prometheus-pull","read_only":true,"group_key":"' + group + '"}',
                     ),
                 )

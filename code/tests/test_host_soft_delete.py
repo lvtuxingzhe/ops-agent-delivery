@@ -48,7 +48,7 @@ def test_soft_delete_sets_marker_disables_and_audits(monkeypatch):
     updates = {}
     value = {
         "platform": "linux",
-        "address": "10.0.0.150",
+        "address": "192.0.2.150",
         "port": 22,
         "password_enc": "enc",
     }
@@ -73,19 +73,19 @@ def test_soft_delete_sets_marker_disables_and_audits(monkeypatch):
     monkeypatch.setattr(service, "insert_event", lambda _conn, event: events.append(event))
 
     result = service.soft_delete_host(
-        _settings(), " VM-150 ", actor_id=7, client_source="web",
+        _settings(), " host-150 ", actor_id=7, client_source="web",
     )
 
-    assert result["id"] == "vm-150"
+    assert result["id"] == "host-150"
     assert result["deleted"] is True
-    assert updates["host_id"] == "vm-150"
-    assert updates["enabled_host_id"] == "vm-150"
+    assert updates["host_id"] == "host-150"
+    assert updates["enabled_host_id"] == "host-150"
     assert updates["enabled"] is False
     assert updates["value"]["deleted_at"]
     assert updates["value"]["deleted_by"] == 7
     assert updates["value"]["password_enc"] == "enc"
     assert events[0].event_type == "exec_host.soft_deleted"
-    assert events[0].payload["host_id"] == "vm-150"
+    assert events[0].payload["host_id"] == "host-150"
     assert events[0].payload["was_enabled"] is True
     assert conn.committed is True
     assert conn.rolled_back is False
@@ -100,15 +100,15 @@ def test_soft_delete_rejects_already_deleted(monkeypatch):
     )
 
     with pytest.raises(service.HostError, match="host_already_deleted"):
-        service.soft_delete_host(_settings(), "vm-1", actor_id=7)
+        service.soft_delete_host(_settings(), "host-1", actor_id=7)
     assert conn.rolled_back is True
 
 
 def test_list_hosts_filters_soft_deleted(monkeypatch):
     rows = [
-        ("vm-1", {"platform": "linux", "address": "10.0.0.1", "user": "root"}, True),
-        ("vm-2", {
-            "platform": "linux", "address": "10.0.0.2", "user": "root",
+        ("host-1", {"platform": "linux", "address": "192.0.2.1", "user": "root"}, True),
+        ("host-2", {
+            "platform": "linux", "address": "192.0.2.2", "user": "root",
             "deleted_at": "2026-11-22T00:00:00+00:00",
         }, False),
     ]
@@ -121,16 +121,16 @@ def test_list_hosts_filters_soft_deleted(monkeypatch):
         "host_key_type": "",
     })
 
-    assert [item["id"] for item in service.list_hosts(_settings())] == ["vm-1"]
+    assert [item["id"] for item in service.list_hosts(_settings())] == ["host-1"]
 
 
 def test_get_host_and_enable_treat_soft_deleted_as_absent(monkeypatch):
     deleted = {
-        "platform": "linux", "address": "10.0.0.2", "user": "root",
+        "platform": "linux", "address": "192.0.2.2", "user": "root",
         "password_enc": "enc", "deleted_at": "2026-11-22T00:00:00+00:00",
     }
-    monkeypatch.setattr(repository, "load_host", lambda *_args, **_kwargs: ("vm-2", deleted, True))
-    assert service.get_host(_settings(), "vm-2") is None
+    monkeypatch.setattr(repository, "load_host", lambda *_args, **_kwargs: ("host-2", deleted, True))
+    assert service.get_host(_settings(), "host-2") is None
 
     monkeypatch.setattr(service, "connect_app", lambda _settings: _FakeConnection())
     monkeypatch.setattr(
@@ -138,4 +138,4 @@ def test_get_host_and_enable_treat_soft_deleted_as_absent(monkeypatch):
         lambda *_args, **_kwargs: dict(deleted),
     )
     with pytest.raises(service.HostError, match="host_not_found"):
-        service.set_host_enabled(_settings(), "vm-2", True, actor_id=7)
+        service.set_host_enabled(_settings(), "host-2", True, actor_id=7)

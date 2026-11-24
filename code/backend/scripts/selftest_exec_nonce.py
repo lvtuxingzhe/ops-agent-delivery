@@ -64,7 +64,7 @@ def main() -> int:
     secret = secrets.token_hex(32)
     task_id = "selftest-nonce-" + secrets.token_hex(4)
     argv = ["uname", "-a"]
-    host = "vm-150"
+    host = "host-150"
     token = issue_permit(secret, task_id=task_id, platform="linux",
                          argv=argv, host=host)
 

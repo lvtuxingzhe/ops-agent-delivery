@@ -12,9 +12,9 @@ from tools.ssh_evidence import SshEvidenceTools
 
 def _host():
     return {
-        "id": "vm-150",
+        "id": "host-150",
         "platform": "linux",
-        "address": "10.0.0.150",
+        "address": "192.0.2.150",
         "port": 22,
         "user": "root",
         "password_enc": "gAAAAA-test",
@@ -55,19 +55,19 @@ def test_query_host_records_ssh_evidence_and_preserves_exit_code(monkeypatch):
         task_id="test-ssh",
     )
 
-    payload = json.loads(tools.query_host("vm-150", "nginx"))
+    payload = json.loads(tools.query_host("host-150", "nginx"))
     assert payload["ok"] is True
-    assert payload["host"] == "vm-150"
+    assert payload["host"] == "host-150"
     assert [item["name"] for item in payload["checks"]] == [
         "hostname", "kernel", "rpm", "dpkg", "which",
         "active", "enabled", "status", "journal", "unit", "listen", "process",
     ]
     # rpm 不是“查询失败”，退出码 1 就是“未安装”的证据。
     assert payload["checks"][2]["exit_code"] == 1
-    assert payload["checks"][2]["evidence_id"] == "ssh:vm-150:1-rpm"
+    assert payload["checks"][2]["evidence_id"] == "ssh:host-150:1-rpm"
     assert len(store) == 12
-    assert store["ssh:vm-150:1-rpm"]["data_status"] == "ok"
-    assert store["ssh:vm-150:1-dpkg"]["data_status"] == "no_data"
+    assert store["ssh:host-150:1-rpm"]["data_status"] == "ok"
+    assert store["ssh:host-150:1-dpkg"]["data_status"] == "no_data"
     assert all(item["source"] == "ssh" and item["fake"] is False for item in store.values())
     assert calls[2][:3] == ["rpm", "-q", "nginx"]
 
@@ -80,7 +80,7 @@ def test_query_host_rejects_host_outside_task_allowlist(monkeypatch):
         hosts=[_host()],
         evidence_store=store,
     )
-    payload = json.loads(tools.query_host("vm-151", "nginx"))
+    payload = json.loads(tools.query_host("host-151", "nginx"))
     assert payload["ok"] is False
     assert payload["reason"] == "host_not_allowed"
     assert store == {}
@@ -113,7 +113,7 @@ def test_query_host_blocks_when_audit_unwritable(monkeypatch, tmp_path):
         hosts=[_host()],
         evidence_store={},
     )
-    payload = json.loads(tools.query_host("vm-150", "nginx"))
+    payload = json.loads(tools.query_host("host-150", "nginx"))
     assert payload["ok"] is False
     assert payload["reason"] == "audit_write_failed"
     assert calls == []
@@ -124,7 +124,7 @@ def test_run_readonly_command_records_evidence_and_rejects_shell(monkeypatch):
 
     def fake_run_ssh(target, argv, timeout_s=15):
         calls.append(argv)
-        return {"exit_code": 0, "stdout": "Nov 17 11:20:00 vm-150 keepalived: config OK\n",
+        return {"exit_code": 0, "stdout": "Nov 17 11:20:00 host-150 keepalived: config OK\n",
                 "stderr": "", "timed_out": False}
 
     monkeypatch.setattr(ssh_evidence, "run_ssh", fake_run_ssh)
@@ -136,21 +136,21 @@ def test_run_readonly_command_records_evidence_and_rejects_shell(monkeypatch):
     )
 
     payload = json.loads(tools.run_readonly_command(
-        "vm-150", "journalctl -u keepalived -n 80 --no-pager",
+        "host-150", "journalctl -u keepalived -n 80 --no-pager",
     ))
     assert payload["ok"] is True
-    assert payload["evidence_id"].startswith("ssh:vm-150:")
+    assert payload["evidence_id"].startswith("ssh:host-150:")
     assert calls[0] == ["journalctl", "-u", "keepalived", "-n", "80", "--no-pager"]
     assert store[payload["evidence_id"]]["source"] == "ssh"
 
     rejected = json.loads(tools.run_readonly_command(
-        "vm-150", "journalctl -u keepalived | grep error",
+        "host-150", "journalctl -u keepalived | grep error",
     ))
     assert rejected["ok"] is False
     assert rejected["reason"] == "shell_metacharacter"
 
     rejected = json.loads(tools.run_readonly_command(
-        "vm-150", "systemctl restart keepalived",
+        "host-150", "systemctl restart keepalived",
     ))
     assert rejected["ok"] is False
     assert rejected["reason"] == "systemctl_write_subcommand"
@@ -171,11 +171,11 @@ def test_run_readonly_command_respects_enabled_command_snapshot(monkeypatch):
         enabled_commands={"df"},
     )
 
-    rejected = json.loads(tools.run_readonly_command("vm-150", "ps -ef"))
+    rejected = json.loads(tools.run_readonly_command("host-150", "ps -ef"))
     assert rejected["ok"] is False
     assert rejected["reason"] == "command_not_enabled"
 
-    allowed = json.loads(tools.run_readonly_command("vm-150", "df -h"))
+    allowed = json.loads(tools.run_readonly_command("host-150", "df -h"))
     assert allowed["ok"] is True
     assert calls[-1] == ["df", "-h"]
 
@@ -201,7 +201,7 @@ def test_long_ssh_output_is_persisted_and_read_in_pages(tmp_path, monkeypatch):
     )
 
     payload = json.loads(tools.run_readonly_command(
-        "vm-150", "journalctl -u keepalived -n 600 --no-pager",
+        "host-150", "journalctl -u keepalived -n 600 --no-pager",
     ))
     evidence_id = payload["evidence_id"]
     assert payload["output_ref"]

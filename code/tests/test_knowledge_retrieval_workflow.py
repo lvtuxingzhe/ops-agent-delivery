@@ -106,10 +106,10 @@ def test_knowledge_intent_only_matches_explicit_reference_questions() -> None:
 
 
 def test_ordinary_realtime_investigation_has_no_knowledge_intent() -> None:
-    assert not workflow.has_knowledge_intent("vm-153 CPU 使用率高")
+    assert not workflow.has_knowledge_intent("host-153 CPU 使用率高")
     assert not workflow.has_knowledge_intent("检查 nginx 是否在监听 9200")
     assert not workflow.has_knowledge_intent("重启之前先看日志")
-    assert not workflow.has_knowledge_intent("对 vm-153 做根因分析")
+    assert not workflow.has_knowledge_intent("对 host-153 做根因分析")
 
 
 def test_negative_context_blocks_false_trigger() -> None:

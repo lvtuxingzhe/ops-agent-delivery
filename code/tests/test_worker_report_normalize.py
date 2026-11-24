@@ -10,7 +10,7 @@ from runtime.report import (
     normalize_report,
 )
 
-EVIDENCE_ID = "ssh:vm-150:1-status"
+EVIDENCE_ID = "ssh:host-150:1-status"
 
 
 def test_report_keeps_redaction_placeholders() -> None:
@@ -48,7 +48,7 @@ def test_report_keeps_redaction_placeholders() -> None:
 def test_summary_allows_object_specific_normal() -> None:
     """带具体对象的“正常”是观察，不是无证据的整体判定。"""
     report = _normalize({
-        "headline": "在 vm-150 范围内 keepalived 启动失败",
+        "headline": "在 host-150 范围内 keepalived 启动失败",
         "verdict": "anomaly",
         "summary": "调度与镜像拉取环节正常，卡在容器配置生成。",
         "root_cause": "配置引用缺失。",
@@ -59,7 +59,7 @@ def test_summary_allows_object_specific_normal() -> None:
 
 def test_summary_flags_blanket_normal() -> None:
     report = _normalize({
-        "headline": "在 vm-150 范围内 keepalived 启动失败",
+        "headline": "在 host-150 范围内 keepalived 启动失败",
         "verdict": "insufficient",
         "summary": "检查后一切正常。",
         "root_cause": "",
@@ -160,7 +160,7 @@ def test_normalize_citations_fills_unique_prefix_and_drops_fake_ids() -> None:
 
 def test_anomaly_without_root_cause_is_incomplete() -> None:
     report = _normalize({
-        "headline": "在 vm-150 范围内 keepalived 未运行",
+        "headline": "在 host-150 范围内 keepalived 未运行",
         "verdict": "anomaly",
         "summary": "确认服务未运行，但没有拿到失败原因。",
         "root_cause": "",
@@ -174,7 +174,7 @@ def test_anomaly_without_root_cause_is_incomplete() -> None:
 
 def test_anomaly_with_root_cause_and_supported_hypothesis_is_complete() -> None:
     report = _normalize({
-        "headline": "在 vm-150 范围内 keepalived 启动失败",
+        "headline": "在 host-150 范围内 keepalived 启动失败",
         "verdict": "anomaly",
         "summary": "日志显示配置校验失败，进程退出。",
         "hypotheses": [{
@@ -199,7 +199,7 @@ def test_anomaly_with_root_cause_and_supported_hypothesis_is_complete() -> None:
 
 def test_anomaly_solution_without_command_is_incomplete() -> None:
     report = _normalize({
-        "headline": "在 vm-150 范围内 keepalived 启动失败",
+        "headline": "在 host-150 范围内 keepalived 启动失败",
         "verdict": "anomaly",
         "summary": "日志显示配置校验失败，进程退出。",
         "hypotheses": [{
@@ -218,34 +218,34 @@ def test_anomaly_solution_without_command_is_incomplete() -> None:
 def test_inventory_report_keeps_scoped_items_and_drops_bad_ones() -> None:
     report = _normalize(
         {
-            "headline": "vm-150、vm-151 共 2 项服务",
+            "headline": "host-150、host-151 共 2 项服务",
             "verdict": "insufficient",
-            "primary_answer": "vm-150 有 MySQL，vm-151 只有 GitLab。",
+            "primary_answer": "host-150 有 MySQL，host-151 只有 GitLab。",
             "summary": "先回答服务清单。",
             "inventory": [
-                {"host": "vm-150", "service": "MySQL", "kind": "systemd", "ports": ["3306"],
+                {"host": "host-150", "service": "MySQL", "kind": "systemd", "ports": ["3306"],
                  "status": "running", "evidence_ids": [EVIDENCE_ID]},
-                {"host": "vm-152", "service": "越界服务", "kind": "systemd",
+                {"host": "host-152", "service": "越界服务", "kind": "systemd",
                  "evidence_ids": [EVIDENCE_ID]},
-                {"host": "vm-150", "service": "空证据", "kind": "process",
+                {"host": "host-150", "service": "空证据", "kind": "process",
                  "evidence_ids": []},
-                {"host": "vm-150", "service": "伪造证据", "kind": "process",
-                 "evidence_ids": ["ssh:vm-150:999"]},
-                {"host": "vm-150", "service": "MySQL", "kind": "systemd",
+                {"host": "host-150", "service": "伪造证据", "kind": "process",
+                 "evidence_ids": ["ssh:host-150:999"]},
+                {"host": "host-150", "service": "MySQL", "kind": "systemd",
                  "evidence_ids": [EVIDENCE_ID]},
             ],
             "incidental_findings": [
-                {"object": "vm-150 nginx", "finding": "容器内 nginx failed",
+                {"object": "host-150 nginx", "finding": "容器内 nginx failed",
                  "severity": "warning", "evidence_ids": [EVIDENCE_ID]},
                 {"object": "无证据", "finding": "不应保留", "severity": "warning",
                  "evidence_ids": []},
             ],
         },
         answer_mode="inventory",
-        target_hosts=["vm-150", "vm-151"],
+        target_hosts=["host-150", "host-151"],
     )
     assert report["answer_mode"] == "inventory"
-    assert report["primary_answer"].startswith("vm-150 有 MySQL")
+    assert report["primary_answer"].startswith("host-150 有 MySQL")
     assert [item["service"] for item in report["inventory"]] == ["MySQL"]
     assert {item["reason"] for item in report["dropped_inventory"]} == {
         "host_out_of_scope", "no_evidence_id", "unknown_evidence_id", "duplicate_item",
@@ -259,7 +259,7 @@ def test_inventory_without_answer_or_list_is_incomplete() -> None:
     report = _normalize(
         {"headline": "", "verdict": "insufficient", "summary": "", "inventory": []},
         answer_mode="inventory",
-        target_hosts=["vm-150"],
+        target_hosts=["host-150"],
     )
     assert report["report_complete"] is False
     assert "缺少主答案或服务清单" in report["report_gaps"]

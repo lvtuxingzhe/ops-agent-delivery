@@ -4,7 +4,7 @@
     cd code
     .\\backend\\.venv\\Scripts\\python.exe eval\\agent\\run_agent_matrix.py ^
       --models deepseek-chat=deepseek-live,deepseek-reasoner=deepseek-live ^
-      --clusters vm-152 ^
+      --clusters host-152 ^
       --runs 3
 """
 
@@ -39,11 +39,11 @@ def _parse_pairs(raw: str) -> list[tuple[str, str]]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--models", default="deepseek-chat=deepseek-live")
-    parser.add_argument("--clusters", default="vm-152")
+    parser.add_argument("--clusters", default="host-152")
     parser.add_argument("--runs", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--refresh", action="store_true")
-    parser.add_argument("--refresh-host", default="vm-152")
+    parser.add_argument("--refresh-host", default="host-152")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 

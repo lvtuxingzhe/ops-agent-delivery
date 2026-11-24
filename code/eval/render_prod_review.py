@@ -148,7 +148,7 @@ def main() -> None:
     add("- 服务层真库自检：`selftest_knowledge_targets.py` 9 pass / 0 fail。")
     add("- HTTP 自检：`selftest_knowledge_targets_http.py` 14 pass / 0 fail，覆盖真实登录、创建、列表、详情、RAG host/service 过滤和非法参数。")
     add("- 回滚脚本 `028_knowledge_targets.rollback.sql` 已在事务中验证：删列后列计数 0，`ROLLBACK` 后恢复为 2。")
-    add("- 自动条目实测：`host_os_unknown` 返回 `target_hosts=[\"local\"]`，`credential_no_data` 返回 `target_hosts=[\"vm-154\"]`，说明 AI 自由方案也能从 `ai_host` / `target_scope` 取到主机。")
+    add("- 自动条目实测：`host_os_unknown` 返回 `target_hosts=[\"local\"]`，`credential_no_data` 返回 `target_hosts=[\"host-154\"]`，说明 AI 自由方案也能从 `ai_host` / `target_scope` 取到主机。")
     add("- 全量 pytest：584 条通过；前端 `npm run build` 通过，217 modules。")
     add("- 页面验收：知识库“新增知识”表单显示“目标主机”“目标服务”及精确匹配提示，截图 `code/var/tmp/knowledge-target-form.png`。")
     add("- 详情验收：自动部署知识详情显示正文“目标 local / unknown”，底部标签“目标主机 local”，截图 `code/var/tmp/knowledge-target-detail-tag.png`。")

@@ -30,7 +30,7 @@ def main() -> int:
     # 密钥只在本次进程内生成：自检不依赖部署环境，也不打印
     os.environ["EXEC_PERMIT_SECRET"] = secrets.token_hex(32)
     host_id = os.environ.get("EXEC_SELFTEST_HOST", "local").strip() or "local"
-    # 远程自检固定 linux（vm-150 是 CentOS 7）；local 跟本机平台走
+    # 远程自检固定 linux（host-150 是 CentOS 7）；local 跟本机平台走
     platform = "linux" if host_id != "local" else (
         "windows" if sys.platform == "win32" else "linux")
     argv = ["uname", "-a"] if platform == "linux" else ["hostname"]

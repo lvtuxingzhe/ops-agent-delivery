@@ -203,11 +203,11 @@ def main() -> int:
 
     # 3b. 网段：合法的能存，非法的进不来
     resp = client.post("/api/config/settings/allowed_cidrs",
-                       json={"value": "10.0.0.0/8, 192.168.0.0/16"},
+                       json={"value": "198.51.100.0/24, 203.0.113.0/24"},
                        headers=auth_headers(admin_token))
     stored = client.get("/api/config/settings",
                         headers=auth_headers(admin_token)).json()["settings"]
-    ok = resp.status_code == 200 and "10.0.0.0/8" in stored.get("allowed_cidrs", "")
+    ok = resp.status_code == 200 and "198.51.100.0/24" in stored.get("allowed_cidrs", "")
     record("网段可以配置（合法 CIDR 存得进）", ok,
            f"当前：{stored.get('allowed_cidrs', '')}")
     resp_bad = client.post("/api/config/settings/allowed_cidrs",

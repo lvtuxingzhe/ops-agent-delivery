@@ -30,7 +30,7 @@ def _base_payload(
         "platform": "linux",
         "os_family": "rhel",
         "package_manager": "none",
-        "default_host": "vm-150",
+        "default_host": "host-150",
         "ttl_minutes": 30,
         "visibility": "team",
         "precheck": [

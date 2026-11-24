@@ -362,7 +362,7 @@ def _active_age_seconds(item: dict, now: datetime) -> float | None:
 
 
 def _normalize_host_token(value: str) -> str:
-    """instance 可能是 10.0.0.153:9100，去掉端口再匹配。"""
+    """instance 可能是 192.0.2.153:9100，去掉端口再匹配。"""
     token = str(value or "").strip()
     if token.count(":") == 1:
         host, port = token.rsplit(":", 1)

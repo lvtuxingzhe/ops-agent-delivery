@@ -12,12 +12,12 @@
     python backend/scripts/selftest_exec_ssh.py
 
 前置：
-  * `configure_exec_host.py` 已登记 vm-150；
+  * `configure_exec_host.py` 已登记 host-150；
   * `.env` 里有 `EXEC_SSH_PASSWORD`（密码值不打印、不写入数据库）。
 
 测什么：
-  * 主机清单能读到 vm-150；
-  * 许可按 `host=vm-150` 签发后，执行器能真的 SSH 到目标并执行 `uname -a`；
+  * 主机清单能读到 host-150；
+  * 许可按 `host=host-150` 签发后，执行器能真的 SSH 到目标并执行 `uname -a`；
   * 同一许可换到 `host=local` 验签必须失败（防「批准 A 跑 B」）；
   * 输出里含目标内核信息，证明不是本机假装执行。
 """
@@ -48,7 +48,7 @@ from ops_contract.permits import (  # noqa: E402
     verify_permit,
 )
 
-HOST_ID = "vm-150"
+HOST_ID = "host-150"
 RESULTS: list[tuple[str, str, str]] = []
 
 
@@ -136,7 +136,7 @@ def main() -> int:
     ok, reason, _scope = verify_permit(token, task_id=task_id,
                                        platform="linux", argv=argv,
                                        host=HOST_ID)
-    record("许可绑定 vm-150 可验签", ok, reason or "ok")
+    record("许可绑定 host-150 可验签", ok, reason or "ok")
 
     ok_other, reason_other, _ = verify_permit(
         token, task_id=task_id, platform="linux", argv=argv, host="local",

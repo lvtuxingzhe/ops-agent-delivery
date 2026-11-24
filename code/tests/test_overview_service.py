@@ -52,8 +52,8 @@ def test_overview_admin_sees_global_and_summarizes_sources(monkeypatch):
     ctx = _FakeCtx()
     monkeypatch.setattr(overview_service, "connect_app", lambda _s: ctx)
     monkeypatch.setattr(overview_service, "list_datasources", lambda _s: [
-        {"name": "vm-150-Prometheus", "enabled": True, "health_status": "ok"},
-        {"name": "vm-150-ELK", "enabled": True, "health_status": "ok"},
+        {"name": "host-150-Prometheus", "enabled": True, "health_status": "ok"},
+        {"name": "host-150-ELK", "enabled": True, "health_status": "ok"},
         {"name": "停用源", "enabled": False, "health_status": "failed"},
     ])
 

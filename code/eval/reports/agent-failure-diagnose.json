@@ -2,7 +2,7 @@
   "generated_at": "2026-11-20T04:09:49.586045+00:00",
   "suite": "agent-k8s-replay",
   "model": "deepseek-chat",
-  "cluster": "vm-152",
+  "cluster": "host-152",
   "runs_count": 2,
   "case_count": 2,
   "metrics": {

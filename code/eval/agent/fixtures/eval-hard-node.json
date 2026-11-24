@@ -127,7 +127,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -164,7 +164,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -201,7 +201,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -238,7 +238,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [

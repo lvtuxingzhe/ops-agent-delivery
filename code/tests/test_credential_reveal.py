@@ -151,7 +151,7 @@ def test_reveal_host_password_audits_without_plaintext(monkeypatch):
     monkeypatch.setattr(
         host_service.repository, "load_password_state",
         lambda *_args, **_kwargs: ({
-            "address": "10.0.0.150", "user": "root",
+            "address": "192.0.2.150", "user": "root",
             "password_enc": sealed, "password_source": "manual",
         }, True),
     )
@@ -160,7 +160,7 @@ def test_reveal_host_password_audits_without_plaintext(monkeypatch):
     )
 
     result = host_service.reveal_host_password(
-        settings, "vm-150", actor_id=7, client_source="web",
+        settings, "host-150", actor_id=7, client_source="web",
     )
 
     assert result["password"] == "s3cret"
@@ -175,7 +175,7 @@ def test_save_datasource_credential_writes_basic_value_and_audits(monkeypatch):
 
     monkeypatch.setattr(
         datasources, "get_datasource",
-        lambda *_args: {"key": "vm-150-ELK", "kind": "elk", "credential_ref": "elk_reader"},
+        lambda *_args: {"key": "host-150-ELK", "kind": "elk", "credential_ref": "elk_reader"},
     )
     monkeypatch.setattr(
         datasources, "load_credential_config",
@@ -194,7 +194,7 @@ def test_save_datasource_credential_writes_basic_value_and_audits(monkeypatch):
     monkeypatch.setattr(datasources, "write_openbao_secret", _write)
 
     result = datasources.save_datasource_credential(
-        SimpleNamespace(), "vm-150-ELK",
+        SimpleNamespace(), "host-150-ELK",
         auth_type="basic", username="reader", password="pw-123",
         actor_id=9, client_source="web",
     )
@@ -236,7 +236,7 @@ def test_save_datasource_credential_db_path_audits_without_plaintext(monkeypatch
 
     monkeypatch.setattr(
         datasources, "get_datasource",
-        lambda *_args: {"key": "vm-150-ELK", "kind": "elk", "credential_ref": "elk_reader"},
+        lambda *_args: {"key": "host-150-ELK", "kind": "elk", "credential_ref": "elk_reader"},
     )
     monkeypatch.setattr(
         datasources, "load_credential_config",
@@ -255,7 +255,7 @@ def test_save_datasource_credential_db_path_audits_without_plaintext(monkeypatch
     monkeypatch.setattr(datasources, "write_db_secret", _write)
 
     result = datasources.save_datasource_credential(
-        SimpleNamespace(), "vm-150-ELK",
+        SimpleNamespace(), "host-150-ELK",
         auth_type="basic", username="reader", password="pw-123",
         actor_id=9, client_source="web",
     )

@@ -27,20 +27,20 @@ def test_unknown_question_falls_back_to_general() -> None:
 
 def test_host_coverage_marks_missing_host_unreachable() -> None:
     coverage = build_host_coverage(
-        {"host_ids": ["vm-150", "vm-151"]},
-        [{"id": "ssh:vm-150:1", "target": "host=vm-150", "data_status": "ok"}],
+        {"host_ids": ["host-150", "host-151"]},
+        [{"id": "ssh:host-150:1", "target": "host=host-150", "data_status": "ok"}],
     )
     assert {item["host"]: item["status"] for item in coverage} == {
-        "vm-150": "ok",
-        "vm-151": "unreachable",
+        "host-150": "ok",
+        "host-151": "unreachable",
     }
     assert coverage[1]["reason"] == "没有取到该主机数据"
 
 
 def test_host_coverage_no_data_is_not_empty_service() -> None:
     coverage = build_host_coverage(
-        {"host_ids": ["vm-150"]},
-        [{"id": "ssh:vm-150:1", "target": "host=vm-150", "data_status": "no_data"}],
+        {"host_ids": ["host-150"]},
+        [{"id": "ssh:host-150:1", "target": "host=host-150", "data_status": "no_data"}],
     )
     assert coverage[0]["status"] == "no_data"
     assert "没有可用数据" in coverage[0]["reason"]

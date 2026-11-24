@@ -67,7 +67,7 @@
       "count": null,
       "involved_object": "Pod/log-app-7c7885bf68-xlk9g",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-hard-inject/log-app-7c7885bf68-xlk9g to vm-153",
+      "message": "Successfully assigned eval-hard-inject/log-app-7c7885bf68-xlk9g to host-153",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -152,7 +152,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -189,7 +189,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -226,7 +226,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -263,7 +263,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -312,7 +312,7 @@
         "pod-template-hash": "7c7885bf68"
       },
       "name": "log-app-7c7885bf68-xlk9g",
-      "node": "vm-153",
+      "node": "host-153",
       "node_selector": {},
       "phase": "Running",
       "pod_ip": "10.42.1.8",

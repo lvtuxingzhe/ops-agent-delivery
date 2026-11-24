@@ -104,7 +104,7 @@ def test_normalize_disposition_rejects_bad_scope():
 @pytest.mark.parametrize(
     ("title", "task_type", "expected"),
     [
-        ("vm-150 磁盘快满了，看看是什么在涨", "investigation", "host"),
+        ("host-150 磁盘快满了，看看是什么在涨", "investigation", "host"),
         ("nginx 启动后 502，帮我查一下", "investigation", "middleware"),
         ("MySQL 主从延迟持续升高", "investigation", "database"),
         ("支付 Pod 一直重启，帮我定位原因", "investigation", "k8s"),

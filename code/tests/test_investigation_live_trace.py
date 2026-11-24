@@ -34,7 +34,7 @@ def test_live_trace_collects_completed_blocks_only():
         reply_id="r", tool_call_id="call-1", tool_call_name="query_host",
     ))
     live.feed(ToolCallDeltaEvent(
-        reply_id="r", tool_call_id="call-1", delta='{"host":"vm-150"}',
+        reply_id="r", tool_call_id="call-1", delta='{"host":"host-150"}',
     ))
     live.feed(ToolCallEndEvent(reply_id="r", tool_call_id="call-1"))
 
@@ -55,7 +55,7 @@ def test_live_trace_collects_completed_blocks_only():
     assert items == [
         {"index": 1, "kind": "thinking", "text": "先看负载"},
         {"index": 2, "kind": "tool_call", "name": "query_host",
-         "call_id": "call-1", "input": '{"host":"vm-150"}'},
+         "call_id": "call-1", "input": '{"host":"host-150"}'},
         {"index": 3, "kind": "tool_result", "name": "query_host",
          "call_id": "call-1", "state": "success", "output": "load1=0.1"},
         {"index": 4, "kind": "text", "text": "结论"},

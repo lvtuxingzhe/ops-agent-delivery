@@ -73,7 +73,7 @@
       "count": null,
       "involved_object": "Pod/quota-app-8f8c9577-p6zjn",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-hard-quota/quota-app-8f8c9577-p6zjn to vm-150",
+      "message": "Successfully assigned eval-hard-quota/quota-app-8f8c9577-p6zjn to host-150",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -246,7 +246,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -283,7 +283,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -320,7 +320,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -357,7 +357,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -406,7 +406,7 @@
         "pod-template-hash": "8f8c9577"
       },
       "name": "quota-app-8f8c9577-p6zjn",
-      "node": "vm-150",
+      "node": "host-150",
       "node_selector": {},
       "phase": "Running",
       "pod_ip": "10.42.2.3",

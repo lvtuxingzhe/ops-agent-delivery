@@ -1,13 +1,13 @@
 id: inv-disk-full
-title: 排查 vm-150 磁盘空间是否不足
+title: 排查 host-150 磁盘空间是否不足
 suite: full
 kind: investigation
 tags: [smoke, investigation]
 input:
-  title: 排查 vm-150 磁盘空间是否不足
-  description: 请检查 vm-150 的磁盘使用率、剩余空间和主要挂载点，结论必须引用实际证据。
+  title: 排查 host-150 磁盘空间是否不足
+  description: 请检查 host-150 的磁盘使用率、剩余空间和主要挂载点，结论必须引用实际证据。
   target_scope:
-    host: vm-150
+    host: host-150
     service: nginx
 expected:
   status: report_ready

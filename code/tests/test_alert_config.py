@@ -22,8 +22,8 @@ def test_alert_severity_whitelist_normalizes_and_rejects_unknown():
 
 
 def test_alert_host_and_alertname_whitelist_is_empty_by_default():
-    assert validate_setting_value("alert_auto_allow_hosts", " vm-150,10.0.0.153 ") == \
-        "vm-150,10.0.0.153"
+    assert validate_setting_value("alert_auto_allow_hosts", " host-150,192.0.2.153 ") == \
+        "host-150,192.0.2.153"
     assert validate_setting_value("alert_auto_allow_hosts", "") == ""
     assert validate_setting_value(
         "alert_auto_allow_alertnames", "HighCPU\nDiskFull"

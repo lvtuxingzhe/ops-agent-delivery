@@ -1,3 +1,6 @@
+Set fso = CreateObject("Scripting.FileSystemObject")
 Set sh = CreateObject("WScript.Shell")
-code = sh.Run("cmd.exe /c ""D:\workbudy\work\ops-agent-delivery\code\backend\scripts\sync_prometheus_alerts.cmd""", 0, True)
+scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
+cmdPath = fso.BuildPath(scriptDir, "sync_prometheus_alerts.cmd")
+code = sh.Run("cmd.exe /c """ & cmdPath & """", 0, True)
 WScript.Quit code

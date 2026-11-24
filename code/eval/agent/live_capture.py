@@ -22,7 +22,7 @@ def _find_json(stdout: str) -> dict[str, Any]:
     raise ValueError("实时采集没有返回 JSON")
 
 
-def refresh_snapshot(namespace: str, host_id: str = "vm-152", timeout_s: int = 180) -> dict[str, Any]:
+def refresh_snapshot(namespace: str, host_id: str = "host-152", timeout_s: int = 180) -> dict[str, Any]:
     """通过已登记主机通道登录集群节点，重新采集一个命名空间的只读快照。"""
     from app.core.config import load_dotenv, load_settings
     from app.services import exec_hosts

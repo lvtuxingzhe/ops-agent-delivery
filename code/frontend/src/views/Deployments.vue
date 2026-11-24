@@ -690,7 +690,7 @@ const {
 
           <label>
             <span>要部署什么 *</span>
-            <textarea v-model="aiForm.goal" rows="3" placeholder="例如：在 vm-150 上安装并启动 keepalived，失败自动回滚" />
+            <textarea v-model="aiForm.goal" rows="3" placeholder="例如：在 host-150 上安装并启动 keepalived，失败自动回滚" />
           </label>
 
           <div class="field-grid">
@@ -780,7 +780,7 @@ const {
                 </label>
                 <label>
                   <span>标题</span>
-                  <input v-model="form.title" placeholder="例如：重启 vm-150 crond" />
+                  <input v-model="form.title" placeholder="例如：重启 host-150 crond" />
                 </label>
               </div>
               <label>

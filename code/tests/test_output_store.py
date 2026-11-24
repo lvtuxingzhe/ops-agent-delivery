@@ -121,8 +121,8 @@ def test_output_is_redacted_before_persist(tmp_path):
         task_id="redact", root=tmp_path,
         session=RedactionSession(task_id="redact"),
     )
-    saved = store.save("password=SuperSecret123\nhost=10.0.0.1", kind="text")
+    saved = store.save("password=SuperSecret123\nhost=192.0.2.1", kind="text")
 
     assert "SuperSecret123" not in saved.text
-    assert "10.0.0.1" not in saved.text
+    assert "192.0.2.1" not in saved.text
     assert store.load(saved.handle) == saved.text

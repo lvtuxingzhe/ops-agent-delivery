@@ -194,7 +194,7 @@ const {
           </details>
 
           <div class="form-grid">
-            <label class="span-2"><span>模板名称 *</span><input v-model="editor.name" maxlength="80" placeholder="例如：vm-150 重启 crond" /></label>
+            <label class="span-2"><span>模板名称 *</span><input v-model="editor.name" maxlength="80" placeholder="例如：host-150 重启 crond" /></label>
             <label><span>平台</span><select v-model="editor.platform"><option value="linux">linux</option><option value="windows">windows</option></select></label>
             <label>
               <span>部署类型</span>
@@ -312,7 +312,7 @@ const {
           AI 只产出草稿，不会创建任务或执行命令。生成后仍需逐条核对，管理员发布后才可用。
           需要平台已启用默认模型、总开关和网关出网闸口。
         </p>
-        <label class="field"><span>要部署什么 *</span><textarea v-model="ai.goal" rows="4" placeholder="例如：在 vm-150 上重启 crond，并确认服务恢复 active；失败时自动重启回滚" /></label>
+        <label class="field"><span>要部署什么 *</span><textarea v-model="ai.goal" rows="4" placeholder="例如：在 host-150 上重启 crond，并确认服务恢复 active；失败时自动重启回滚" /></label>
         <div class="ai-target-grid">
           <label class="field ai-platform-field">
             <span>平台</span>

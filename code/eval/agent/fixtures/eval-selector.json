@@ -40,7 +40,7 @@
       "count": null,
       "involved_object": "Pod/api-v2-85664d5f95-5gnzn",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-selector/api-v2-85664d5f95-5gnzn to vm-152",
+      "message": "Successfully assigned eval-selector/api-v2-85664d5f95-5gnzn to host-152",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -48,7 +48,7 @@
       "count": null,
       "involved_object": "Pod/api-v2-85664d5f95-xfj77",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-selector/api-v2-85664d5f95-xfj77 to vm-153",
+      "message": "Successfully assigned eval-selector/api-v2-85664d5f95-xfj77 to host-153",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -174,7 +174,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -211,7 +211,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -248,7 +248,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -285,7 +285,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -334,7 +334,7 @@
         "pod-template-hash": "85664d5f95"
       },
       "name": "api-v2-85664d5f95-5gnzn",
-      "node": "vm-152",
+      "node": "host-152",
       "phase": "Running",
       "pod_ip": "10.42.0.5"
     },
@@ -383,7 +383,7 @@
         "pod-template-hash": "85664d5f95"
       },
       "name": "api-v2-85664d5f95-xfj77",
-      "node": "vm-153",
+      "node": "host-153",
       "phase": "Running",
       "pod_ip": "10.42.1.6"
     }

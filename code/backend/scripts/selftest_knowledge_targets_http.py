@@ -72,9 +72,9 @@ def main() -> int:
         exact = call("POST", "/knowledge", token, {
             "title": f"A2 HTTP 精确-{suffix}",
             "summary": "A2 精确主机过滤",
-            "body": "目标 10.0.0.1，服务 nginx。",
+            "body": "目标 192.0.2.1，服务 nginx。",
             "tech_domain": "middleware",
-            "target_hosts": ["10.0.0.1"],
+            "target_hosts": ["192.0.2.1"],
             "target_services": ["nginx"],
         })
         check("创建精确条目", exact[0] == 201, f"HTTP {exact[0]}")
@@ -86,9 +86,9 @@ def main() -> int:
         near = call("POST", "/knowledge", token, {
             "title": f"A2 HTTP 相近-{suffix}",
             "summary": "A2 相近主机过滤",
-            "body": "正文也写 10.0.0.1，但目标是 10.0.0.10。",
+            "body": "正文也写 192.0.2.1，但目标是 192.0.2.10。",
             "tech_domain": "middleware",
-            "target_hosts": ["10.0.0.10"],
+            "target_hosts": ["192.0.2.10"],
             "target_services": ["nginx-ingress"],
         })
         check("创建相近条目", near[0] == 201, f"HTTP {near[0]}")
@@ -98,7 +98,7 @@ def main() -> int:
         fallback = call("POST", "/knowledge", token, {
             "title": f"A2 HTTP 回退-{suffix}",
             "summary": "A2 未标注回退",
-            "body": "旧知识没有目标字段，正文出现 10.0.0.1。",
+            "body": "旧知识没有目标字段，正文出现 192.0.2.1。",
             "tech_domain": "middleware",
         })
         check("创建未标注条目", fallback[0] == 201, f"HTTP {fallback[0]}")
@@ -106,22 +106,22 @@ def main() -> int:
         created.append(fallback_id)
 
         detail = call("GET", f"/knowledge/{exact_id}", token)
-        check("详情返回 target_hosts", detail[1].get("target_hosts") == ["10.0.0.1"])
+        check("详情返回 target_hosts", detail[1].get("target_hosts") == ["192.0.2.1"])
         check("详情返回 target_services", detail[1].get("target_services") == ["nginx"])
 
         listing = call("GET", "/knowledge?limit=50", token)
         ids = {item["id"]: item for item in listing[1].get("items", [])}
-        check("列表返回 target_hosts", ids.get(exact_id, {}).get("target_hosts") == ["10.0.0.1"])
+        check("列表返回 target_hosts", ids.get(exact_id, {}).get("target_hosts") == ["192.0.2.1"])
 
         rag = call("POST", "/knowledge/rag", token, {
             "query": f"A2 HTTP 精确-{suffix}",
             "limit": 5,
             "kind": "manual",
-            "host": "10.0.0.1",
+            "host": "192.0.2.1",
         })
         rag_ids = [item["id"] for item in rag[1].get("documents", [])]
         check("RAG host 包含精确条目", exact_id in rag_ids, str(rag_ids))
-        check("RAG host 排除 10.0.0.10", near_id not in rag_ids, str(rag_ids))
+        check("RAG host 排除 192.0.2.10", near_id not in rag_ids, str(rag_ids))
         check("RAG host 包含未标注回退", fallback_id in rag_ids, str(rag_ids))
 
         rag_service = call("POST", "/knowledge/rag", token, {
@@ -136,7 +136,7 @@ def main() -> int:
 
         invalid = call("POST", "/knowledge", token, {
             "title": f"A2 HTTP 非法-{suffix}",
-            "target_hosts": "10.0.0.1",
+            "target_hosts": "192.0.2.1",
         })
         check("非法 target_hosts 返回 400", invalid[0] == 400, f"HTTP {invalid[0]}")
         detail_value = invalid[1].get("detail")

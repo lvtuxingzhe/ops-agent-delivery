@@ -9,7 +9,7 @@
 用法（在 code 目录）：
     .\\backend\\.venv\\Scripts\\python.exe backend\\scripts\\configure_exec_host.py
     .\\backend\\.venv\\Scripts\\python.exe backend\\scripts\\configure_exec_host.py ^
-        --host-id vm-150 --address 10.0.0.150 --user root
+        --host-id host-150 --address 192.0.2.150 --user root
 
 默认值就是本次验收的 VMware 主机；密码通过 `password_env` 指向环境变量
 `EXEC_SSH_PASSWORD`，脚本本身不读、不回显密码值。
@@ -31,8 +31,8 @@ from psycopg.types.json import Jsonb  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="登记 SSH 执行主机")
-    parser.add_argument("--host-id", default="vm-150")
-    parser.add_argument("--address", default="10.0.0.150")
+    parser.add_argument("--host-id", default="host-150")
+    parser.add_argument("--address", default="192.0.2.150")
     parser.add_argument("--port", type=int, default=22)
     parser.add_argument("--user", default="root")
     parser.add_argument("--platform", default="linux")

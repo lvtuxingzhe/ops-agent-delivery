@@ -5,7 +5,7 @@ kind: deployment
 tags: [smoke, deployment]
 input:
   template_id: eval-five-stage-rollback-fail-v2
-  host: vm-150
+  host: host-150
 expected:
   status: closed
   outcome: failed

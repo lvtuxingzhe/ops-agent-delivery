@@ -265,7 +265,7 @@ function closeEditor() {
       </header>
       <div class="form-grid">
         <label class="wide">允许触达的网段
-          <input v-model="cidrsInput" class="cidrs-input" placeholder="10.0.0.0/8, 192.168.0.0/16" />
+          <input v-model="cidrsInput" class="cidrs-input" placeholder="198.51.100.0/24, 203.0.113.0/24" />
         </label>
       </div>
       <footer class="config-editor-foot">

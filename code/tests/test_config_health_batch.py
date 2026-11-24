@@ -38,8 +38,8 @@ class _FakeCtx:
 
 def _sources():
     return [
-        {"key": 1, "name": "vm-150-Prometheus", "kind": "prometheus", "enabled": True},
-        {"key": 2, "name": "vm-150-ELK", "kind": "elk", "enabled": True},
+        {"key": 1, "name": "host-150-Prometheus", "kind": "prometheus", "enabled": True},
+        {"key": 2, "name": "host-150-ELK", "kind": "elk", "enabled": True},
         {"key": 3, "name": "样例-Prometheus", "kind": "prometheus", "enabled": True},
         {"key": 4, "name": "停用-ELK", "kind": "elk", "enabled": False},
     ]

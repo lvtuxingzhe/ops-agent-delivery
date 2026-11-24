@@ -1,6 +1,6 @@
 # Agent K8s 回放基线分析（P0）
 
-- 集群：vm-152 控制面，vm-150/153/154 worker，k3s `v1.28.15+k3s1`
+- 集群：host-152 控制面，host-150/153/154 worker，k3s `v1.28.15+k3s1`
 - 用例：6 条真实 K8s 故障快照（CrashLoop、ImagePull、Service selector、Readiness、ConfigMap 缺失、PVC StorageClass 缺失）
 - 执行：3 轮 × 6 条 = 18 次；模型 `deepseek-chat`
 - 原始结果：`eval/reports/agent-baseline.json`

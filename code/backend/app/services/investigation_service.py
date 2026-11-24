@@ -129,7 +129,7 @@ def _redact_knowledge(settings: Settings, task_id: str, knowledge: list[dict]) -
 
 
 def _host_sort_key(host_id: str) -> tuple:
-    """按主机编号自然排序，避免 vm-150 排在 vm-15 后面。"""
+    """按主机编号自然排序，避免 host-150 排在 host-15 后面。"""
     return tuple(
         int(part) if part.isdigit() else part.casefold()
         for part in re.split(r"(\d+)", host_id)
@@ -240,7 +240,7 @@ def _host_ids_from_text(candidates: list[dict], text: str) -> list[str]:
                 if start <= int(host["last_octet"]) <= end:
                     matched.add(host["id"])
 
-    # vm-150 到 vm-154 这类带前缀的 ID 范围。
+    # host-150 到 host-154 这类带前缀的 ID 范围。
     id_range_re = re.compile(
         r"([a-z][a-z0-9_.-]*?)-(\d{1,4})\s*(?:-|~|到|至)\s*\1-(\d{1,4})"
     )

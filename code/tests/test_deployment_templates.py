@@ -16,10 +16,10 @@ from app.services.deployment_template_service import (
 
 def _payload(**overrides):
     base = {
-        "name": "vm-150 重启 crond",
+        "name": "host-150 重启 crond",
         "description": "重启并验证",
         "platform": "linux",
-        "default_host": "vm-150",
+        "default_host": "host-150",
         "ttl_minutes": 30,
         "operations": [{"command": "systemctl restart crond", "scope": "dangerous"}],
         "verify": [{

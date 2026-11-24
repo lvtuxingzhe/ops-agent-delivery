@@ -14,7 +14,7 @@ def test_public_trace_keeps_only_frontend_fields():
         "index": 1,
         "kind": "tool_call",
         "name": "ssh.run",
-        "input": "host=vm-150",
+        "input": "host=host-150",
         "output": "{" + '"secret": "x"' + "}",
         "state": "success",
         "call_id": "call-1",

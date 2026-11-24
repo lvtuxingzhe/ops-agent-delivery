@@ -63,19 +63,19 @@ def test_xlsx_cells_are_flattened():
     sheet = workbook.active
     sheet.title = "主机清单"
     sheet.append(["主机", "用途"])
-    sheet.append(["vm-150", "Prometheus"])
+    sheet.append(["host-150", "Prometheus"])
     buffer = io.BytesIO()
     workbook.save(buffer)
     result = _prepare(buffer.getvalue(), "主机清单.xlsx")
     assert result["file_type"] == "excel"
-    assert "vm-150 | Prometheus" in result["source_text"]
+    assert "host-150 | Prometheus" in result["source_text"]
 
 
 def test_csv_is_treated_as_excel():
-    data = "主机,用途\nvm-150,Prometheus\n".encode()
+    data = "主机,用途\nhost-150,Prometheus\n".encode()
     result = _prepare(data, "主机清单.csv")
     assert result["file_type"] == "excel"
-    assert "vm-150 | Prometheus" in result["source_text"]
+    assert "host-150 | Prometheus" in result["source_text"]
 
 
 def test_docx_paragraphs_and_tables_are_extracted():

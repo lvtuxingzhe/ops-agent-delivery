@@ -112,8 +112,8 @@
           "tool_calls": 9,
           "latency_ms": 20858,
           "guard_ok": true,
-          "root_cause": "1. 直接原因：容器 app 每次启动后立即以退出码 1 终止（k8s:5-pod/crash-app-5fcc6f64bf-gkljs），kubelet 按退避策略反复重建，最终进入 CrashLoopBackOff，Pod 始终无法 Ready。\\n2. 触发链：11-20 09:22 前后 Deployment 扩容创建 Pod，镜像拉取成功后容器被创建并启动 5 次，每次启动后立即退出，BackOff 警告累计 9 次（k8s:6-event/6、8、9）。\\n3. 影响范围：Deployment crash-app 期望 1 副本、可用 0 副本，Available=False（MinimumReplicasUnavailable）；命名空间内无 Service/Endpoints，暂无对外流量入口受影响，但该应用完全不可用。\\n4. 旁证与排除：镜像拉取成功、节点 vm-154 Ready 且无资源压力，可排除镜像与节点资源类原因（k8s:6-event/5、k8s:7-node/vm-154）。\\n5. 尚未确定：容器日志只有一行「starting app」，没有错误输出",
-          "summary": "在 eval-crash 命名空间的 crash-app 范围内，确认 Pod 处于 CrashLoopBackOff、READY 0/1、重启 4 次，Deployment 因最小可用副本不足而 Available=False。容器以退出码 1 结束，但当前与上一次容器日志都只有一行「starting app」，没有任何错误输出，说明进程在启动后立即以非零码退出，且自身没有打印失败原因。节点 vm-154 资源与 Ready 状态均无异常，镜像拉取成功，因此不是调度、拉镜像或节点资源问题。根因尚未确定：缺少容器启动命令/参数（command/args）与探针配置，无法判断是启动脚本主动退出还是探针/命令配置错误导致。命名空间内没有 Service/Endpoints，无法从服务侧进一步验证。",
+          "root_cause": "1. 直接原因：容器 app 每次启动后立即以退出码 1 终止（k8s:5-pod/crash-app-5fcc6f64bf-gkljs），kubelet 按退避策略反复重建，最终进入 CrashLoopBackOff，Pod 始终无法 Ready。\\n2. 触发链：11-20 09:22 前后 Deployment 扩容创建 Pod，镜像拉取成功后容器被创建并启动 5 次，每次启动后立即退出，BackOff 警告累计 9 次（k8s:6-event/6、8、9）。\\n3. 影响范围：Deployment crash-app 期望 1 副本、可用 0 副本，Available=False（MinimumReplicasUnavailable）；命名空间内无 Service/Endpoints，暂无对外流量入口受影响，但该应用完全不可用。\\n4. 旁证与排除：镜像拉取成功、节点 host-154 Ready 且无资源压力，可排除镜像与节点资源类原因（k8s:6-event/5、k8s:7-node/host-154）。\\n5. 尚未确定：容器日志只有一行「starting app」，没有错误输出",
+          "summary": "在 eval-crash 命名空间的 crash-app 范围内，确认 Pod 处于 CrashLoopBackOff、READY 0/1、重启 4 次，Deployment 因最小可用副本不足而 Available=False。容器以退出码 1 结束，但当前与上一次容器日志都只有一行「starting app」，没有任何错误输出，说明进程在启动后立即以非零码退出，且自身没有打印失败原因。节点 host-154 资源与 Ready 状态均无异常，镜像拉取成功，因此不是调度、拉镜像或节点资源问题。根因尚未确定：缺少容器启动命令/参数（command/args）与探针配置，无法判断是启动脚本主动退出还是探针/命令配置错误导致。命名空间内没有 Service/Endpoints，无法从服务侧进一步验证。",
           "invalid_citation_count": 0,
           "invalid_citations": []
         },
@@ -151,8 +151,8 @@
           "tool_calls": 5,
           "latency_ms": 16941,
           "guard_ok": true,
-          "root_cause": "1. 直接原因：Pod bad-image 的容器镜像被指定为 nginx:no-such-tag-20261120，kubelet 向 docker.m.daocloud.io 请求该 tag 的 manifest 时返回 403 Forbidden，镜像无法解析（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：镜像拉取失败 → 报 ErrImagePull → kubelet 按退避策略重试 → 进入 ImagePullBackOff，容器始终未创建，因此重启次数为 0、无上次退出日志（k8s:1-pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅 eval-image/bad-image 这一个 Pod 处于 Pending 且未 Ready，容器 app 未运行；Pod 已调度到 vm-153，节点本身 Ready 且资源充足，问题不扩散到节点（k8s:3-pod/bad-image、k8s:4-node/vm-153）。\n4. 旁证与排除：调度失败、节点资源不足、节点 NotReady 均已被事",
-          "summary": "在 eval-image 命名空间内，bad-image Pod 的 ImagePullBackOff 已确认是镜像拉取失败，不是调度或节点资源问题：Pod 已成功调度到 vm-153，节点 Ready 且无内存/磁盘/PID 压力，容器从未启动过（重启次数 0，无上次退出记录）。拉取失败的直接报错是 docker.io/library/nginx:no-such-tag-20261120 经镜像加速地址 docker.m.daocloud.io 解析时返回 403 Forbidden，说明该 tag 在仓库侧不存在或不可访问，kubelet 因此反复退避重试，状态在 ErrImagePull 与 ImagePullBackOff 之间循环。命名空间内没有对应 Deployment，无法从工作负载定义确认镜像 tag 来源，也无法确认节点上是否配置了 imagePullSecret 或私有仓库凭据。结论：镜像引用本身无效是主因，需改为真实存在的 tag 后重建 Pod。",
+          "root_cause": "1. 直接原因：Pod bad-image 的容器镜像被指定为 nginx:no-such-tag-20261120，kubelet 向 docker.m.daocloud.io 请求该 tag 的 manifest 时返回 403 Forbidden，镜像无法解析（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：镜像拉取失败 → 报 ErrImagePull → kubelet 按退避策略重试 → 进入 ImagePullBackOff，容器始终未创建，因此重启次数为 0、无上次退出日志（k8s:1-pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅 eval-image/bad-image 这一个 Pod 处于 Pending 且未 Ready，容器 app 未运行；Pod 已调度到 host-153，节点本身 Ready 且资源充足，问题不扩散到节点（k8s:3-pod/bad-image、k8s:4-node/host-153）。\n4. 旁证与排除：调度失败、节点资源不足、节点 NotReady 均已被事",
+          "summary": "在 eval-image 命名空间内，bad-image Pod 的 ImagePullBackOff 已确认是镜像拉取失败，不是调度或节点资源问题：Pod 已成功调度到 host-153，节点 Ready 且无内存/磁盘/PID 压力，容器从未启动过（重启次数 0，无上次退出记录）。拉取失败的直接报错是 docker.io/library/nginx:no-such-tag-20261120 经镜像加速地址 docker.m.daocloud.io 解析时返回 403 Forbidden，说明该 tag 在仓库侧不存在或不可访问，kubelet 因此反复退避重试，状态在 ErrImagePull 与 ImagePullBackOff 之间循环。命名空间内没有对应 Deployment，无法从工作负载定义确认镜像 tag 来源，也无法确认节点上是否配置了 imagePullSecret 或私有仓库凭据。结论：镜像引用本身无效是主因，需改为真实存在的 tag 后重建 Pod。",
           "invalid_citation_count": 0,
           "invalid_citations": []
         },
@@ -233,7 +233,7 @@
           "latency_ms": 17347,
           "guard_ok": false,
           "root_cause": "1. 直接原因：ready-app 的 Pod 模板中就绪探针指向 8080 端口（事件中为 http://IP-1:8080/、http://IP-2:8080/），而容器内 nginx 以默认配置启动、监听 80 端口，探针请求被 connection refused（k8s:5-event/10、k8s:5-event/14、k8s:6-log、k8s:7-log）。\\n2. 触发链：容器进程正常启动（restart_count=0、日志无报错），但 readiness 探针持续失败，kubelet 将容器标记为 ContainersNotReady，Pod Ready 条件为 False（k8s:3-pod、k8s:4-pod）。\\n3. 影响范围：Deployment 的 Available 条件为 False（MinimumReplicasUnavailable），2 个副本全部不可用；Pod 未 Ready 时不会进入 Endpoints，Service 因此没有后端，业务流量无法到达（k8s:1-deployment）。\\n4. 旁证与排除：镜像拉取、调度、容器启动事件",
-          "summary": "在 eval-readiness 命名空间的 ready-app Deployment（2 个副本，节点 vm-153 / vm-150）范围内，确认存在异常：两个 Pod 容器都在运行且无重启，但 Ready 条件均为 False（ContainersNotReady），Deployment 的 Available 条件为 False（MinimumReplicasUnavailable）。直接证据是探针事件：两个 Pod 的 readiness 探针都请求 http://<PodIP>:8080/，返回 connection refused，分别累计 22 次和 21 次。容器日志显示 nginx 正常启动并监听默认端口，说明进程本身健康，问题出在探针端口与容器实际监听端口不一致（nginx 默认 80，探针指向 8080）。因此 Pod 永远无法通过就绪检查，Service 也就没有可用后端。Service 与 Endpoints 查询均返回无数据，无法确认 Service 对象是否存在，需人工核对。",
+          "summary": "在 eval-readiness 命名空间的 ready-app Deployment（2 个副本，节点 host-153 / host-150）范围内，确认存在异常：两个 Pod 容器都在运行且无重启，但 Ready 条件均为 False（ContainersNotReady），Deployment 的 Available 条件为 False（MinimumReplicasUnavailable）。直接证据是探针事件：两个 Pod 的 readiness 探针都请求 http://<PodIP>:8080/，返回 connection refused，分别累计 22 次和 21 次。容器日志显示 nginx 正常启动并监听默认端口，说明进程本身健康，问题出在探针端口与容器实际监听端口不一致（nginx 默认 80，探针指向 8080）。因此 Pod 永远无法通过就绪检查，Service 也就没有可用后端。Service 与 Endpoints 查询均返回无数据，无法确认 Service 对象是否存在，需人工核对。",
           "invalid_citation_count": 0,
           "invalid_citations": []
         },
@@ -347,8 +347,8 @@
       "tool_calls": 9,
       "latency_ms": 20858,
       "guard_ok": true,
-      "root_cause": "1. 直接原因：容器 app 每次启动后立即以退出码 1 终止（k8s:5-pod/crash-app-5fcc6f64bf-gkljs），kubelet 按退避策略反复重建，最终进入 CrashLoopBackOff，Pod 始终无法 Ready。\\n2. 触发链：11-20 09:22 前后 Deployment 扩容创建 Pod，镜像拉取成功后容器被创建并启动 5 次，每次启动后立即退出，BackOff 警告累计 9 次（k8s:6-event/6、8、9）。\\n3. 影响范围：Deployment crash-app 期望 1 副本、可用 0 副本，Available=False（MinimumReplicasUnavailable）；命名空间内无 Service/Endpoints，暂无对外流量入口受影响，但该应用完全不可用。\\n4. 旁证与排除：镜像拉取成功、节点 vm-154 Ready 且无资源压力，可排除镜像与节点资源类原因（k8s:6-event/5、k8s:7-node/vm-154）。\\n5. 尚未确定：容器日志只有一行「starting app」，没有错误输出",
-      "summary": "在 eval-crash 命名空间的 crash-app 范围内，确认 Pod 处于 CrashLoopBackOff、READY 0/1、重启 4 次，Deployment 因最小可用副本不足而 Available=False。容器以退出码 1 结束，但当前与上一次容器日志都只有一行「starting app」，没有任何错误输出，说明进程在启动后立即以非零码退出，且自身没有打印失败原因。节点 vm-154 资源与 Ready 状态均无异常，镜像拉取成功，因此不是调度、拉镜像或节点资源问题。根因尚未确定：缺少容器启动命令/参数（command/args）与探针配置，无法判断是启动脚本主动退出还是探针/命令配置错误导致。命名空间内没有 Service/Endpoints，无法从服务侧进一步验证。",
+      "root_cause": "1. 直接原因：容器 app 每次启动后立即以退出码 1 终止（k8s:5-pod/crash-app-5fcc6f64bf-gkljs），kubelet 按退避策略反复重建，最终进入 CrashLoopBackOff，Pod 始终无法 Ready。\\n2. 触发链：11-20 09:22 前后 Deployment 扩容创建 Pod，镜像拉取成功后容器被创建并启动 5 次，每次启动后立即退出，BackOff 警告累计 9 次（k8s:6-event/6、8、9）。\\n3. 影响范围：Deployment crash-app 期望 1 副本、可用 0 副本，Available=False（MinimumReplicasUnavailable）；命名空间内无 Service/Endpoints，暂无对外流量入口受影响，但该应用完全不可用。\\n4. 旁证与排除：镜像拉取成功、节点 host-154 Ready 且无资源压力，可排除镜像与节点资源类原因（k8s:6-event/5、k8s:7-node/host-154）。\\n5. 尚未确定：容器日志只有一行「starting app」，没有错误输出",
+      "summary": "在 eval-crash 命名空间的 crash-app 范围内，确认 Pod 处于 CrashLoopBackOff、READY 0/1、重启 4 次，Deployment 因最小可用副本不足而 Available=False。容器以退出码 1 结束，但当前与上一次容器日志都只有一行「starting app」，没有任何错误输出，说明进程在启动后立即以非零码退出，且自身没有打印失败原因。节点 host-154 资源与 Ready 状态均无异常，镜像拉取成功，因此不是调度、拉镜像或节点资源问题。根因尚未确定：缺少容器启动命令/参数（command/args）与探针配置，无法判断是启动脚本主动退出还是探针/命令配置错误导致。命名空间内没有 Service/Endpoints，无法从服务侧进一步验证。",
       "invalid_citation_count": 0,
       "invalid_citations": []
     },
@@ -386,8 +386,8 @@
       "tool_calls": 5,
       "latency_ms": 16941,
       "guard_ok": true,
-      "root_cause": "1. 直接原因：Pod bad-image 的容器镜像被指定为 nginx:no-such-tag-20261120，kubelet 向 docker.m.daocloud.io 请求该 tag 的 manifest 时返回 403 Forbidden，镜像无法解析（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：镜像拉取失败 → 报 ErrImagePull → kubelet 按退避策略重试 → 进入 ImagePullBackOff，容器始终未创建，因此重启次数为 0、无上次退出日志（k8s:1-pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅 eval-image/bad-image 这一个 Pod 处于 Pending 且未 Ready，容器 app 未运行；Pod 已调度到 vm-153，节点本身 Ready 且资源充足，问题不扩散到节点（k8s:3-pod/bad-image、k8s:4-node/vm-153）。\n4. 旁证与排除：调度失败、节点资源不足、节点 NotReady 均已被事",
-      "summary": "在 eval-image 命名空间内，bad-image Pod 的 ImagePullBackOff 已确认是镜像拉取失败，不是调度或节点资源问题：Pod 已成功调度到 vm-153，节点 Ready 且无内存/磁盘/PID 压力，容器从未启动过（重启次数 0，无上次退出记录）。拉取失败的直接报错是 docker.io/library/nginx:no-such-tag-20261120 经镜像加速地址 docker.m.daocloud.io 解析时返回 403 Forbidden，说明该 tag 在仓库侧不存在或不可访问，kubelet 因此反复退避重试，状态在 ErrImagePull 与 ImagePullBackOff 之间循环。命名空间内没有对应 Deployment，无法从工作负载定义确认镜像 tag 来源，也无法确认节点上是否配置了 imagePullSecret 或私有仓库凭据。结论：镜像引用本身无效是主因，需改为真实存在的 tag 后重建 Pod。",
+      "root_cause": "1. 直接原因：Pod bad-image 的容器镜像被指定为 nginx:no-such-tag-20261120，kubelet 向 docker.m.daocloud.io 请求该 tag 的 manifest 时返回 403 Forbidden，镜像无法解析（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：镜像拉取失败 → 报 ErrImagePull → kubelet 按退避策略重试 → 进入 ImagePullBackOff，容器始终未创建，因此重启次数为 0、无上次退出日志（k8s:1-pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅 eval-image/bad-image 这一个 Pod 处于 Pending 且未 Ready，容器 app 未运行；Pod 已调度到 host-153，节点本身 Ready 且资源充足，问题不扩散到节点（k8s:3-pod/bad-image、k8s:4-node/host-153）。\n4. 旁证与排除：调度失败、节点资源不足、节点 NotReady 均已被事",
+      "summary": "在 eval-image 命名空间内，bad-image Pod 的 ImagePullBackOff 已确认是镜像拉取失败，不是调度或节点资源问题：Pod 已成功调度到 host-153，节点 Ready 且无内存/磁盘/PID 压力，容器从未启动过（重启次数 0，无上次退出记录）。拉取失败的直接报错是 docker.io/library/nginx:no-such-tag-20261120 经镜像加速地址 docker.m.daocloud.io 解析时返回 403 Forbidden，说明该 tag 在仓库侧不存在或不可访问，kubelet 因此反复退避重试，状态在 ErrImagePull 与 ImagePullBackOff 之间循环。命名空间内没有对应 Deployment，无法从工作负载定义确认镜像 tag 来源，也无法确认节点上是否配置了 imagePullSecret 或私有仓库凭据。结论：镜像引用本身无效是主因，需改为真实存在的 tag 后重建 Pod。",
       "invalid_citation_count": 0,
       "invalid_citations": []
     },
@@ -468,7 +468,7 @@
       "latency_ms": 17347,
       "guard_ok": false,
       "root_cause": "1. 直接原因：ready-app 的 Pod 模板中就绪探针指向 8080 端口（事件中为 http://IP-1:8080/、http://IP-2:8080/），而容器内 nginx 以默认配置启动、监听 80 端口，探针请求被 connection refused（k8s:5-event/10、k8s:5-event/14、k8s:6-log、k8s:7-log）。\\n2. 触发链：容器进程正常启动（restart_count=0、日志无报错），但 readiness 探针持续失败，kubelet 将容器标记为 ContainersNotReady，Pod Ready 条件为 False（k8s:3-pod、k8s:4-pod）。\\n3. 影响范围：Deployment 的 Available 条件为 False（MinimumReplicasUnavailable），2 个副本全部不可用；Pod 未 Ready 时不会进入 Endpoints，Service 因此没有后端，业务流量无法到达（k8s:1-deployment）。\\n4. 旁证与排除：镜像拉取、调度、容器启动事件",
-      "summary": "在 eval-readiness 命名空间的 ready-app Deployment（2 个副本，节点 vm-153 / vm-150）范围内，确认存在异常：两个 Pod 容器都在运行且无重启，但 Ready 条件均为 False（ContainersNotReady），Deployment 的 Available 条件为 False（MinimumReplicasUnavailable）。直接证据是探针事件：两个 Pod 的 readiness 探针都请求 http://<PodIP>:8080/，返回 connection refused，分别累计 22 次和 21 次。容器日志显示 nginx 正常启动并监听默认端口，说明进程本身健康，问题出在探针端口与容器实际监听端口不一致（nginx 默认 80，探针指向 8080）。因此 Pod 永远无法通过就绪检查，Service 也就没有可用后端。Service 与 Endpoints 查询均返回无数据，无法确认 Service 对象是否存在，需人工核对。",
+      "summary": "在 eval-readiness 命名空间的 ready-app Deployment（2 个副本，节点 host-153 / host-150）范围内，确认存在异常：两个 Pod 容器都在运行且无重启，但 Ready 条件均为 False（ContainersNotReady），Deployment 的 Available 条件为 False（MinimumReplicasUnavailable）。直接证据是探针事件：两个 Pod 的 readiness 探针都请求 http://<PodIP>:8080/，返回 connection refused，分别累计 22 次和 21 次。容器日志显示 nginx 正常启动并监听默认端口，说明进程本身健康，问题出在探针端口与容器实际监听端口不一致（nginx 默认 80，探针指向 8080）。因此 Pod 永远无法通过就绪检查，Service 也就没有可用后端。Service 与 Endpoints 查询均返回无数据，无法确认 Service 对象是否存在，需人工核对。",
       "invalid_citation_count": 0,
       "invalid_citations": []
     },

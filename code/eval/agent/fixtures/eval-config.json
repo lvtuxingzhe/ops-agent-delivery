@@ -35,7 +35,7 @@
       "count": null,
       "involved_object": "Pod/cfg-app-fd66bdd64-7qmmg",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-config/cfg-app-fd66bdd64-7qmmg to vm-154",
+      "message": "Successfully assigned eval-config/cfg-app-fd66bdd64-7qmmg to host-154",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -126,7 +126,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -163,7 +163,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -200,7 +200,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -237,7 +237,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -287,7 +287,7 @@
         "pod-template-hash": "fd66bdd64"
       },
       "name": "cfg-app-fd66bdd64-7qmmg",
-      "node": "vm-154",
+      "node": "host-154",
       "phase": "Pending",
       "pod_ip": "10.42.3.4"
     }

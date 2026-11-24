@@ -10,7 +10,7 @@
 # 手动排查时也可以直接执行本脚本；按 Ctrl+C 结束守护，不会删除数据。
 
 $ErrorActionPreference = 'Stop'
-$Root = 'D:\workbudy\work\ops-agent-delivery\code'
+$Root = Split-Path -Parent $PSScriptRoot
 $BackendDir = Join-Path $Root 'backend'
 $FrontendDir = Join-Path $Root 'frontend'
 $Python = Join-Path $BackendDir '.venv\Scripts\python.exe'

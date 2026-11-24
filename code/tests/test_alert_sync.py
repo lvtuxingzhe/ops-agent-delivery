@@ -35,8 +35,8 @@ def test_prometheus_alerts_normalizes_labels_and_fingerprint(monkeypatch):
         "status": "success",
         "data": {"alerts": [{
             "labels": {
-                "alertname": "Vm150HighCpu",
-                "host": "vm-150",
+                "alertname": "Host150HighCpu",
+                "host": "host-150",
                 "severity": "warning",
             },
             "annotations": {"summary": "CPU 高"},
@@ -52,8 +52,8 @@ def test_prometheus_alerts_normalizes_labels_and_fingerprint(monkeypatch):
     result = ops_datasource.prometheus_alerts("http://prom.example")
     assert result["data_status"] == "ok"
     item = result["items"][0]
-    assert item["alertname"] == "Vm150HighCpu"
-    assert item["host"] == "vm-150"
+    assert item["alertname"] == "Host150HighCpu"
+    assert item["host"] == "host-150"
     assert item["state"] == "firing"
     assert len(item["key"]) == 24
 
@@ -65,8 +65,8 @@ def test_sync_only_notifies_firing_from_real_prometheus(monkeypatch):
         alert_ingest.config_service,
         "list_datasources",
         lambda _settings: [
-            {"key": "vm-150-Prometheus", "kind": "prometheus",
-             "endpoint": "http://10.0.0.150:9090", "enabled": True,
+            {"key": "host-150-Prometheus", "kind": "prometheus",
+             "endpoint": "http://192.0.2.150:9090", "enabled": True,
              "credential_ref": ""},
             {"key": "样例-Prometheus", "kind": "prometheus",
              "endpoint": "http://127.0.0.1:19090", "enabled": True,
@@ -84,12 +84,12 @@ def test_sync_only_notifies_firing_from_real_prometheus(monkeypatch):
         "alerts",
         lambda *_args, **_kwargs: {
             "items": [
-                {"key": "a1", "state": "firing", "alertname": "Vm150HighCpu",
-                 "host": "vm-150", "severity": "warning",
+                {"key": "a1", "state": "firing", "alertname": "Host150HighCpu",
+                 "host": "host-150", "severity": "warning",
                  "active_at": "2026-11-15T01:00:00Z", "value": "88",
                  "annotations": {"summary": "CPU 高"}},
-                {"key": "a2", "state": "pending", "alertname": "Vm150HighLoad",
-                 "host": "vm-150", "severity": "warning",
+                {"key": "a2", "state": "pending", "alertname": "Host150HighLoad",
+                 "host": "host-150", "severity": "warning",
                  "active_at": "2026-11-15T01:01:00Z", "value": "4.1",
                  "annotations": {}},
             ],
@@ -119,9 +119,9 @@ def test_sync_only_notifies_firing_from_real_prometheus(monkeypatch):
     assert result["notifications"] == 1
     assert result["skipped"] == 1
     assert calls[0]["resolved"] is False
-    assert calls[0]["key"] == alert_ingest._group_key("Vm150HighCpu", "vm-150")
-    assert "Vm150HighCpu" in calls[0]["title"]
-    assert "vm-150" in calls[0]["body"]
+    assert calls[0]["key"] == alert_ingest._group_key("Host150HighCpu", "host-150")
+    assert "Host150HighCpu" in calls[0]["title"]
+    assert "host-150" in calls[0]["body"]
 
 
 def test_sync_sends_recovery_for_disappeared_firing(monkeypatch):
@@ -132,8 +132,8 @@ def test_sync_sends_recovery_for_disappeared_firing(monkeypatch):
         alert_ingest.config_service,
         "list_datasources",
         lambda _settings: [{
-            "key": "vm-150-Prometheus", "kind": "prometheus",
-            "endpoint": "http://10.0.0.150:9090", "enabled": True,
+            "key": "host-150-Prometheus", "kind": "prometheus",
+            "endpoint": "http://192.0.2.150:9090", "enabled": True,
             "credential_ref": "",
         }],
     )
@@ -146,7 +146,7 @@ def test_sync_sends_recovery_for_disappeared_firing(monkeypatch):
     monkeypatch.setattr(
         alert_ingest, "_open_firing",
         lambda *_args: [{
-            "key": "a1", "alertname": "Vm150HighCpu", "host": "vm-150",
+            "key": "a1", "alertname": "Host150HighCpu", "host": "host-150",
             "severity": "warning", "first_seen": "2026-11-15T01:00:00+00:00",
             "group_key": "", "task_id": None,
         }],
@@ -172,24 +172,24 @@ def test_sync_sends_recovery_for_disappeared_firing(monkeypatch):
     assert result["notifications"] == 1
     assert calls[0]["resolved"] is True
     assert "监控恢复" in calls[0]["title"]
-    assert marked == [("vm-150-Prometheus", "a1")]
+    assert marked == [("host-150-Prometheus", "a1")]
 
 
 def test_group_key_is_stable_and_ignores_active_at():
     """同一告警名+主机只靠内容生成键，activeAt 变化不导致重复建单。"""
-    first = alert_ingest._group_key("HighCPU", "vm-150")
-    second = alert_ingest._group_key(" highcpu ", "VM-150")
+    first = alert_ingest._group_key("HighCPU", "host-150")
+    second = alert_ingest._group_key(" highcpu ", "host-150")
     assert first == second
-    assert first != alert_ingest._group_key("HighCPU", "vm-151")
+    assert first != alert_ingest._group_key("HighCPU", "host-151")
 
 
 def test_gate_blocks_before_agent_when_whitelist_empty(monkeypatch):
     """空白名单是 fail closed：没有明确放行就不建单。"""
     policy = _policy(enabled=True)
-    item = {"alertname": "HighCPU", "host": "vm-150", "severity": "critical",
+    item = {"alertname": "HighCPU", "host": "host-150", "severity": "critical",
             "active_at": "2026-11-21T10:00:00+00:00", "value": "90"}
     reason = alert_ingest._gate_reason(
-        SimpleNamespace(), policy, item, "g1", "vm-150", "vm-150",
+        SimpleNamespace(), policy, item, "g1", "host-150", "host-150",
         "P1", 7, alert_ingest.datetime.now(alert_ingest.UTC), False,
     )
     assert reason == "host_not_allowlisted"
@@ -227,8 +227,8 @@ def test_gate_allows_unmapped_host_only_with_star(monkeypatch):
 def test_gate_blocks_short_firing_existing_task_and_limits(monkeypatch):
     """最短持续、已有未关闭任务、小时上限都在调用 Agent 前拦住。"""
     policy = _policy(enabled=True)
-    policy.update(allow_hosts={"vm-150"}, allow_alertnames={"highcpu"})
-    item = {"alertname": "HighCPU", "host": "vm-150", "severity": "critical",
+    policy.update(allow_hosts={"host-150"}, allow_alertnames={"highcpu"})
+    item = {"alertname": "HighCPU", "host": "host-150", "severity": "critical",
             "active_at": "2026-11-21T10:00:00+00:00", "value": "90"}
     now = alert_ingest.datetime(2026, 11, 21, 10, 0, 30,
                                 tzinfo=alert_ingest.UTC)
@@ -242,13 +242,13 @@ def test_gate_blocks_short_firing_existing_task_and_limits(monkeypatch):
     ):
         monkeypatch.setattr(alert_ingest, name, lambda *_args, v=value: v)
     assert alert_ingest._gate_reason(
-        SimpleNamespace(), policy, item, "g1", "vm-150", "vm-150",
+        SimpleNamespace(), policy, item, "g1", "host-150", "host-150",
         "critical", 7, now, False,
     ) == "too_short"
     monkeypatch.setattr(alert_ingest, "_existing_task",
                         lambda *_args: "task-1")
     assert alert_ingest._gate_reason(
-        SimpleNamespace(), policy, item, "g1", "vm-150", "vm-150",
+        SimpleNamespace(), policy, item, "g1", "host-150", "host-150",
         "critical", 7, now + alert_ingest.timedelta(minutes=5), False,
     ) == "existing_task"
     monkeypatch.setattr(alert_ingest, "_existing_task", lambda *_args: None)
@@ -257,7 +257,7 @@ def test_gate_blocks_short_firing_existing_task_and_limits(monkeypatch):
         lambda _s, minutes: 2 if minutes == 60 else 0,
     )
     assert alert_ingest._gate_reason(
-        SimpleNamespace(), policy, item, "g1", "vm-150", "vm-150",
+        SimpleNamespace(), policy, item, "g1", "host-150", "host-150",
         "critical", 7, now + alert_ingest.timedelta(minutes=5), False,
     ) == "hourly_limit"
 
@@ -273,12 +273,12 @@ def test_create_task_uses_no_ssh_for_unmapped_host(monkeypatch):
     )
     task_id = alert_ingest._create_task(
         SimpleNamespace(),
-        {"alertname": "HighCPU", "host": "10.0.0.99", "severity": "critical",
+        {"alertname": "HighCPU", "host": "192.0.2.99", "severity": "critical",
          "active_at": "2026-11-21T10:00:00+00:00", "value": "90"},
-        "g2", "P1", "", "10.0.0.99", 7,
+        "g2", "P1", "", "192.0.2.99", 7,
     )
     assert task_id == "task-2"
-    assert captured["target_scope"] == {"no_ssh": True, "alert_host": "10.0.0.99"}
+    assert captured["target_scope"] == {"no_ssh": True, "alert_host": "192.0.2.99"}
 
 
 def test_create_task_passes_readonly_origin_and_scoped_host(monkeypatch):
@@ -294,15 +294,15 @@ def test_create_task_passes_readonly_origin_and_scoped_host(monkeypatch):
         alert_ingest.investigation_service, "submit_task", _submit
     )
     item = {
-        "alertname": "HighCPU", "host": "vm-150", "severity": "critical",
+        "alertname": "HighCPU", "host": "host-150", "severity": "critical",
         "active_at": "2026-11-21T10:00:00+00:00", "value": "90",
         "annotations": {"summary": "CPU 高"},
     }
     task_id = alert_ingest._create_task(
-        SimpleNamespace(), item, "g1", "P1", "vm-150", "vm-150", 7,
+        SimpleNamespace(), item, "g1", "P1", "host-150", "host-150", 7,
     )
     assert task_id == "task-1"
-    assert captured["target_scope"] == {"host_id": "vm-150"}
+    assert captured["target_scope"] == {"host_id": "host-150"}
     assert captured["origin"]["read_only"] is True
     assert captured["origin"]["source"] == "prometheus-pull"
     assert captured["origin"]["fake"] is False

@@ -9,7 +9,7 @@ from app.services.investigation.answer_quality_backfill import (
 
 def test_inventory_legacy_headline_becomes_direct_answer():
     quality = build_legacy_answer_quality({
-        "headline": "vm-150 上有 nginx、mysql 两个服务。",
+        "headline": "host-150 上有 nginx、mysql 两个服务。",
         "summary": "本次只读检查。",
         "verdict": "no_anomaly",
     }, title="帮我看看150上面有哪些服务")

@@ -166,7 +166,7 @@ def redact_text(text: str, session: RedactionSession | None = None,
     """
     把文本里的四类敏感串换成稳定占位符，返回 (脱敏文本, 每类命中数, 会话)。
 
-    长串优先替换：10.0.0.1 这种短串先替换，会把 svc-10.0.0.1.internal 里的
+    长串优先替换：192.0.2.1 这种短串先替换，会把 svc-192.0.2.1.internal 里的
     数字段打散，主机名就再也认不出来。
     """
     rules = rules if rules is not None else default_rules()

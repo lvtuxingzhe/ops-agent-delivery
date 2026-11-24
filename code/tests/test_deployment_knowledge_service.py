@@ -11,11 +11,11 @@ def _row(task_id: str, *, title: str = "部署 keepalived", reason: str = "verif
          template_id: str = "tpl-1", os_family: str = "rhel",
          updated: str = "2026-11-17T08:00:00+00:00") -> dict:
     return {
-        "id": task_id, "title": title, "description": "在 vm-150 上部署 keepalived",
+        "id": task_id, "title": title, "description": "在 host-150 上部署 keepalived",
         "outcome": "failed", "reason_code": reason, "stage": "deployment",
         "updated_at": datetime.fromisoformat(updated),
         "plan": {"template_id": template_id, "template_version": 2,
-                 "host_os_family": os_family, "host": "vm-150",
+                 "host_os_family": os_family, "host": "host-150",
                  "summary": "yum 安装 keepalived 并启动服务"},
         "approval": {"exec": {"failure": {
             "code": "verify_expect_mismatch",
@@ -39,11 +39,11 @@ def test_build_item_only_keeps_safe_summary():
 def test_build_item_falls_back_to_ai_host_and_target_scope():
     """AI 自由方案没有 plan.host 时，仍要拿到目标主机。"""
     row = _row("f" * 36)
-    row["plan"] = {"ai_host": "vm-154", "host_os_family": "linux", "ai_mode": "freeform"}
-    row["target_scope"] = {"host": "vm-154", "platform": "linux"}
+    row["plan"] = {"ai_host": "host-154", "host_os_family": "linux", "ai_mode": "freeform"}
+    row["target_scope"] = {"host": "host-154", "platform": "linux"}
     item = service.build_item(row)
     assert item is not None
-    assert item["host"] == "vm-154"
+    assert item["host"] == "host-154"
 
     row = _row("g" * 36)
     row["plan"] = {"host_os_family": "linux", "ai_mode": "freeform"}

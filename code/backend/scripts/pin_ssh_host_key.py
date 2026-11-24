@@ -7,8 +7,8 @@
 * 已登记主机公钥发生变化时拒绝，不提供“覆盖”开关。
 
 用法（在 code 目录）：
-    python backend/scripts/pin_ssh_host_key.py --host-id vm-150
-    python backend/scripts/pin_ssh_host_key.py --host-id vm-150 \
+    python backend/scripts/pin_ssh_host_key.py --host-id host-150
+    python backend/scripts/pin_ssh_host_key.py --host-id host-150 \
         --expected-fingerprint SHA256:xxxxx
 """
 

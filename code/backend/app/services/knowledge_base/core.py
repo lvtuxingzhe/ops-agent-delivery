@@ -57,9 +57,9 @@ _BODY_LABEL_RE = re.compile(
 _BODY_STEP_RE = re.compile(r"[ \t]+(\d+[.、](?!\d))\s*")
 # AI 规划任务的标题通常都叫“AI 规划部署”，直接展示会像重复；补上原因码或主机。
 _GENERIC_AI_TITLES = {"AI 规划部署", "AI 规划"}
-# 从摘要里认主机名；“vm-150”“host-12”都统一到纯数字，便于跨问法比较。
+# 从摘要里认主机名；“host-150”“host-12”都统一到纯数字，便于跨问法比较。
 _HOST_RE = re.compile(r"(?:vm|host)-?(\d{2,})", re.IGNORECASE)
-# 有些排查报告只写 IP（10.0.0.150），取最后一段当主机号，和 vm-150 对齐。
+# 有些排查报告只写 IP（192.0.2.150），取最后一段当主机号，和 host-150 对齐。
 _IP_HOST_RE = re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.(\d{1,3})\b")
 # 查询里的口语词不构成“知识主题”；去掉后才能把“查看150的负载”和
 # “给我看看150机器的负载”认成同一件事。
@@ -137,8 +137,8 @@ def _short_reason(value: object) -> str:
 def _cluster_key(*parts: object) -> str:
     """去重用的归一化文本：去括号限定语、标点、空白，只留内容词。
 
-    “排查 vm-150 CPU 使用率（多可见人回归）”和
-    “排查 vm-150 CPU 使用率（可见范围回归）”对人来说是同一件事；
+    “排查 host-150 CPU 使用率（多可见人回归）”和
+    “排查 host-150 CPU 使用率（可见范围回归）”对人来说是同一件事；
     括号里的词不该把相似度拉到阈值以下。
     """
     text = _PAREN_RE.sub(" ", " ".join(_clean(part) for part in parts))

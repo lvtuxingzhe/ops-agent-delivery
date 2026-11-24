@@ -9,7 +9,7 @@
 原用途：把目标机的 SSH 主机公钥固定到 known_hosts，并把本机公钥装进目标机。
 
 用法（在 code 目录，密码只从 .env 的 EXEC_SSH_PASSWORD 读）：
-    python backend/scripts/configure_ssh_trust.py --host-id vm-150 --install-key
+    python backend/scripts/configure_ssh_trust.py --host-id host-150 --install-key
 
 做的事：
   1. 用现有凭据连一次目标机，取出它出示的主机公钥；
@@ -119,7 +119,7 @@ def main() -> int:
     load_dotenv()
     settings = load_settings()
     parser = argparse.ArgumentParser(description="固定 SSH 主机指纹 / 安装公钥")
-    parser.add_argument("--host-id", default="vm-150")
+    parser.add_argument("--host-id", default="host-150")
     parser.add_argument("--known-hosts", default="var/ssh/known_hosts")
     parser.add_argument("--public-key", default="var/ssh/ops_agent_rsa.pub")
     parser.add_argument("--install-key", action="store_true")

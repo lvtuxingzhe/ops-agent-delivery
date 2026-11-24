@@ -200,7 +200,7 @@ onMounted(async () => {
           <div class="form-section">主机与操作系统</div>
           <label v-if="!editingId" class="field">
             <span>主机 ID</span>
-            <input v-model="hostIdInput" type="text" placeholder="例如 vm-150" :disabled="!canWrite" />
+            <input v-model="hostIdInput" type="text" placeholder="例如 host-150" :disabled="!canWrite" />
           </label>
           <label class="field">
             <span>平台</span>
@@ -236,7 +236,7 @@ onMounted(async () => {
           <div class="form-section">SSH 连接</div>
           <label class="field">
             <span>地址</span>
-            <input v-model="form.address" type="text" placeholder="10.0.0.150" :disabled="!canWrite" />
+            <input v-model="form.address" type="text" placeholder="192.0.2.150" :disabled="!canWrite" />
           </label>
           <label class="field">
             <span>端口</span>

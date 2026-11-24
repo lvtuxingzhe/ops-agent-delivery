@@ -2,7 +2,7 @@
 
 生成时间：2026-11-20
 模型：`deepseek-chat`（主基线）；`deepseek-reasoner`（第二模型 smoke）
-集群：`vm-152` 一主三从（k3s v1.28.15+k3s1）
+集群：`host-152` 一主三从（k3s v1.28.15+k3s1）
 
 ## 1. 用例太少、只有单故障
 
@@ -14,7 +14,7 @@
 - `k8s-hard-dual-fault`：CrashLoop 与 Service selector 同时故障；
 - `k8s-hard-log-injection`：日志里植入“OOMKilled / 一切正常”诱导。
 
-5 个命名空间在 vm-152 上真实创建、真实故障、用 kubectl 采集后落盘，不是手写理想数据。
+5 个命名空间在 host-152 上真实创建、真实故障、用 kubectl 采集后落盘，不是手写理想数据。
 
 11 条 × 1 轮结果（`agent-baseline-hard-v1.json`，注入指标按修正后的分句判定重算）：
 
@@ -50,7 +50,7 @@
 两处改动：
 
 1. **补深快照**：采集 Deployment 的 `template_node_selector`、容器 `command/args/env/probes/volumes`，补 ConfigMap 键列表和 ResourceQuota 硬限制/已用量；工具层新增 `get_configmaps`、`get_resource_quotas`。
-2. **评测前重采**：`--refresh` 在每轮开始前通过 vm-152 的已登记主机通道执行只读采集，写入临时 fixture 目录；命名空间已清理时保留静态快照并打印原因。报告逐行记录 `snapshot_captured_at`，聚合出 `snapshot_refresh_rate`。
+2. **评测前重采**：`--refresh` 在每轮开始前通过 host-152 的已登记主机通道执行只读采集，写入临时 fixture 目录；命名空间已清理时保留静态快照并打印原因。报告逐行记录 `snapshot_captured_at`，聚合出 `snapshot_refresh_rate`。
 
 补深前后的直接差异：`k8s-hard-node-selector` 旧快照没有 `nodeSelector`，模型只能说“条件不匹配、无法指名”；补采后能看到 `disktype=no-such-disk`，该用例的 `root_cause_verified` 才具备可判定性。
 
@@ -62,7 +62,7 @@
 - 新增 `run_agent_matrix.py`，按“模型 × 集群”逐格调用评测并汇总；
 - `deepseek-reasoner` 已在同端点跑通 1 条 smoke：根因、Verdict、证据、完整率均为 1.0，引用不可追溯为 1.0（`agent-model-reasoner-smoke.json`）。
 
-集群侧：矩阵入口已接受多集群参数，但当前只有一套集群。vm-151 只剩约 257MB 可用内存，且没有 Docker/Podman/k3d，其余 4 台节点已全部加入 vm-152 集群。**第二个集群受资源限制，未能落地。**
+集群侧：矩阵入口已接受多集群参数，但当前只有一套集群。host-151 只剩约 257MB 可用内存，且没有 Docker/Podman/k3d，其余 4 台节点已全部加入 host-152 集群。**第二个集群受资源限制，未能落地。**
 
 ## 5. 只跑 1 轮、缺 3 轮稳定性
 

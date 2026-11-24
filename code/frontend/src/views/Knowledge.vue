@@ -305,7 +305,7 @@ const {
           <div class="editor-row">
             <label class="field">
               <span>目标主机（逗号分隔，可选）</span>
-              <input v-model="editor.targetHosts" placeholder="10.0.0.1, vm-150" />
+              <input v-model="editor.targetHosts" placeholder="192.0.2.1, host-150" />
               <small class="field-tip">填了只按精确主机匹配；留空则按正文匹配。</small>
             </label>
             <label class="field">

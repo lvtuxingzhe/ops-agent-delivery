@@ -74,7 +74,7 @@
       "count": null,
       "involved_object": "Pod/key-app-5dddcc6d99-m47rp",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-hard-key/key-app-5dddcc6d99-m47rp to vm-153",
+      "message": "Successfully assigned eval-hard-key/key-app-5dddcc6d99-m47rp to host-153",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -82,7 +82,7 @@
       "count": null,
       "involved_object": "Pod/key-app-586fd75cc7-8jhjb",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-hard-key/key-app-586fd75cc7-8jhjb to vm-150",
+      "message": "Successfully assigned eval-hard-key/key-app-586fd75cc7-8jhjb to host-150",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -221,7 +221,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -258,7 +258,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -295,7 +295,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -332,7 +332,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -382,7 +382,7 @@
         "pod-template-hash": "586fd75cc7"
       },
       "name": "key-app-586fd75cc7-8jhjb",
-      "node": "vm-150",
+      "node": "host-150",
       "node_selector": {},
       "phase": "Pending",
       "pod_ip": "10.42.2.4",
@@ -471,7 +471,7 @@
         "pod-template-hash": "5dddcc6d99"
       },
       "name": "key-app-5dddcc6d99-m47rp",
-      "node": "vm-153",
+      "node": "host-153",
       "node_selector": {},
       "phase": "Pending",
       "pod_ip": "10.42.1.7",

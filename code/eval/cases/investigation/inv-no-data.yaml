@@ -5,9 +5,9 @@ kind: investigation
 tags: [smoke, investigation]
 input:
   title: 排查一个没有数据来源的虚构服务
-  description: 请排查 vm-150 上服务 eval-service-does-not-exist 的日志异常。如果查不到数据，必须明确说无数据，不能写成正常。
+  description: 请排查 host-150 上服务 eval-service-does-not-exist 的日志异常。如果查不到数据，必须明确说无数据，不能写成正常。
   target_scope:
-    host: vm-150
+    host: host-150
     service: eval-service-does-not-exist
 expected:
   status: report_ready

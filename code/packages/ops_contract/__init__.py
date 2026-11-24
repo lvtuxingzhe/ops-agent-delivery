@@ -70,7 +70,7 @@ class IncidentalFinding(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    object: str = Field(min_length=1, max_length=120, description="异常对象，例如 vm-150 nginx")
+    object: str = Field(min_length=1, max_length=120, description="异常对象，例如 host-150 nginx")
     finding: str = Field(min_length=1, max_length=300, description="现象和原因摘要")
     severity: Literal["info", "warning", "critical"] = Field(
         default="warning", description="影响程度；info=记录，warning=需关注，critical=影响业务"

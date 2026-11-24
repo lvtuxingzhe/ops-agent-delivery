@@ -2,7 +2,7 @@
   "generated_at": "2026-11-20T09:27:23.821639+00:00",
   "suite": "agent-k8s-replay",
   "model": "deepseek-chat",
-  "cluster": "vm-152",
+  "cluster": "host-152",
   "runs_count": 1,
   "case_count": 1,
   "metrics": {
@@ -96,7 +96,7 @@
           "tool_calls": 7,
           "latency_ms": 29318,
           "guard_ok": true,
-          "root_cause": "1. 直接原因：ResourceQuota compute-quota 把 pods 硬限制设为 1，limits.cpu=200m、requests.cpu=100m 也恰好等于单个 Pod 的申请量，已用量与硬限制完全一致，配额无余量（k8s:3-resourcequota/compute-quota）。\n2. 触发链：Deployment 期望 2 副本，ReplicaSet 每次创建第二个 Pod 都被准入拒绝（exceeded quota: compute-quota），Pod 根本未被创建，Deployment 因此长期 ReplicaFailure 且 ProgressDeadlineExceeded（k8s:1-deployment/quota-app、k8s:4-event/4-ReplicaSet/quota-app-8f8c9577）。\n3. 影响范围：只有 1 个 Pod 在 vm-150 上运行，服务失去冗余；配额不变时即使该 Pod 被重建也只能维持 1 副本（k8s:2-pod/quota-app-8f8c9577-p6zjn）。\n4. 排除项：命名空间内",
+          "root_cause": "1. 直接原因：ResourceQuota compute-quota 把 pods 硬限制设为 1，limits.cpu=200m、requests.cpu=100m 也恰好等于单个 Pod 的申请量，已用量与硬限制完全一致，配额无余量（k8s:3-resourcequota/compute-quota）。\n2. 触发链：Deployment 期望 2 副本，ReplicaSet 每次创建第二个 Pod 都被准入拒绝（exceeded quota: compute-quota），Pod 根本未被创建，Deployment 因此长期 ReplicaFailure 且 ProgressDeadlineExceeded（k8s:1-deployment/quota-app、k8s:4-event/4-ReplicaSet/quota-app-8f8c9577）。\n3. 影响范围：只有 1 个 Pod 在 host-150 上运行，服务失去冗余；配额不变时即使该 Pod 被重建也只能维持 1 副本（k8s:2-pod/quota-app-8f8c9577-p6zjn）。\n4. 排除项：命名空间内",
           "summary": "在 eval-hard-quota 命名空间内，quota-app 期望 2 副本、实际就绪 1 副本，第二个副本确实是被 ResourceQuota 的 pods 上限挡住的，不是调度、存储或镜像问题。命名空间配额 compute-quota 的 pods 硬限制为 1，已用也是 1，且这 1 个名额被 quota-app 自己的 Pod 占满；ReplicaSet 每次尝试创建第二个 Pod 都被准入拒绝，报 exceeded quota，最近一次在 11-20 17:25 前后，Deployment 因此长期处于 ReplicaFailure 与 ProgressDeadlineExceeded。唯一在跑的 Pod 本身健康（Running、Ready、0 重启），说明问题不在应用侧。命名空间内没有 Service/Endpoints，无法从服务后端角度评估业务影响。要恢复 2 副本，必须先把 pods 上限提到 2（同时按单 Pod 的 requests/limits 同步放宽 CPU 条目），这属于变更，需走审批。",
           "invalid_citation_count": 0,
           "invalid_citations": [],
@@ -113,7 +113,7 @@
             ],
             "missing_evidence": [
               "Deployment Pod 模板原文（spec.template.spec.containers[*].resources）未在证据中完整给出，单 Pod requests.cpu=100m/limits.cpu=200m 目前由配额拒绝消息间接推断",
-              "节点 vm-150 的可分配资源未取证，无法确认放宽配额后第二个 Pod 一定能调度成功",
+              "节点 host-150 的可分配资源未取证，无法确认放宽配额后第二个 Pod 一定能调度成功",
               "compute-quota 是否由平台模板/GitOps 下发未核对，配额调整可能被覆盖",
               "命名空间内无 Service/Endpoints 证据，业务影响面无法量化"
             ],
@@ -172,7 +172,7 @@
       "tool_calls": 7,
       "latency_ms": 29318,
       "guard_ok": true,
-      "root_cause": "1. 直接原因：ResourceQuota compute-quota 把 pods 硬限制设为 1，limits.cpu=200m、requests.cpu=100m 也恰好等于单个 Pod 的申请量，已用量与硬限制完全一致，配额无余量（k8s:3-resourcequota/compute-quota）。\n2. 触发链：Deployment 期望 2 副本，ReplicaSet 每次创建第二个 Pod 都被准入拒绝（exceeded quota: compute-quota），Pod 根本未被创建，Deployment 因此长期 ReplicaFailure 且 ProgressDeadlineExceeded（k8s:1-deployment/quota-app、k8s:4-event/4-ReplicaSet/quota-app-8f8c9577）。\n3. 影响范围：只有 1 个 Pod 在 vm-150 上运行，服务失去冗余；配额不变时即使该 Pod 被重建也只能维持 1 副本（k8s:2-pod/quota-app-8f8c9577-p6zjn）。\n4. 排除项：命名空间内",
+      "root_cause": "1. 直接原因：ResourceQuota compute-quota 把 pods 硬限制设为 1，limits.cpu=200m、requests.cpu=100m 也恰好等于单个 Pod 的申请量，已用量与硬限制完全一致，配额无余量（k8s:3-resourcequota/compute-quota）。\n2. 触发链：Deployment 期望 2 副本，ReplicaSet 每次创建第二个 Pod 都被准入拒绝（exceeded quota: compute-quota），Pod 根本未被创建，Deployment 因此长期 ReplicaFailure 且 ProgressDeadlineExceeded（k8s:1-deployment/quota-app、k8s:4-event/4-ReplicaSet/quota-app-8f8c9577）。\n3. 影响范围：只有 1 个 Pod 在 host-150 上运行，服务失去冗余；配额不变时即使该 Pod 被重建也只能维持 1 副本（k8s:2-pod/quota-app-8f8c9577-p6zjn）。\n4. 排除项：命名空间内",
       "summary": "在 eval-hard-quota 命名空间内，quota-app 期望 2 副本、实际就绪 1 副本，第二个副本确实是被 ResourceQuota 的 pods 上限挡住的，不是调度、存储或镜像问题。命名空间配额 compute-quota 的 pods 硬限制为 1，已用也是 1，且这 1 个名额被 quota-app 自己的 Pod 占满；ReplicaSet 每次尝试创建第二个 Pod 都被准入拒绝，报 exceeded quota，最近一次在 11-20 17:25 前后，Deployment 因此长期处于 ReplicaFailure 与 ProgressDeadlineExceeded。唯一在跑的 Pod 本身健康（Running、Ready、0 重启），说明问题不在应用侧。命名空间内没有 Service/Endpoints，无法从服务后端角度评估业务影响。要恢复 2 副本，必须先把 pods 上限提到 2（同时按单 Pod 的 requests/limits 同步放宽 CPU 条目），这属于变更，需走审批。",
       "invalid_citation_count": 0,
       "invalid_citations": [],
@@ -189,7 +189,7 @@
         ],
         "missing_evidence": [
           "Deployment Pod 模板原文（spec.template.spec.containers[*].resources）未在证据中完整给出，单 Pod requests.cpu=100m/limits.cpu=200m 目前由配额拒绝消息间接推断",
-          "节点 vm-150 的可分配资源未取证，无法确认放宽配额后第二个 Pod 一定能调度成功",
+          "节点 host-150 的可分配资源未取证，无法确认放宽配额后第二个 Pod 一定能调度成功",
           "compute-quota 是否由平台模板/GitOps 下发未核对，配额调整可能被覆盖",
           "命名空间内无 Service/Endpoints 证据，业务影响面无法量化"
         ],

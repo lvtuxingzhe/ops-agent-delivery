@@ -44,7 +44,7 @@ def test_real_prometheus_evidence_is_not_fake():
         tools = EvidenceTools(
             RedactionSession(task_id="test-real"),
             [{
-                "name": "vm-150-Prometheus",
+                "name": "host-150-Prometheus",
                 "kind": "prometheus",
                 "endpoint": f"http://127.0.0.1:{server.server_port}",
                 "default_query": "up",
@@ -73,13 +73,13 @@ def test_real_prometheus_falls_back_to_second_instance():
             RedactionSession(task_id="test-failover"),
             [
                 {
-                    "name": "vm-150-Prometheus",
+                    "name": "host-150-Prometheus",
                     "kind": "prometheus",
                     "endpoint": "http://127.0.0.1:9",
                     "default_query": "up",
                 },
                 {
-                    "name": "vm-153-Prometheus",
+                    "name": "host-153-Prometheus",
                     "kind": "prometheus",
                     "endpoint": f"http://127.0.0.1:{server.server_port}",
                     "default_query": "up",
@@ -89,7 +89,7 @@ def test_real_prometheus_falls_back_to_second_instance():
         payload = json.loads(tools.query_metrics())
         assert payload["fake"] is False
         assert payload["data_status"] == "ok"
-        assert payload["datasource"] == "vm-153-Prometheus"
+        assert payload["datasource"] == "host-153-Prometheus"
         assert len(payload["items"]) == 1
     finally:
         server.shutdown()
@@ -100,7 +100,7 @@ def test_real_query_failure_is_no_data_not_sample():
     tools = EvidenceTools(
         RedactionSession(task_id="test-fail"),
         [{
-            "name": "vm-150-Prometheus",
+            "name": "host-150-Prometheus",
             "kind": "prometheus",
             "endpoint": "http://127.0.0.1:9",
             "default_query": "up",
@@ -156,9 +156,9 @@ def test_demo_mode_never_overrides_real_ssh_hosts():
         {
             "datasources": [],
             "ssh_hosts": [{
-                "id": "vm-150",
+                "id": "host-150",
                 "platform": "linux",
-                "address": "10.0.0.150",
+                "address": "192.0.2.150",
                 "port": 22,
                 "user": "root",
                 "password_enc": "gAAAAA-test",

@@ -53,7 +53,7 @@ OPS_IMAGE_TAG=2026.11.22 bash ops/deploy/package-images.sh
 
 默认 Python 基础镜像走 `docker.1ms.run`，`pip` 走阿里云；能直连 Docker Hub 时
 可用 `--build-arg PYTHON_IMAGE=python:3.13-slim` 覆盖。镜像按 CPU 架构区分，
-不按 CentOS 小版本区分；本交付只验证 `vm-153`（CentOS 7 / x86_64）。
+不按 CentOS 小版本区分；本交付只验证 `host-153`（CentOS 7 / x86_64）。
 
 ## 目标机部署
 

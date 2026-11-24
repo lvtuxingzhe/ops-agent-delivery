@@ -11,7 +11,7 @@ def test_redact_exec_part_removes_permits_and_password_cipher():
         "permits": {"fp-1": "tok-1"},
         "permit_items": [{"fingerprint": "fp-1"}],
         "target": {
-            "address": "10.0.0.150",
+            "address": "192.0.2.150",
             "port": 22,
             "user": "root",
             "password_enc": "gAAAAA-secret",
@@ -24,7 +24,7 @@ def test_redact_exec_part_removes_permits_and_password_cipher():
     assert "permits" not in cleaned
     assert "permit_items" not in cleaned
     assert cleaned["target"] == {
-        "address": "10.0.0.150",
+        "address": "192.0.2.150",
         "port": 22,
         "user": "root",
     }

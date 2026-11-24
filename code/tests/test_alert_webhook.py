@@ -98,14 +98,14 @@ def test_webhook_item_maps_alertmanager_fields():
         "endsAt": "0001-01-01T00:00:00Z",
         "labels": {
             "alertname": "DiskFull",
-            "instance": "10.0.0.151:9100",
+            "instance": "192.0.2.151:9100",
             "severity": "critical",
         },
         "annotations": {"value": "91%", "summary": "disk"},
     })
     assert item["key"] == "fp-1"
     assert item["alertname"] == "DiskFull"
-    assert item["host"] == "10.0.0.151"
+    assert item["host"] == "192.0.2.151"
     assert item["severity"] == "critical"
     assert item["state"] == "firing"
     assert item["value"] == "91%"
@@ -114,7 +114,7 @@ def test_webhook_item_maps_alertmanager_fields():
 def test_webhook_item_resolved_without_fingerprint_is_stable():
     raw = {
         "status": "resolved",
-        "labels": {"alertname": "DiskFull", "instance": "vm-151"},
+        "labels": {"alertname": "DiskFull", "instance": "host-151"},
     }
     first = alert_ingest._webhook_item(raw)
     second = alert_ingest._webhook_item(raw)

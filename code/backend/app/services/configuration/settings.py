@@ -251,5 +251,5 @@ def validate_cidrs(value: str) -> list[str]:
         try:
             ipaddress.ip_network(part, strict=False)
         except ValueError as exc:
-            raise ConfigError(f"「{part}」不是合法的网段（CIDR），例如 10.0.0.0/8") from exc
+            raise ConfigError(f"「{part}」不是合法的网段（CIDR），例如 198.51.100.0/24") from exc
     return parts

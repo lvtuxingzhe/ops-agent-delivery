@@ -93,12 +93,12 @@ def test_rerank_prefers_title_match_after_same_rrf():
 
 def test_candidate_filter_applies_before_channel(monkeypatch):
     entries = [
-        _doc("hit", "vm-150 Nginx 端口占用", "主机 vm-150"),
-        _doc("miss", "vm-151 Nginx 端口占用", "主机 vm-151"),
+        _doc("hit", "host-150 Nginx 端口占用", "主机 host-150"),
+        _doc("miss", "host-151 Nginx 端口占用", "主机 host-151"),
     ]
     monkeypatch.setattr(pipeline, "_auto_entries", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "_manual_entries", lambda *args, **kwargs: entries)
-    filters = RagFilters(host="vm-150")
+    filters = RagFilters(host="host-150")
     candidates = pipeline._candidate_entries(None, {"id": 1, "roles": ["admin"]}, filters)
     assert [item["id"] for item in candidates] == ["hit"]
 

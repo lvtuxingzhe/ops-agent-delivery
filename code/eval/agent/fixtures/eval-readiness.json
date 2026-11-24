@@ -35,7 +35,7 @@
       "count": null,
       "involved_object": "Pod/ready-app-6c44dd7f7-w4wvn",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-readiness/ready-app-6c44dd7f7-w4wvn to vm-150",
+      "message": "Successfully assigned eval-readiness/ready-app-6c44dd7f7-w4wvn to host-150",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -43,7 +43,7 @@
       "count": null,
       "involved_object": "Pod/ready-app-6c44dd7f7-fggnv",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-readiness/ready-app-6c44dd7f7-fggnv to vm-153",
+      "message": "Successfully assigned eval-readiness/ready-app-6c44dd7f7-fggnv to host-153",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -185,7 +185,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -222,7 +222,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -259,7 +259,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -296,7 +296,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -345,7 +345,7 @@
         "pod-template-hash": "6c44dd7f7"
       },
       "name": "ready-app-6c44dd7f7-fggnv",
-      "node": "vm-153",
+      "node": "host-153",
       "phase": "Running",
       "pod_ip": "10.42.1.5"
     },
@@ -394,7 +394,7 @@
         "pod-template-hash": "6c44dd7f7"
       },
       "name": "ready-app-6c44dd7f7-w4wvn",
-      "node": "vm-150",
+      "node": "host-150",
       "phase": "Running",
       "pod_ip": "10.42.2.2"
     }

@@ -80,10 +80,10 @@ def test_upsert_reads_locks_and_writes_on_same_transaction(monkeypatch):
     _install(monkeypatch, conn)
 
     result = service.upsert_host(
-        SimpleNamespace(), "vm-1",
+        SimpleNamespace(), "host-1",
         {
             "platform": "linux",
-            "address": "10.0.0.1",
+            "address": "192.0.2.1",
             "user": "root",
             "enabled": False,
             "custom_fields": {"custom_owner": "新值"},
@@ -111,7 +111,7 @@ def test_password_change_reads_and_writes_on_same_transaction(monkeypatch):
     monkeypatch.setattr(service, "seal_password", lambda _settings, _raw: "enc-new")
 
     result = service.set_host_password(
-        SimpleNamespace(), "vm-1", "new-password", actor_id=7,
+        SimpleNamespace(), "host-1", "new-password", actor_id=7,
     )
 
     assert result["password_set"] is True
@@ -132,7 +132,7 @@ def test_enable_reads_and_writes_on_same_transaction(monkeypatch):
     _install(monkeypatch, conn)
 
     result = service.set_host_enabled(
-        SimpleNamespace(), "vm-1", True, actor_id=7,
+        SimpleNamespace(), "host-1", True, actor_id=7,
     )
 
     assert result["enabled"] is True
@@ -153,7 +153,7 @@ def test_audit_failure_rolls_back_before_commit(monkeypatch):
     _install(monkeypatch, conn, audit_error=RuntimeError("audit down"))
 
     with pytest.raises(RuntimeError, match="audit down"):
-        service.set_host_enabled(SimpleNamespace(), "vm-1", True, actor_id=7)
+        service.set_host_enabled(SimpleNamespace(), "host-1", True, actor_id=7)
 
     assert conn.committed is False
     assert conn.rolled_back is True

@@ -44,7 +44,7 @@ def test_load_task_reads_json_from_stdin(monkeypatch: pytest.MonkeyPatch) -> Non
         "task_id": "t-5",
         "title": "磁盘写满",
         "description": "根分区使用率 100%",
-        "target_scope": {"host": "vm-150"},
+        "target_scope": {"host": "host-150"},
     }
     monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(payload, ensure_ascii=False)))
     assert load_task(json_mode=True) == payload

@@ -6,11 +6,11 @@ from app.services.investigation.answer_quality import evaluate_answer_quality
 def _quality(**overrides):
     base = dict(
         answer_mode="inventory",
-        primary_answer="vm-150 上有 mysql 和 ssh",
-        inventory=[{"host": "vm-150", "service": "mysql"}],
+        primary_answer="host-150 上有 mysql 和 ssh",
+        inventory=[{"host": "host-150", "service": "mysql"}],
         inventory_dropped=0,
         incidental_findings=[],
-        host_coverage=[{"host": "vm-150", "status": "ok"}],
+        host_coverage=[{"host": "host-150", "status": "ok"}],
         root_cause="",
         solution="",
         root_cause_verified=False,
@@ -67,8 +67,8 @@ def test_diagnosis_without_root_cause_or_solution_is_unanswered():
 def test_host_gap_and_dropped_inventory_degrade_answer():
     result = _quality(
         host_coverage=[
-            {"host": "vm-150", "status": "ok"},
-            {"host": "vm-151", "status": "unreachable"},
+            {"host": "host-150", "status": "ok"},
+            {"host": "host-151", "status": "unreachable"},
         ],
         inventory_dropped=2,
     )

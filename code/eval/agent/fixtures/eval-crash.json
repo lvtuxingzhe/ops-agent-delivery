@@ -35,7 +35,7 @@
       "count": null,
       "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
       "last_timestamp": null,
-      "message": "Successfully assigned eval-crash/crash-app-5fcc6f64bf-gkljs to vm-154",
+      "message": "Successfully assigned eval-crash/crash-app-5fcc6f64bf-gkljs to host-154",
       "reason": "Scheduled",
       "type": "Normal"
     },
@@ -145,7 +145,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-150"
+      "name": "host-150"
     },
     {
       "allocatable": {
@@ -182,7 +182,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-152"
+      "name": "host-152"
     },
     {
       "allocatable": {
@@ -219,7 +219,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-153"
+      "name": "host-153"
     },
     {
       "allocatable": {
@@ -256,7 +256,7 @@
           "type": "Ready"
         }
       ],
-      "name": "vm-154"
+      "name": "host-154"
     }
   ],
   "pods": [
@@ -312,7 +312,7 @@
         "pod-template-hash": "5fcc6f64bf"
       },
       "name": "crash-app-5fcc6f64bf-gkljs",
-      "node": "vm-154",
+      "node": "host-154",
       "phase": "Running",
       "pod_ip": "10.42.3.3"
     }
