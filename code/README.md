@@ -131,5 +131,3 @@ curl -H "X-Metrics-Token: $METRICS_TOKEN" http://127.0.0.1:8000/api/metrics
 - `code/var/secrets/`
 - `code/var/backups/secrets/`
 
-这些文件不提交、不移动、不发聊天工具。`.env.example` 和 `.env.production.example` 是脱敏模板，必须纳入 Git。
-
