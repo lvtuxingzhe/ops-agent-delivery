@@ -4,7 +4,7 @@
 
 ## 先看这里
 
-- 默认环境是 `test`，用测试数据执行，不对真实主机产生变更；生产编排固定 `production`。
+- 第一次使用先按本地方式启动。默认 `APP_ENV=test` 只是开发测试环境，不是演练模式；登记真实主机、数据源或审批执行后，仍会访问真实环境。正式上线由生产编排固定 `APP_ENV=production`。
 - 后台默认 `http://127.0.0.1:8000`，前端默认 `http://127.0.0.1:5173`，worker 不暴露端口。
 - Windows 本机开发优先用 `code/ops/dev-stack.ps1`；容器方式见下面的“Compose”。
 - `.env`、`secrets.encrypted.env*`、`var/secrets/` 是敏感文件，不提交、不移动。
