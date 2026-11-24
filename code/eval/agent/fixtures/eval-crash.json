@@ -1,0 +1,322 @@
+{
+  "captured_at": "2026-11-20T01:24:38.483174Z",
+  "deployments": [
+    {
+      "available_replicas": null,
+      "conditions": [
+        {
+          "message": "Deployment does not have minimum availability.",
+          "reason": "MinimumReplicasUnavailable",
+          "status": "False",
+          "type": "Available"
+        },
+        {
+          "message": "ReplicaSet \"crash-app-5fcc6f64bf\" is progressing.",
+          "reason": "ReplicaSetUpdated",
+          "status": "True",
+          "type": "Progressing"
+        }
+      ],
+      "name": "crash-app",
+      "ready_replicas": null,
+      "replicas": 1,
+      "selector": {
+        "app": "crash-app"
+      },
+      "template_labels": {
+        "app": "crash-app"
+      },
+      "updated_replicas": 1
+    }
+  ],
+  "endpoints": [],
+  "events": [
+    {
+      "count": null,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-crash/crash-app-5fcc6f64bf-gkljs to vm-154",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Pulling image \"busybox:1.36\"",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/crash-app-5fcc6f64bf",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Created pod: crash-app-5fcc6f64bf-gkljs",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/crash-app",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Scaled up replica set crash-app-5fcc6f64bf to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
+      "last_timestamp": "2026-11-20T01:22:53Z",
+      "message": "Successfully pulled image \"busybox:1.36\" in 6.599s (6.599s including waiting)",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 5,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
+      "last_timestamp": "2026-11-20T01:24:22Z",
+      "message": "Created container app",
+      "reason": "Created",
+      "type": "Normal"
+    },
+    {
+      "count": 4,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
+      "last_timestamp": "2026-11-20T01:24:22Z",
+      "message": "Container image \"busybox:1.36\" already present on machine",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 5,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
+      "last_timestamp": "2026-11-20T01:24:23Z",
+      "message": "Started container app",
+      "reason": "Started",
+      "type": "Normal"
+    },
+    {
+      "count": 9,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-gkljs",
+      "last_timestamp": "2026-11-20T01:24:23Z",
+      "message": "Back-off restarting failed container app in pod crash-app-5fcc6f64bf-gkljs_eval-crash(91737fbc-0513-4261-840f-7486f1a1bdc0)",
+      "reason": "BackOff",
+      "type": "Warning"
+    }
+  ],
+  "logs": {
+    "crash-app-5fcc6f64bf-gkljs/app": "starting app\n",
+    "crash-app-5fcc6f64bf-gkljs/app-previous": "starting app\n"
+  },
+  "namespace": "eval-crash",
+  "nodes": [
+    {
+      "allocatable": {
+        "cpu": "2",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "1838456Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-150"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-152"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-153"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-154"
+    }
+  ],
+  "pods": [
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "docker.io/library/busybox:1.36",
+          "last_state": {
+            "exitCode": 1,
+            "finishedAt": "2026-11-20T01:24:23Z",
+            "reason": "Error",
+            "startedAt": "2026-11-20T01:24:23Z",
+            "state": "terminated"
+          },
+          "name": "app",
+          "ready": false,
+          "restart_count": 4,
+          "state": {
+            "message": "back-off 1m20s restarting failed container=app pod=crash-app-5fcc6f64bf-gkljs_eval-crash(91737fbc-0513-4261-840f-7486f1a1bdc0)",
+            "reason": "CrashLoopBackOff",
+            "state": "waiting"
+          }
+        }
+      ],
+      "labels": {
+        "app": "crash-app",
+        "pod-template-hash": "5fcc6f64bf"
+      },
+      "name": "crash-app-5fcc6f64bf-gkljs",
+      "node": "vm-154",
+      "phase": "Running",
+      "pod_ip": "10.42.3.3"
+    }
+  ],
+  "pvc": [],
+  "services": []
+}

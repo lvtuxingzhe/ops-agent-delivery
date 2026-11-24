@@ -1,0 +1,9 @@
+id: edge-expect-exit-one
+title: 期望退出码 1 且实际 1 时判定满足预期
+suite: full
+kind: guard
+tags: [edge]
+input:
+  guard: expect_exit_one
+expected:
+  expect_ok: true

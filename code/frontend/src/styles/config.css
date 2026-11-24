@@ -1,0 +1,813 @@
+/**
+ * 配置页专属样式。
+ *
+ * 只保留三块面板会用到的布局补偿；卡片、按钮、表格、表单控件
+ * 统一走 `styles/theme.css` 的全局类，避免一处改色要改四个文件。
+ */
+
+.config-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.config-page .card {
+  margin: 0;
+}
+
+.config-page .card-head {
+  align-items: center;
+}
+
+.config-page .card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-page .table {
+  min-width: 1080px;
+  font-size: calc(12px * var(--font-scale, 1));
+}
+
+.config-page .desc.warn {
+  padding: 10px 12px;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+}
+
+.config-page .endpoint {
+  font-family: var(--mono);
+  font-size: calc(12px * var(--font-scale, 1));
+  word-break: break-all;
+}
+
+.config-page .tag {
+  display: inline-flex;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 600;
+}
+
+.config-page .tag-on,
+.config-page .health-ok {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.config-page .tag-off,
+.config-page .health-unknown {
+  color: var(--muted);
+  background: var(--surface-muted);
+}
+
+.config-page .health-no_data {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.config-page .health-failed {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.config-page .health-note {
+  max-width: 220px;
+  margin-top: 4px;
+  color: var(--muted-2);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.5;
+}
+
+.config-page .ops {
+  white-space: nowrap;
+}
+
+.config-page .ops button {
+  margin: 0 4px 4px 0;
+}
+
+.config-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.config-page .form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--ink-2);
+  font-size: calc(12px * var(--font-scale, 1));
+  font-weight: 550;
+}
+
+.config-page .form-grid textarea {
+  min-height: 76px;
+  resize: vertical;
+  font-family: var(--mono);
+  font-size: calc(12px * var(--font-scale, 1));
+  line-height: 1.5;
+}
+
+.config-page .form-grid .wide,
+.config-page .form-grid .check {
+  grid-column: 1 / -1;
+}
+
+.config-page .form-grid .check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-page .form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.config-page .switches {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.config-page .switches li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: calc(13px * var(--font-scale, 1));
+}
+
+.config-page .switches li:last-child {
+  border-bottom: 0;
+}
+
+.config-page .cidrs-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.config-page .cidrs-input {
+  flex: 1;
+  min-width: 200px;
+  font-family: var(--mono);
+}
+
+.config-page .config-tabs {
+  display: flex;
+  gap: 2px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.config-page .config-tab {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: calc(13px * var(--font-scale, 1));
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.config-page .config-tab:hover {
+  color: var(--ink);
+  background: var(--surface-soft);
+}
+
+.config-page .config-tab.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.config-page .datasource-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.config-page .datasource-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.config-page .ds-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.config-page .ds-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.config-page .ds-name strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: calc(13px * var(--font-scale, 1));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .ds-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.config-page .ds-endpoint {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.config-page .ds-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.config-page .ds-query summary {
+  width: fit-content;
+  color: var(--accent);
+  font-size: calc(11px * var(--font-scale, 1));
+  cursor: pointer;
+}
+
+.config-page .ds-query div {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.config-page .ds-health-detail {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.config-page .ds-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.config-page .llm-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.config-page .llm-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.config-page .llm-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.config-page .llm-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.config-page .llm-name strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: calc(13px * var(--font-scale, 1));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .llm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.config-page .llm-endpoint {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.config-page .llm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.config-page .llm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.config-page .config-warning {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: var(--warn-soft);
+}
+
+.config-page .config-warning summary {
+  color: var(--warn);
+  font-size: calc(12px * var(--font-scale, 1));
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.config-page .config-warning p {
+  margin: 8px 0 0;
+}
+
+@media (min-width: 960px) {
+  .config-page .datasource-list,
+  .config-page .llm-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .config-page .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .config-page .config-tabs {
+    width: 100%;
+  }
+  .config-page .config-tab {
+    flex: 1;
+    padding-right: 8px;
+    padding-left: 8px;
+    text-align: center;
+  }
+}
+
+/* 配置记录：一行一条，不再用卡片网格；桌面端按列扫读，窄屏折成纵向。 */
+.config-page .config-record-table {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.config-page .record-row {
+  display: grid;
+  grid-template-columns: var(--rt-grid, var(--rt-default));
+  gap: var(--rt-gap, 10px);
+  align-items: center;
+  min-height: 60px;
+  padding: 9px var(--rt-pad-x, 4px);
+  border-bottom: 1px solid var(--line);
+}
+
+.config-page .config-rt-head {
+  min-height: 44px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 650;
+  letter-spacing: .03em;
+}
+
+.config-page .config-rt-head > span {
+  line-height: 44px;
+}
+
+.config-page .resizable-table {
+  overflow-x: auto;
+}
+
+.config-page .record-head {
+  min-height: 44px;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 650;
+  letter-spacing: .03em;
+}
+
+.config-page .record-head > span:last-child {
+  text-align: right;
+}
+
+.config-page .record-row {
+  color: var(--ink-2);
+  font-size: calc(12px * var(--font-scale, 1));
+}
+
+.config-page .record-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.config-page .record-main strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: calc(13px * var(--font-scale, 1));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .record-main small,
+.config-page .record-endpoint small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .record-endpoint {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.config-page .record-endpoint .mono {
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: calc(11px * var(--font-scale, 1));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/*
+ * 配置表操作列沿用主机表：列宽固定，单元格吸在滚动容器右侧。
+ * 横向滚动时按钮仍然可见，不会随表格一起被推出卡片。
+ */
+.config-page .config-sticky-actions,
+.config-page .resizable-table .config-rt-head > span.config-sticky-actions {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  justify-content: flex-start;
+  overflow: visible;
+  padding-left: 10px;
+  background: var(--surface);
+  box-shadow: -10px 0 12px -14px rgba(15, 23, 42, 0.45);
+}
+
+.config-page .resizable-table .config-rt-head > span.config-sticky-actions {
+  z-index: 3;
+  text-align: left;
+}
+
+.config-page .llm-table .config-sticky-actions {
+  padding-left: 0;
+}
+
+.config-page .record-kind {
+  color: var(--ink-2);
+  font-size: calc(11px * var(--font-scale, 1));
+  text-transform: lowercase;
+}
+
+.config-page .ds-status {
+  display: flex;
+  min-width: 0;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.config-page .ds-status .health-note {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .record-model {
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: calc(11px * var(--font-scale, 1));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .record-tags,
+.config-page .record-params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 9px;
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale, 1));
+}
+
+.config-page .llm-table .record-actions {
+  flex-wrap: nowrap;
+}
+
+.config-page .llm-table .record-params {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-page .llm-table .record-actions .plain {
+  min-height: 34px;
+  padding: 8px 10px;
+  font-size: calc(12px * var(--font-scale, 1));
+}
+
+.config-page .token-config-card {
+  margin-bottom: 0;
+}
+
+.config-page .token-config-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.config-page .token-config-metrics > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-soft, rgba(148, 163, 184, 0.05));
+}
+
+.config-page .token-config-metrics span,
+.config-page .token-config-metrics small {
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale, 1));
+}
+
+.config-page .token-config-metrics strong {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: calc(18px * var(--font-scale, 1));
+  font-weight: 650;
+}
+
+.config-page .token-budget-form {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.config-page .token-budget-form label {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 210px;
+  color: var(--ink-2);
+  font-size: calc(12px * var(--font-scale, 1));
+}
+
+.config-page .token-budget-form input {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+@media (max-width: 760px) {
+  .config-page .token-config-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .config-page .token-budget-form label {
+    min-width: 100%;
+  }
+}
+
+
+.config-page .config-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 18px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, .52);
+  backdrop-filter: blur(4px);
+}
+
+.config-page .config-editor {
+  width: min(760px, 100%);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, .28);
+}
+
+.config-page .config-editor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.config-page .config-editor-head h2 {
+  margin: 4px 0 0;
+  font-size: calc(18px * var(--font-scale, 1));
+}
+
+.config-page .kicker {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale, 1));
+  letter-spacing: .12em;
+}
+
+.config-page .config-editor .form-grid {
+  margin-bottom: 0;
+}
+
+.config-page .config-editor-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 900px) {
+  .config-page .record-head {
+    display: none;
+  }
+
+  .config-page .record-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 13px 4px;
+  }
+
+  .config-page .record-row > :nth-child(1) {
+    grid-column: 1 / -1;
+  }
+
+  .config-page .record-row > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .config-page .record-row > :nth-child(5) {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding-top: 4px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .config-page .notification-table .record-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .config-page .notification-table .record-row > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .config-page .notification-table .record-row > :nth-child(5) {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding-top: 4px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .config-page .settings-table .record-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .config-page .settings-table .record-row > :nth-child(2) {
+    grid-column: 1 / -1;
+  }
+
+  .config-page .settings-table .record-row > :nth-child(4) {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding-top: 4px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .config-page .llm-table .record-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .config-page .llm-table .record-row > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .config-page .llm-table .record-row > :nth-child(6) {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding-top: 4px;
+    border-top: 1px dashed var(--line);
+  }
+}
+
+/* 数据源操作固定三个入口：检查、编辑、更多操作，不再挤压按钮。 */
+.config-page .ds-table .record-actions {
+  flex-wrap: nowrap;
+  gap: 6px;
+}

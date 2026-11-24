@@ -1,0 +1,59 @@
+# 填了真值的环境变量绝不入库（凭据不进版本库，是最基本的一条）
+.env
+.env.local
+*.env
+.env.production
+.env.production.*
+!.env.example
+!.env.production.example
+
+# 应用自己生成的密钥 / 令牌 / 本地缓存
+*.key
+*.pem
+secrets/
+secrets.encrypted.env.*
+
+# 前端与 Node 依赖、构建产物
+node_modules/
+frontend/dist/
+desktop/dist/
+desktop/release/
+
+# 生产镜像 tar 与校验文件（产物目录，不入库）
+dist/
+
+# electron-builder 的打包日志（每次排查会生成，属本地工作产物）
+desktop/pack*.log
+desktop/selftest-*.log
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 编辑器 / 系统垃圾文件
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 平台自身日志与报告落盘（可能含主机信息，不外传、不提交）
+logs/
+runtime-data/
+
+# 审计归档的本地落盘（没配对象存储时的开发目录；生产进对象锁桶）
+var/
+
+# 数据库备份含业务数据，不入库
+backup/
+
+# 测试与静态检查缓存
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 桌面壳自检模式生成的一次性结果文件（每次跑会重新生成）
+desktop/.selftest-result.json
+
+var/ssh/

@@ -1,0 +1,22 @@
+id: k8s-hard-dual-fault
+title: eval-hard-dual 同时有 CrashLoop 和 Service 无后端
+description: 同一命名空间里 crash-app 反复重启，api-svc 的 selector 又匹配不到 api-v2，两个独立故障同时存在。
+fixture: eval-hard-dual
+namespace: eval-hard-dual
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: 两个独立故障叠加：crash-app 容器启动后 exit 1 进入 CrashLoopBackOff；api-svc 的 selector 是 app=api，而 api-v2 的标签是 app=api-v2，Endpoints 为空。
+  root_cause_terms:
+    - ["crashloop", "exit 1", "crash-app"]
+    - ["selector", "endpoints", "api-svc"]
+    - ["两个", "叠加", "同时", "独立"]
+  evidence_terms:
+    - "starting app"
+    - "selector"
+    - "endpoints"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+tags: ["k8s", "hard", "dual-fault"]

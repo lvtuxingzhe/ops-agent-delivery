@@ -1,0 +1,22 @@
+id: k8s-hard-resourcequota
+title: eval-hard-quota 的 quota-app 只起来一个副本
+description: quota-app 期望 2 副本，但命名空间 ResourceQuota 限制 pods=1，第二个 Pod 一直创建失败。
+fixture: eval-hard-quota
+namespace: eval-hard-quota
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: ResourceQuota compute-quota 限制 pods=1，ReplicaSet 创建第二个 Pod 时被拒绝，报 exceeded quota。
+  root_cause_terms:
+    - ["resourcequota", "quota", "compute-quota"]
+    - ["exceeded", "forbidden", "限制"]
+    - ["pods", "副本"]
+  evidence_terms:
+    - "exceeded quota"
+    - "compute-quota"
+    - "failedcreate"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+tags: ["k8s", "hard", "quota"]

@@ -1,0 +1,22 @@
+# worker 进程依赖
+#
+# 玉龙 2026-11-12 拍板：本轮就装 AgentScope，真接 DeepSeek，
+# 不要拿样例数据加规则引擎糊弄成 Agent。所以框架加在这里。
+# 已实测装好：agentscope==2.0.11（阿里云 PyPI 源，官方源太慢、
+# 清华源没这个包）。它自带 DeepSeekChatModel，正好对上给的 Key。
+#
+# 后台 backend/requirements.txt 永远不许出现它：
+# 两个进程能 import 的东西不一样，是「排查侧物理上拿不到写工具」的第一层。
+#
+# API Key 不写在这里、也不写进任何文件，只在运行时从环境变量读。
+agentscope==2.0.11
+
+# SSH 远程执行（worker/tools/ssh_exec.py 在 import 时就依赖它）
+# 后台镜像不需要：只有执行侧才碰 SSH
+paramiko>=3,<6
+
+# 主机密码密文解密：与后端共用 TOTP_ENCRYPTION_KEY（Fernet）
+cryptography>=42,<60
+
+# 执行许可 nonce 的多副本去重；只有配了 REDIS_URL 才启用
+redis>=5,<7

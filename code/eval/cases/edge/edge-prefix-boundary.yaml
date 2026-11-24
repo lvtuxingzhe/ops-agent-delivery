@@ -1,0 +1,11 @@
+id: edge-prefix-boundary
+title: datex 不能靠 date 前缀绕过允许清单
+suite: full
+kind: guard
+tags: [edge]
+input:
+  guard: prefix_boundary
+  argv: [datex]
+expected:
+  tier: null
+  error_code: not_allowlisted

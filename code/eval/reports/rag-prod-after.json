@@ -1,0 +1,2490 @@
+{
+  "generated_at": "2026-11-21T11:58:15.466576+00:00",
+  "top_k": 5,
+  "case_count": 50,
+  "metrics": {
+    "recall_at_5": 0.96,
+    "top1_accuracy": 0.88,
+    "mrr": 0.9116666666666667,
+    "empty_retrieval_rate": 0.0,
+    "dangerous_false_recall_rate": 0.0,
+    "dangerous_labeled_cases": 50
+  },
+  "by_domain": {
+    "manual": {
+      "case_count": 40,
+      "hit": 40,
+      "top1": 38,
+      "empty": 0,
+      "recall_at_5": 1.0,
+      "top1_accuracy": 0.95,
+      "empty_retrieval_rate": 0.0
+    },
+    "deployment": {
+      "case_count": 10,
+      "hit": 8,
+      "top1": 6,
+      "empty": 0,
+      "recall_at_5": 0.8,
+      "top1_accuracy": 0.6,
+      "empty_retrieval_rate": 0.0
+    }
+  },
+  "cases": [
+    {
+      "id": "prod-man-01a",
+      "query": "nginx 返回 502 Bad Gateway 怎么排查",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+      "top_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 8
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 2
+        }
+      ]
+    },
+    {
+      "id": "prod-man-01b",
+      "query": "error.log 里 connect failed 或 upstream prematurely closed",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+      "top_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】TLS 证书过期"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 5
+        }
+      ]
+    },
+    {
+      "id": "prod-man-01c",
+      "query": "后端进程正常但 nginx 还是返回 502",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+      "top_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 2
+        }
+      ]
+    },
+    {
+      "id": "prod-man-01d",
+      "query": "网站访问网关错误 502，怎么定位上游",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+      "top_ids": [
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 启动失败：监听端口被占用"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-02a",
+      "query": "https 访问提示证书过期",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+      "top_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "top_titles": [
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Redis 连接超时与连接数打满"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 2
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-02b",
+      "query": "certificate has expired 怎么换证书链",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+      "top_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a"
+      ],
+      "top_titles": [
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-02c",
+      "query": "openssl s_client 看 notAfter 已经过期",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+      "top_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "top_titles": [
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】MySQL 从库复制中断处理"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-02d",
+      "query": "浏览器提示证书不安全，服务端证书到期了",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+      "top_ids": [
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "top_titles": [
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Redis 连接超时与连接数打满"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-03a",
+      "query": "服务本机监听正常但外部连不上",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 2,
+      "top1_hit": false,
+      "matched": "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+      "top_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced"
+      ],
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】TLS 证书过期"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-03b",
+      "query": "firewall-cmd 没有放行目标端口",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+      "top_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370"
+      ],
+      "top_titles": [
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败",
+        "AI 规划部署 · host_os_unknown"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-03c",
+      "query": "iptables 拦截了服务端口，外部访问超时",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+      "top_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2"
+      ],
+      "top_titles": [
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Nginx 启动失败：监听端口被占用"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-03d",
+      "query": "云安全组和主机防火墙都放行还是超时",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+      "top_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "top_titles": [
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】MySQL 从库复制中断处理"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-04a",
+      "query": "域名解析失败 Name or service not known",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+      "top_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370"
+      ],
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "AI 规划部署 · credential_no_data",
+        "AI 规划部署 · host_os_unknown"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-04b",
+      "query": "resolv.conf 里的 DNS 服务器不可达",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+      "top_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-04c",
+      "query": "getent hosts 解析不了域名",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+      "top_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】MySQL 从库复制中断处理"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-04d",
+      "query": "应用访问域名报解析失败，DNS 不通",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+      "top_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced"
+      ],
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】TLS 证书过期"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-05a",
+      "query": "磁盘还有空间但创建文件报 No space left on device",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+      "top_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "top_titles": [
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "AI 规划部署 · host_os_unknown",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-05b",
+      "query": "df -i 显示 inode 使用率 100%",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+      "top_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a"
+      ],
+      "top_titles": [
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-05c",
+      "query": "大量小文件把 inode 用满了",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+      "top_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "top_titles": [
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Redis 连接超时与连接数打满"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-05d",
+      "query": "df -h 没满但文件创建失败",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+      "top_ids": [
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370"
+      ],
+      "top_titles": [
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "AI 规划部署 · host_os_unknown"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-06a",
+      "query": "pod 一直重启 CrashLoopBackOff",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+      "top_ids": [
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "top_titles": [
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 2
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-06b",
+      "query": "kubectl describe 显示 back-off restarting failed container",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+      "top_ids": [
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "top_titles": [
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】磁盘 inode 耗尽"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 4
+        }
+      ]
+    },
+    {
+      "id": "prod-man-06c",
+      "query": "容器启动后马上退出怎么查上一次日志",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 2,
+      "top1_hit": false,
+      "matched": "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+      "top_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】磁盘 inode 耗尽"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-06d",
+      "query": "K8s pod 反复重启，怎么看失败原因",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+      "top_ids": [
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2"
+      ],
+      "top_titles": [
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 启动失败：监听端口被占用"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 8
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-07a",
+      "query": "应用连 redis 一直超时",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+      "top_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "top_titles": [
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】MySQL 从库复制中断处理"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-07b",
+      "query": "connected_clients 快打满 maxclients 了",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+      "top_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-07c",
+      "query": "redis 连接池泄漏怎么排查",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+      "top_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "top_titles": [
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】磁盘 inode 耗尽"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 8
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-07d",
+      "query": "Redis 连接超时但网络看起来正常",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+      "top_ids": [
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-08a",
+      "query": "数据库从节点同步断了怎么恢复",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+      "top_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-08b",
+      "query": "Slave_SQL_Running 为 No 主键冲突",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+      "top_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a"
+      ],
+      "top_titles": [
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-08c",
+      "query": "从库复制中断 Last_SQL_Error 怎么处理",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+      "top_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "top_titles": [
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "AI 规划部署 · credential_no_data",
+        "【RAG验收】磁盘 inode 耗尽"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-08d",
+      "query": "MySQL 主从复制断了，从库 SQL 线程停了",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+      "top_ids": [
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "top_titles": [
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Redis 连接超时与连接数打满"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-09a",
+      "query": "服务进程启动就退出，退出码不是零",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+      "top_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-09b",
+      "query": "systemctl start 失败 ExecStart 返回非 0",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+      "top_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 3
+        }
+      ]
+    },
+    {
+      "id": "prod-man-09c",
+      "query": "unit 进入 failed 状态怎么查首次失败原因",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+      "top_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 4
+        }
+      ]
+    },
+    {
+      "id": "prod-man-09d",
+      "query": "systemd 服务 failed，journal 里怎么定位",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+      "top_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 4
+        }
+      ]
+    },
+    {
+      "id": "prod-man-10a",
+      "query": "网站服务起不来，日志说地址已经被别的程序占用了",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+      "top_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】防火墙未放行端口"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 8
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-man-10b",
+      "query": "nginx bind 0.0.0.0:9200 failed",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+      "top_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e0fc5043-c0b7-4875-9173-4659cd50f86a",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 4
+        }
+      ]
+    },
+    {
+      "id": "prod-man-10c",
+      "query": "9200 端口冲突导致 web 服务启动失败",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+      "top_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 9
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-man-10d",
+      "query": "Elasticsearch 占了 9200，nginx 起不来怎么办",
+      "domain": "manual",
+      "expected_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+      "top_ids": [
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-114e4d1a-52e3-4f96-b31e-55082e266be4",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93"
+      ],
+      "top_titles": [
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 2
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 2
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-15a",
+      "query": "AI 规划部署报 host_os_unknown，目标机没登记系统怎么办",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "dep-029c7645-edab-4dc4-8340-6adfc66015fc"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+      "top_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "AI 规划部署 · host_os_unknown",
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】防火墙未放行端口",
+        "AI 规划部署 · credential_no_data",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-15b",
+      "query": "AI 规划失败说 host_os_unknown 是什么问题",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "dep-029c7645-edab-4dc4-8340-6adfc66015fc"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+      "top_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "dep-e55bba09-ef06-4994-8271-c02755b09015"
+      ],
+      "top_titles": [
+        "AI 规划部署 · host_os_unknown",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "AI 规划部署 · credential_no_data"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-15c",
+      "query": "部署前 AI 说目标机操作系统未知，不能出方案",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "dep-029c7645-edab-4dc4-8340-6adfc66015fc"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 3,
+      "top1_hit": false,
+      "matched": "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+      "top_ids": [
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3",
+        "manual-ad163663-38bf-4be6-81a5-2b1fec51aced",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8"
+      ],
+      "top_titles": [
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】TLS 证书过期",
+        "AI 规划部署 · host_os_unknown",
+        "AI 规划部署 · credential_no_data",
+        "【RAG验收】磁盘 inode 耗尽"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-15d",
+      "query": "host_os_unknown 导致 AI 规划部署失败",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "dep-029c7645-edab-4dc4-8340-6adfc66015fc"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+      "top_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "dep-e55bba09-ef06-4994-8271-c02755b09015"
+      ],
+      "top_titles": [
+        "AI 规划部署 · host_os_unknown",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "AI 规划部署 · credential_no_data"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-15e",
+      "query": "目标机没填 OS，AI 规划直接失败",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "dep-029c7645-edab-4dc4-8340-6adfc66015fc"
+      ],
+      "expected_titles": [],
+      "hit": false,
+      "rank": 0,
+      "top1_hit": false,
+      "matched": "",
+      "top_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-39268cbd-c5a4-4b17-aa47-1051677daea3"
+      ],
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】防火墙未放行端口"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 9
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-17a",
+      "query": "AI 规划部署报 credential_no_data，模型凭据没接入",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "dep-e55bba09-ef06-4994-8271-c02755b09015",
+      "top_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e"
+      ],
+      "top_titles": [
+        "AI 规划部署 · credential_no_data",
+        "AI 规划部署 · host_os_unknown",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 2
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-17b",
+      "query": "模型凭据未接入导致 AI 规划失败",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 4,
+      "top1_hit": false,
+      "matched": "dep-e55bba09-ef06-4994-8271-c02755b09015",
+      "top_ids": [
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370"
+      ],
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "AI 规划部署 · credential_no_data",
+        "AI 规划部署 · host_os_unknown"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-17c",
+      "query": "credential_no_data 是什么意思，部署规划做不下去",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "dep-e55bba09-ef06-4994-8271-c02755b09015",
+      "top_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93"
+      ],
+      "top_titles": [
+        "AI 规划部署 · credential_no_data",
+        "AI 规划部署 · host_os_unknown",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 2
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-17d",
+      "query": "AI 规划没有拿到模型凭据，报错 credential_no_data",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015"
+      ],
+      "expected_titles": [],
+      "hit": true,
+      "rank": 1,
+      "top1_hit": true,
+      "matched": "dep-e55bba09-ef06-4994-8271-c02755b09015",
+      "top_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015",
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "dep-c26e9d64-df84-4026-b00d-120126e4a370",
+        "manual-b7f6eae6-68db-49d9-8958-3fdf39d86fa8",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767"
+      ],
+      "top_titles": [
+        "AI 规划部署 · credential_no_data",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "AI 规划部署 · host_os_unknown",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】MySQL 从库复制中断处理"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "prod-dep-17e",
+      "query": "模型凭据配置缺失，AI 规划部署失败怎么处理",
+      "domain": "deployment",
+      "expected_ids": [
+        "dep-e55bba09-ef06-4994-8271-c02755b09015"
+      ],
+      "expected_titles": [],
+      "hit": false,
+      "rank": 0,
+      "top1_hit": false,
+      "matched": "",
+      "top_ids": [
+        "manual-7f2c619f-9480-4bbe-a868-02a48e255e93",
+        "manual-e2e1ec91-0d13-49f1-bc29-eaeab721c72e",
+        "manual-5c08e202-637b-42cf-99b0-1a10af317767",
+        "manual-de9a0b96-1a39-4555-8f92-ad2b10facbc2",
+        "manual-ecf9ae9c-1055-441d-b101-68103b9ee91e"
+      ],
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Redis 连接超时与连接数打满"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "candidate_count": 12,
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 8
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    }
+  ]
+}

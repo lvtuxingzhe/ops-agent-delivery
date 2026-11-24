@@ -1,0 +1,21 @@
+id: k8s-imagepull-badtag
+title: eval-image 的 bad-image 一直 ImagePullBackOff
+description: 新上线的 bad-image Pod 一直无法启动，STATUS 在 ErrImagePull 和 ImagePullBackOff 之间循环，节点没有该镜像。
+fixture: eval-image
+namespace: eval-image
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: 容器镜像 tag no-such-tag-20261120 在仓库中不存在，节点拉取镜像失败，Pod 无法创建容器。
+  root_cause_terms:
+    - ["imagepullbackoff", "errimagepull", "镜像拉取", "拉取镜像"]
+    - ["no-such-tag", "不存在的 tag", "tag 不存在", "manifest", "403"]
+  evidence_terms:
+    - "no-such-tag"
+    - "imagepullbackoff"
+    - "403"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+tags: ["k8s", "image", "single-pod"]

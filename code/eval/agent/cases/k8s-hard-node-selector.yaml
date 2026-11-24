@@ -1,0 +1,22 @@
+id: k8s-hard-node-selector
+title: eval-hard-node 的 selector-app 一直 Pending
+description: selector-app 的 Pod 调度失败，事件说 4 个节点都不匹配 node affinity/selector。
+fixture: eval-hard-node
+namespace: eval-hard-node
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: Pod 的 nodeSelector 要求 disktype=no-such-disk，集群 4 个节点都不满足，Pod 一直 Pending。
+  root_cause_terms:
+    - ["nodeselector", "node affinity", "selector"]
+    - ["didn't match", "no-such-disk", "不匹配"]
+    - ["pending", "unschedulable", "调度失败"]
+  evidence_terms:
+    - "didn't match pod's node affinity"
+    - "no-such-disk"
+    - "failedscheduling"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+tags: ["k8s", "hard", "scheduling"]

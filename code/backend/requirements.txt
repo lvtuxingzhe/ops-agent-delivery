@@ -1,0 +1,54 @@
+# 后台进程依赖
+#
+# 第 ① 步只有 fastapi + uvicorn（能让服务起来）。
+# 第 ② 步加了 psycopg：连 PostgreSQL 用，审计账本和所有核心表都靠它。
+# 第 ③ 步加了四个认证相关包（见下）。
+# 用版本范围而不是钉死小版本：内网镜像源同步往往滞后，钉太死容易装不上。
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.34,<1.0
+psycopg[binary]>=3.2,<4.0
+
+# ---- 阶段 3：连接池（core/db.py 顶层 import，缺了服务起不来） ----
+psycopg_pool>=3.2,<4.0
+
+# ---- 阶段 2/3：审计归档上传对象锁桶（配了 MINIO_ENDPOINT 才用到） ----
+minio>=7.2,<8.0
+
+# ---- 第 ③ 步：登录与权限 ----
+pyjwt>=2.8,<3.0          # 会话令牌（JWT HS256）
+cryptography>=42,<60     # TOTP 密钥的 Fernet 加密；paramiko 也依赖它
+paramiko>=3,<6           # hosts 服务导入 known_hosts 时必须有，缺了后端起不来
+qrcode>=8.0,<9.0         # TOTP 绑定二维码（SVG 输出，不需要 PIL）
+httpx>=0.28,<1.0        # 仅自检脚本用（FastAPI TestClient 的依赖），
+                         # 不参与运行时逻辑；内网严格裁剪时可以去掉
+
+# ---- 阶段 3：接口限流与执行 nonce 的多副本共享计数 ----
+# 只有配了 REDIS_URL 才会启用；单机开发不配也能跑（退回进程内计数）
+redis>=5,<7
+
+# ---- 报告导出：Markdown 用标准库，PDF 用 ReportLab，Word 用 python-docx ----
+reportlab>=4.2,<5.0
+python-docx>=1.2,<2.0
+
+# ---- 知识库文档上传：PDF / Excel 文本抽取 ----
+pypdf>=5,<7                 # PDF 只读文本抽取
+openpyxl>=3.1,<4.0          # .xlsx / .xlsm 只读单元格
+xlrd>=2.0,<3.0              # 旧版 .xls 只读单元格
+
+# ---- 第二期：报错截图上传与 OCR ----
+python-multipart>=0.0.9,<1.0   # FastAPI 接收 multipart 截图
+Pillow>=10,<14                # 真实图片格式校验 + 缩略图
+numpy>=1.26,<3                # OCR 输入的 ndarray
+rapidocr>=3.0,<4.0            # 本地 ONNX OCR（不要装 rapidocr-onnxruntime，Python 3.13 不支持）
+onnxruntime>=1.20,<2.0        # RapidOCR 的推理后端
+
+# ---- 本地知识 embedding（BGE / ONNX） ----
+tokenizers>=0.20,<1.0         # bge-small-zh-v1.5 的 tokenizer.json 加载
+
+# 第 ⑦ 步真正用 Redis / RabbitMQ / MinIO 时再引入对应客户端。
+# 现阶段 backend/scripts/init_infra.py 用标准库就能验连通，没必要提前装。
+#
+# 【重要】这里永远不许出现 agentscope。
+# AgentScope 只属于独立的 worker 进程（见 worker/requirements.txt）。
+# 后台一旦 import 它，就等于把「排查 Agent」和「对外服务」焊死在同一个进程里，
+# 既违背分层，也没法给排查侧单独设网络与凭据边界。

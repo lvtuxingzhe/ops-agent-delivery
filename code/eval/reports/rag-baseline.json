@@ -1,0 +1,1124 @@
+{
+  "generated_at": "2026-11-20T00:09:06.771303+00:00",
+  "top_k": 5,
+  "case_count": 30,
+  "metrics": {
+    "recall_at_5": 1.0,
+    "mrr": 0.9833333333333333,
+    "empty_retrieval_rate": 0.0,
+    "dangerous_false_recall_rate": 0.0,
+    "dangerous_labeled_cases": 30
+  },
+  "cases": [
+    {
+      "id": "nginx-port-1",
+      "query": "网站服务起不来，日志说地址已经被别的程序占用了",
+      "expected_titles": [
+        "Nginx 启动失败：监听端口被占用"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】防火墙未放行端口"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "nginx-port-2",
+      "query": "nginx bind 0.0.0.0:9200 failed",
+      "expected_titles": [
+        "Nginx 启动失败：监听端口被占用"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 4
+        }
+      ]
+    },
+    {
+      "id": "nginx-port-3",
+      "query": "9200 端口冲突导致 web 服务启动失败",
+      "expected_titles": [
+        "Nginx 启动失败：监听端口被占用"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 9
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "systemd-exit-1",
+      "query": "服务进程启动就退出，退出码不是零",
+      "expected_titles": [
+        "systemd 服务启动失败：ExecStart 非零退出"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 9
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "systemd-exit-2",
+      "query": "systemctl start 失败 ExecStart 返回非 0",
+      "expected_titles": [
+        "systemd 服务启动失败：ExecStart 非零退出"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "验收-真实 LLM 结构化与脱敏",
+        "验收-真实 ELK 取证全链路"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 5
+        }
+      ]
+    },
+    {
+      "id": "systemd-exit-3",
+      "query": "unit 进入 failed 状态怎么查首次失败原因",
+      "expected_titles": [
+        "systemd 服务启动失败：ExecStart 非零退出"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "验收-真实 LLM 结构化与脱敏"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 5
+        }
+      ]
+    },
+    {
+      "id": "mysql-replica-1",
+      "query": "数据库从节点同步断了怎么恢复",
+      "expected_titles": [
+        "MySQL 从库复制中断处理"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "验收-真实 LLM 结构化与脱敏",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "验收-真实 ELK 取证全链路"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "mysql-replica-2",
+      "query": "Slave_SQL_Running 为 No 主键冲突",
+      "expected_titles": [
+        "MySQL 从库复制中断处理"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "mysql-replica-3",
+      "query": "从库复制中断 Last_SQL_Error 怎么处理",
+      "expected_titles": [
+        "MySQL 从库复制中断处理"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "redis-timeout-1",
+      "query": "应用连 redis 一直超时",
+      "expected_titles": [
+        "Redis 连接超时与连接数打满"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "验收-真实 LLM 结构化与脱敏",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】防火墙未放行端口"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 2
+        }
+      ]
+    },
+    {
+      "id": "redis-timeout-2",
+      "query": "connected_clients 快打满 maxclients 了",
+      "expected_titles": [
+        "Redis 连接超时与连接数打满"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "redis-timeout-3",
+      "query": "redis 连接池泄漏怎么排查",
+      "expected_titles": [
+        "Redis 连接超时与连接数打满"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "验收-真实 LLM 结构化与脱敏",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】DNS 解析失败"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 9
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 2
+        }
+      ]
+    },
+    {
+      "id": "k8s-crashloop-1",
+      "query": "pod 一直重启 CrashLoopBackOff",
+      "expected_titles": [
+        "Kubernetes Pod CrashLoopBackOff"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "验收-真实 ELK 取证全链路",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "k8s-crashloop-2",
+      "query": "kubectl describe 显示 back-off restarting failed container",
+      "expected_titles": [
+        "Kubernetes Pod CrashLoopBackOff"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】磁盘 inode 耗尽"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 4
+        }
+      ]
+    },
+    {
+      "id": "k8s-crashloop-3",
+      "query": "容器启动后马上退出怎么查上一次日志",
+      "expected_titles": [
+        "Kubernetes Pod CrashLoopBackOff"
+      ],
+      "hit": true,
+      "rank": 2,
+      "top_titles": [
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】磁盘 inode 耗尽"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "disk-inode-1",
+      "query": "磁盘还有空间但创建文件报 No space left on device",
+      "expected_titles": [
+        "磁盘 inode 耗尽"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "验收-真实 ELK 取证全链路"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 4
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "disk-inode-2",
+      "query": "df -i 显示 inode 使用率 100%",
+      "expected_titles": [
+        "磁盘 inode 耗尽"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "disk-inode-3",
+      "query": "大量小文件把 inode 用满了",
+      "expected_titles": [
+        "磁盘 inode 耗尽"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "验收-真实 ELK 取证全链路",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "验收-真实 LLM 结构化与脱敏"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "dns-fail-1",
+      "query": "域名解析失败 Name or service not known",
+      "expected_titles": [
+        "DNS 解析失败"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "验收-真实 LLM 结构化与脱敏",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 2
+        }
+      ]
+    },
+    {
+      "id": "dns-fail-2",
+      "query": "resolv.conf 里的 DNS 服务器不可达",
+      "expected_titles": [
+        "DNS 解析失败"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】Nginx 502 Bad Gateway"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "dns-fail-3",
+      "query": "getent hosts 解析不了域名",
+      "expected_titles": [
+        "DNS 解析失败"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】MySQL 从库复制中断处理"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "firewall-1",
+      "query": "服务本机监听正常但外部连不上",
+      "expected_titles": [
+        "防火墙未放行端口"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】TLS 证书过期"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 7
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "firewall-2",
+      "query": "firewall-cmd 没有放行目标端口",
+      "expected_titles": [
+        "防火墙未放行端口"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】DNS 解析失败",
+        "验收-真实 LLM 结构化与脱敏"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "firewall-3",
+      "query": "云安全组和主机防火墙都放行还是超时",
+      "expected_titles": [
+        "防火墙未放行端口"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】防火墙未放行端口",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "验收-真实 ELK 取证全链路"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 0
+        }
+      ]
+    },
+    {
+      "id": "tls-expired-1",
+      "query": "https 访问提示证书过期",
+      "expected_titles": [
+        "TLS 证书过期"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】DNS 解析失败",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "验收-真实 LLM 结构化与脱敏"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "tls-expired-2",
+      "query": "openssl s_client 看 notAfter 已经过期",
+      "expected_titles": [
+        "TLS 证书过期"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "【RAG验收】MySQL 从库复制中断处理"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "tls-expired-3",
+      "query": "certificate has expired 怎么换证书链",
+      "expected_titles": [
+        "TLS 证书过期"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】TLS 证书过期",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】磁盘 inode 耗尽",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 1
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 1
+        }
+      ]
+    },
+    {
+      "id": "nginx-502-1",
+      "query": "nginx 返回 502 Bad Gateway",
+      "expected_titles": [
+        "Nginx 502 Bad Gateway"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "验收-真实 LLM 结构化与脱敏",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 5
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 3
+        }
+      ]
+    },
+    {
+      "id": "nginx-502-2",
+      "query": "upstream prematurely closed connection",
+      "expected_titles": [
+        "Nginx 502 Bad Gateway"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Redis 连接超时与连接数打满",
+        "验收-真实 LLM 结构化与脱敏",
+        "【RAG验收】MySQL 从库复制中断处理",
+        "【RAG验收】Kubernetes Pod CrashLoopBackOff"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 3
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 3
+        }
+      ]
+    },
+    {
+      "id": "nginx-502-3",
+      "query": "后端进程正常但 nginx 还是返回 502",
+      "expected_titles": [
+        "Nginx 502 Bad Gateway"
+      ],
+      "hit": true,
+      "rank": 1,
+      "top_titles": [
+        "【RAG验收】Nginx 502 Bad Gateway",
+        "【RAG验收】Nginx 启动失败：监听端口被占用",
+        "验收-真实 LLM 结构化与脱敏",
+        "【RAG验收】systemd 服务启动失败：ExecStart 非零退出",
+        "【RAG验收】防火墙未放行端口"
+      ],
+      "dangerous_terms_labeled": true,
+      "dangerous_hit": false,
+      "empty": false,
+      "retrieval_mode": "hybrid",
+      "channels": [
+        {
+          "name": "dense",
+          "available": true,
+          "hit_count": 10
+        },
+        {
+          "name": "sparse",
+          "available": true,
+          "hit_count": 6
+        },
+        {
+          "name": "exact",
+          "available": true,
+          "hit_count": 3
+        }
+      ]
+    }
+  ]
+}

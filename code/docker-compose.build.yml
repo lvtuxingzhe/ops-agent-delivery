@@ -1,0 +1,32 @@
+# 仅用于构建镜像；生产编排 docker-compose.prod.yml 不包含 build。
+#
+# 用法：
+#   bash ops/deploy/build-images.sh
+#   # 或手动：
+#   docker compose -f docker-compose.prod.yml -f docker-compose.build.yml build backend worker frontend
+#
+# 构建完成后镜像标签由 OPS_IMAGE_TAG 决定，默认 prod。
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.prod
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple/}
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple/}
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.prod
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-docker.1ms.run/library/node:22-alpine}
+        NGINX_IMAGE: ${NGINX_IMAGE:-docker.1ms.run/library/nginx:1.27-alpine}
+        NPM_CONFIG_REGISTRY: ${NPM_CONFIG_REGISTRY:-https://registry.npmmirror.com}

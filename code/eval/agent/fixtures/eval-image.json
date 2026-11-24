@@ -1,0 +1,260 @@
+{
+  "captured_at": "2026-11-20T01:24:39.938780Z",
+  "deployments": [],
+  "endpoints": [],
+  "events": [
+    {
+      "count": null,
+      "involved_object": "Pod/bad-image",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-image/bad-image to vm-153",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": 2,
+      "involved_object": "Pod/bad-image",
+      "last_timestamp": "2026-11-20T01:23:59Z",
+      "message": "Back-off pulling image \"nginx:no-such-tag-20261120\"",
+      "reason": "BackOff",
+      "type": "Normal"
+    },
+    {
+      "count": 2,
+      "involved_object": "Pod/bad-image",
+      "last_timestamp": "2026-11-20T01:23:59Z",
+      "message": "Error: ImagePullBackOff",
+      "reason": "Failed",
+      "type": "Warning"
+    },
+    {
+      "count": 3,
+      "involved_object": "Pod/bad-image",
+      "last_timestamp": "2026-11-20T01:24:11Z",
+      "message": "Pulling image \"nginx:no-such-tag-20261120\"",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 3,
+      "involved_object": "Pod/bad-image",
+      "last_timestamp": "2026-11-20T01:24:35Z",
+      "message": "Failed to pull image \"nginx:no-such-tag-20261120\": failed to pull and unpack image \"docker.io/library/nginx:no-such-tag-20261120\": failed to resolve reference \"docker.io/library/nginx:no-such-tag-20261120\": unexpected status from HEAD request to https://docker.m.daocloud.io/v2/library/nginx/manifests/no-such-tag-20261120?ns=docker.io: 403 Forbidden",
+      "reason": "Failed",
+      "type": "Warning"
+    },
+    {
+      "count": 3,
+      "involved_object": "Pod/bad-image",
+      "last_timestamp": "2026-11-20T01:24:35Z",
+      "message": "Error: ErrImagePull",
+      "reason": "Failed",
+      "type": "Warning"
+    }
+  ],
+  "logs": {},
+  "namespace": "eval-image",
+  "nodes": [
+    {
+      "allocatable": {
+        "cpu": "2",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "1838456Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-150"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-152"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-153"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-154"
+    }
+  ],
+  "pods": [
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "nginx:no-such-tag-20261120",
+          "last_state": {},
+          "name": "app",
+          "ready": false,
+          "restart_count": 0,
+          "state": {
+            "message": "Back-off pulling image \"nginx:no-such-tag-20261120\"",
+            "reason": "ImagePullBackOff",
+            "state": "waiting"
+          }
+        }
+      ],
+      "labels": {
+        "app": "bad-image"
+      },
+      "name": "bad-image",
+      "node": "vm-153",
+      "phase": "Pending",
+      "pod_ip": "10.42.1.4"
+    }
+  ],
+  "pvc": [],
+  "services": []
+}

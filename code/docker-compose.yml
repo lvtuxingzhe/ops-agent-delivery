@@ -1,0 +1,223 @@
+# 本机开发环境编排（第 ① 步应用进程 + 第 ② 步基础设施）
+#
+# 【项目名必须显式写】默认会按目录名取项目名，本目录叫 code，
+# 而 D:\code 那套 Milvus 编排的项目名也是 code —— 同名项目 + 同名 service(minio)
+# 会被 Compose 当成同一个东西，`up` 时直接把对方的 milvus-minio 容器替换掉。
+# 显式起名叫 ops-agent，两边互不干扰。
+name: ops-agent
+
+#
+# 默认只起三个应用进程：后台、前端开发服务器、AgentScope worker。
+# 数据库 / 缓存 / 队列 / 对象存储挂在 infra profile 下，第 ② 步这样起：
+#   docker compose --profile infra up -d
+# 桌面 Electron 是 GUI 程序，在本机单独 npm start，不放进容器。
+#
+# 【不写死】所有端口、账号、地址都从 .env 读（${...}）。
+# 换机房、换端口改 .env 就行，不用动这个文件、更不用动代码。
+# 注意 backend 容器里连的是 compose 服务名（postgres / redis / rabbitmq / minio），
+# 本机脚本（init_db.py、selftest_live.py）连的是 127.0.0.1 —— 两边都由变量拼装，
+# 不是两套硬编码地址。
+#
+# 【网络提示】第 ⑦ 步要给「排查 Agent」和「部署 Agent」各配独立 network、
+# 独立凭据来源。第 ② 步 worker 还是空壳、不连任何东西，先共用一个默认网络，
+# 到时候在这里拆成两条 network，代码不用改。
+
+services:
+  # ---------- 后台：网页和桌面唯一对外的门 ----------
+  backend:
+    build: ./backend
+    environment:
+      APP_ENV: ${APP_ENV:-test}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      APP_NAME: ${APP_NAME:-运维 Agent 平台 · 后台}
+      # 容器内要监听 0.0.0.0 才能被外面访问；这不是"外部系统地址"
+      BACKEND_HOST: 0.0.0.0
+      BACKEND_PORT: 8000
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://127.0.0.1:5173}
+      # 容器内用服务名，本机的 .env 用 127.0.0.1，两者都由变量拼装
+      DATABASE_URL: postgresql://${DB_APP_ROLE}:${DB_APP_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_ADMIN_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_AUDIT_READER_URL: postgresql://${DB_AUDIT_READER_ROLE}:${DB_AUDIT_READER_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # 认证专属连接串：少了它登录接口直接 500，这里必须显式传
+      DB_AUTH_URL: postgresql://${DB_AUTH_ROLE}:${DB_AUTH_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_APP_ROLE: ${DB_APP_ROLE}
+      DB_AUDIT_READER_ROLE: ${DB_AUDIT_READER_ROLE}
+      DB_AUTH_ROLE: ${DB_AUTH_ROLE:-ops_auth}
+      AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET}
+      AUTH_TOKEN_TTL_MINUTES: ${AUTH_TOKEN_TTL_MINUTES:-480}
+      AUTH_TOTP_ISSUER: ${AUTH_TOTP_ISSUER:-ops-agent}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:-}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:-}
+      SMS_CHANNEL: ${SMS_CHANNEL:-test}
+      SMS_CODE_TTL_SECONDS: ${SMS_CODE_TTL_SECONDS:-300}
+      LOGIN_LOCKOUT_THRESHOLD: ${LOGIN_LOCKOUT_THRESHOLD:-5}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_PHONE: ${ADMIN_PHONE}
+      PBKDF2_ROUNDS: ${PBKDF2_ROUNDS:-100000}
+      # 排查子进程要用的模型地址与 Key：只在运行时注入，不落盘
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-}
+      DEEPSEEK_LIVE_KEY: ${DEEPSEEK_LIVE_KEY:-}
+      REDIS_URL: redis://redis:6379/0
+      # 执行许可的共享 HMAC 密钥：后台签发、worker 验签，两边必须是同一个值
+      EXEC_PERMIT_SECRET: ${EXEC_PERMIT_SECRET}
+      MQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    # 排查子进程要能找到 worker 脚本；后台自己的脱敏也用 packages/ops_guard。
+    # 两处都只读挂载，不写进后台镜像 —— 既是开发期便利，也明确
+    # 「后台镜像本身不含排查代码，共享包只有一份」这条隔离。
+    volumes:
+      - ./worker:/srv/worker:ro
+      - ./packages:/srv/packages:ro
+    healthcheck:
+      # python:3.13-slim 里没有 curl，用标准库探活，不额外装包
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health',timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- 前端：网页版直接看，桌面版开发期也加载它 ----------
+  frontend:
+    build: ./frontend
+    environment:
+      # 容器里 backend 是服务名，不是 127.0.0.1
+      BACKEND_TARGET: http://backend:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  # ---------- 任务 worker：队列消费者 + AgentScope 执行器 ----------
+  worker:
+    # 上下文是仓库根：镜像里要同时有 backend/app、backend/scripts、worker/、packages/
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    # 复用 .env 里的认证/模型配置，再覆盖容器内地址（127.0.0.1 → 服务名）
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-test}
+      DATABASE_URL: postgresql://${DB_APP_ROLE}:${DB_APP_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_ADMIN_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_AUDIT_READER_URL: postgresql://${DB_AUDIT_READER_ROLE}:${DB_AUDIT_READER_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_AUTH_URL: postgresql://${DB_AUTH_ROLE}:${DB_AUTH_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: http://minio:9000
+      # 与后台同一把执行许可密钥
+      EXEC_PERMIT_SECRET: ${EXEC_PERMIT_SECRET}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-}
+      DEEPSEEK_LIVE_KEY: ${DEEPSEEK_LIVE_KEY:-}
+    volumes:
+      # 历史 SSH 私钥/known_hosts 目录不进镜像；当前密码-only 执行器不依赖它
+      - ./var/ssh:/srv/code/var/ssh:ro
+    depends_on:
+      # required: false —— 生产可把 worker 单独部署、连外部 PG/Redis；
+      # 本机带 --profile infra 起时仍会等它们健康，不带也不会判配置非法。
+      postgres:
+        condition: service_healthy
+        required: false
+      redis:
+        condition: service_healthy
+        required: false
+    # 不暴露端口：只由队列驱动，不该被外部直接访问
+    restart: unless-stopped
+
+  # ================= 以下都是第 ② 步的基础设施 =================
+  # profiles 隔离：不带 --profile infra 启动时，这些服务完全不创建。
+  postgres:
+    image: ${IMAGE_POSTGRES:-pgvector/pgvector:pg16}
+    profiles: ["infra"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fake_ops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fake_password_do_not_use}
+      POSTGRES_DB: ${POSTGRES_DB:-fake_opsdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fake_ops} -d ${POSTGRES_DB:-fake_opsdb}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["infra"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    profiles: ["infra"]
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-fake_ops}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-fake_password_do_not_use}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    profiles: ["infra"]
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-fake_ops}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-fake_password_do_not_use}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    # 不在这里配 healthcheck：minio/minio 镜像里没有 mc 客户端，
+    # 用 curl 也不保证存在。连通性由 backend/scripts/init_infra.py 走
+    # /minio/health/live 验，更可靠，也不依赖镜像里装了什么工具。
+
+  # 一次性任务：把报告 / 证据要用的 bucket 建好。
+  # 单独跑一个小容器，就不用在后台里提前引入 MinIO SDK；
+  # 账号密码从环境变量传进去，不写死在编排文件里（$$ 是给 shell 读的转义）。
+  minio-init:
+    image: minio/mc:latest
+    profiles: ["infra"]
+    depends_on:
+      - minio
+    environment:
+      MINIO_USER: ${MINIO_USER:-fake_ops}
+      MINIO_PASSWORD: ${MINIO_PASSWORD:-fake_password_do_not_use}
+      MINIO_BUCKET: ${MINIO_BUCKET:-ops-agent-artifacts}
+      MINIO_AUDIT_BUCKET: ${MINIO_AUDIT_BUCKET:-ops-agent-audit}
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS:-90}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        # depends_on 只保证容器启动了，不保证服务就绪，所以自己重试等它
+        until mc alias set local http://minio:9000 "$${MINIO_USER}" "$${MINIO_PASSWORD}" 2>/dev/null; do
+          echo "等待 MinIO 就绪..."; sleep 2
+        done
+        mc mb --ignore-existing "local/$${MINIO_BUCKET}"
+        # 审计桶必须开对象锁：--with-lock 只能建桶时给，
+        # 已经存在的普通桶无法事后开启，所以这里让失败直接暴露出来，不吞掉。
+        mc mb --ignore-existing --with-lock "local/$${MINIO_AUDIT_BUCKET}"
+        mc retention set --default COMPLIANCE "$${AUDIT_RETENTION_DAYS}d" "local/$${MINIO_AUDIT_BUCKET}"
+        mc ls local
+
+volumes:
+  postgres_data:
+  minio_data:

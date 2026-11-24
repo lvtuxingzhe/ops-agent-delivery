@@ -1,0 +1,20 @@
+id: dep-apply-fail
+title: apply 命令非零退出后回滚
+suite: full
+kind: deployment
+tags: [smoke, deployment]
+input:
+  template_id: eval-five-stage-apply-fail
+  host: vm-150
+expected:
+  status: closed
+  outcome: failed
+  reason_code: exit_code_nonzero
+  failure_code: exit_code_nonzero
+  failure_rollback_ok: true
+  groups:
+    precheck: {count: 1, all_expect_ok: true}
+    apply: {count: 1, all_ok: false}
+    verify: {count: 0}
+    rollback: {count: 1, all_ok: true}
+    post_rollback: {count: 1, all_expect_ok: true}

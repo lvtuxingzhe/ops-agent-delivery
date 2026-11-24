@@ -1,0 +1,52 @@
+{
+  "name": "ops-agent-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "运维 Agent 平台 · Windows 桌面壳（Electron），直接复用 frontend 的前端代码",
+  "author": "Ops Agent Team",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:prod": "electron . --prod",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win nsis",
+    "dist:from-unpacked": "electron-builder --win nsis --prepackaged release/win-unpacked"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.opsagent.platform",
+    "productName": "OpsAgent",
+    "directories": {
+      "output": "release"
+    },
+    "electronDist": "node_modules/electron/dist",
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../frontend/dist",
+        "to": "frontend-dist"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "artifactName": "OpsAgent-${version}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    }
+  }
+}

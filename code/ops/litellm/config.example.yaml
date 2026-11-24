@@ -1,0 +1,46 @@
+# LiteLLM Proxy 生产模板 —— 只做示例，不提交真实 key。
+#
+# 启动：
+#   export DEEPSEEK_API_KEY=...
+#   export LITELLM_MASTER_KEY=...
+#   litellm --config ops/litellm/config.example.yaml --port 4000
+#
+# 平台侧模型配置：
+#   base_url  = http://litellm.internal:4000/v1
+#   model_name = deepseek-chat
+#   credential_ref = LITELLM_VIRTUAL_KEY  -> 环境变量 CRED_LITELLM_VIRTUAL_KEY
+#
+# 生产建议把 proxy 放在内网、只开 4000，前面加反向代理和 mTLS；
+# 平台所在机器只放虚拟 key，不持有上游真 key。
+
+model_list:
+  - model_name: deepseek-chat
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_base: https://api.deepseek.com/v1
+      api_key: os.environ/DEEPSEEK_API_KEY
+      timeout: 60
+      max_retries: 1
+    model_info:
+      description: 默认排查/审批预审模型
+
+  # 可选：给审批预审单独一个更便宜的模型
+  - model_name: deepseek-approval
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_base: https://api.deepseek.com/v1
+      api_key: os.environ/DEEPSEEK_API_KEY
+      timeout: 60
+      max_retries: 1
+    model_info:
+      description: 审批 AI 预审专用
+
+litellm_settings:
+  # 关闭对外暴露的详细错误，避免把上游 key 或请求体带进响应
+  drop_params: true
+  set_verbose: false
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  # 生产启用数据库审计/虚拟 key 时再打开；先不要用内存模式接生产
+  # database_url: os.environ/LITELLM_DATABASE_URL

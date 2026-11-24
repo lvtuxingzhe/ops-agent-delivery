@@ -1,0 +1,299 @@
+{
+  "captured_at": "2026-11-20T02:51:02.274462Z",
+  "configmaps": [
+    {
+      "keys": [
+        "ca.crt"
+      ],
+      "name": "kube-root-ca.crt"
+    }
+  ],
+  "deployments": [
+    {
+      "available_replicas": null,
+      "conditions": [
+        {
+          "message": "Deployment does not have minimum availability.",
+          "reason": "MinimumReplicasUnavailable",
+          "status": "False",
+          "type": "Available"
+        },
+        {
+          "message": "ReplicaSet \"selector-app-55ddb4d458\" has timed out progressing.",
+          "reason": "ProgressDeadlineExceeded",
+          "status": "False",
+          "type": "Progressing"
+        }
+      ],
+      "name": "selector-app",
+      "ready_replicas": null,
+      "replicas": 1,
+      "selector": {
+        "app": "selector-app"
+      },
+      "template_containers": [
+        {
+          "args": [],
+          "command": [],
+          "env": [],
+          "image": "nginx:1.25",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": []
+        }
+      ],
+      "template_labels": {
+        "app": "selector-app"
+      },
+      "template_node_selector": {
+        "disktype": "no-such-disk"
+      },
+      "template_volumes": [],
+      "updated_replicas": 1
+    }
+  ],
+  "endpoints": [],
+  "events": [
+    {
+      "count": null,
+      "involved_object": "Pod/selector-app-55ddb4d458-49nb8",
+      "last_timestamp": null,
+      "message": "0/4 nodes are available: 4 node(s) didn't match Pod's node affinity/selector. preemption: 0/4 nodes are available: 4 Preemption is not helpful for scheduling..",
+      "reason": "FailedScheduling",
+      "type": "Warning"
+    },
+    {
+      "count": null,
+      "involved_object": "Pod/selector-app-55ddb4d458-49nb8",
+      "last_timestamp": null,
+      "message": "0/4 nodes are available: 4 node(s) didn't match Pod's node affinity/selector. preemption: 0/4 nodes are available: 4 Preemption is not helpful for scheduling..",
+      "reason": "FailedScheduling",
+      "type": "Warning"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/selector-app-55ddb4d458",
+      "last_timestamp": "2026-11-20T02:39:01Z",
+      "message": "Created pod: selector-app-55ddb4d458-49nb8",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/selector-app",
+      "last_timestamp": "2026-11-20T02:39:01Z",
+      "message": "Scaled up replica set selector-app-55ddb4d458 to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    }
+  ],
+  "logs": {},
+  "namespace": "eval-hard-node",
+  "nodes": [
+    {
+      "allocatable": {
+        "cpu": "2",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "1838456Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-150"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-152"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-153"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-154"
+    }
+  ],
+  "pods": [
+    {
+      "conditions": [
+        {
+          "message": "0/4 nodes are available: 4 node(s) didn't match Pod's node affinity/selector. preemption: 0/4 nodes are available: 4 Preemption is not helpful for scheduling..",
+          "reason": "Unschedulable",
+          "status": "False",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [],
+      "labels": {
+        "app": "selector-app",
+        "pod-template-hash": "55ddb4d458"
+      },
+      "name": "selector-app-55ddb4d458-49nb8",
+      "node": null,
+      "node_selector": {
+        "disktype": "no-such-disk"
+      },
+      "phase": "Pending",
+      "pod_ip": null,
+      "service_account": "default",
+      "spec_containers": [
+        {
+          "args": [],
+          "command": [],
+          "env": [],
+          "image": "nginx:1.25",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": [
+            {
+              "mount_path": "/var/run/secrets/kubernetes.io/serviceaccount",
+              "name": "kube-api-access-99dxp",
+              "sub_path": null
+            }
+          ]
+        }
+      ],
+      "volumes": [
+        {
+          "config_map": null,
+          "name": "kube-api-access-99dxp",
+          "pvc": null,
+          "secret": null
+        }
+      ]
+    }
+  ],
+  "pvc": [],
+  "resource_quotas": [],
+  "services": []
+}

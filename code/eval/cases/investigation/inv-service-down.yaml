@@ -1,0 +1,17 @@
+id: inv-service-down
+title: 排查 vm-150 nginx 服务是否运行
+suite: full
+kind: investigation
+tags: [smoke, investigation]
+input:
+  title: 排查 vm-150 nginx 服务是否运行
+  description: 请检查 vm-150 上 nginx 服务状态、端口监听和最近日志，说明是否有异常。
+  target_scope:
+    host: vm-150
+    service: nginx
+expected:
+  status: report_ready
+  min_trace: 1
+  min_conclusions: 1
+  min_evidence: 1
+  data_quality_any: [有数据, 部分数据]

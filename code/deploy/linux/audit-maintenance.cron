@@ -1,0 +1,16 @@
+# 审计维护定时任务（Linux cron 版）
+#
+# 安装（root 或部署账号）：
+#   sudo cp audit-maintenance.cron /etc/cron.d/ops-agent-audit
+#   sudo chmod 644 /etc/cron.d/ops-agent-audit
+#   sudo systemctl restart cron
+#
+# 改路径：把 /opt/ops-agent 换成真实部署目录；Python 用部署虚拟环境里的那个，
+# 不要用系统 python（依赖装在 venv 里）。
+#
+# 为什么 00:05 而不是 00:00：归档读的是「昨天」的账本，留 5 分钟给
+# 跨零点还在写审计的请求，避免边界那几条落到今天被漏掉。
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+# 分 时 日 月 周   用户   命令
+5 0 * * *   opsagent   cd /opt/ops-agent/code && /opt/ops-agent/code/backend/.venv/bin/python backend/scripts/audit_maintenance.py >> /opt/ops-agent/code/var/logs/audit-maintenance.log 2>&1

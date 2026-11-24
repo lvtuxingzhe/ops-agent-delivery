@@ -1,0 +1,297 @@
+{
+  "captured_at": "2026-11-20T01:24:44.979156Z",
+  "deployments": [
+    {
+      "available_replicas": null,
+      "conditions": [
+        {
+          "message": "Deployment does not have minimum availability.",
+          "reason": "MinimumReplicasUnavailable",
+          "status": "False",
+          "type": "Available"
+        },
+        {
+          "message": "ReplicaSet \"cfg-app-fd66bdd64\" is progressing.",
+          "reason": "ReplicaSetUpdated",
+          "status": "True",
+          "type": "Progressing"
+        }
+      ],
+      "name": "cfg-app",
+      "ready_replicas": null,
+      "replicas": 1,
+      "selector": {
+        "app": "cfg-app"
+      },
+      "template_labels": {
+        "app": "cfg-app"
+      },
+      "updated_replicas": 1
+    }
+  ],
+  "endpoints": [],
+  "events": [
+    {
+      "count": null,
+      "involved_object": "Pod/cfg-app-fd66bdd64-7qmmg",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-config/cfg-app-fd66bdd64-7qmmg to vm-154",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/cfg-app-fd66bdd64",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Created pod: cfg-app-fd66bdd64-7qmmg",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/cfg-app",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Scaled up replica set cfg-app-fd66bdd64 to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/cfg-app-fd66bdd64-7qmmg",
+      "last_timestamp": "2026-11-20T01:22:47Z",
+      "message": "Pulling image \"busybox:1.36\"",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/cfg-app-fd66bdd64-7qmmg",
+      "last_timestamp": "2026-11-20T01:22:53Z",
+      "message": "Successfully pulled image \"busybox:1.36\" in 6.252s (6.252s including waiting)",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 10,
+      "involved_object": "Pod/cfg-app-fd66bdd64-7qmmg",
+      "last_timestamp": "2026-11-20T01:24:36Z",
+      "message": "Error: configmap \"missing-config\" not found",
+      "reason": "Failed",
+      "type": "Warning"
+    },
+    {
+      "count": 9,
+      "involved_object": "Pod/cfg-app-fd66bdd64-7qmmg",
+      "last_timestamp": "2026-11-20T01:24:36Z",
+      "message": "Container image \"busybox:1.36\" already present on machine",
+      "reason": "Pulled",
+      "type": "Normal"
+    }
+  ],
+  "logs": {},
+  "namespace": "eval-config",
+  "nodes": [
+    {
+      "allocatable": {
+        "cpu": "2",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "1838456Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-150"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-152"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-153"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-154"
+    }
+  ],
+  "pods": [
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "busybox:1.36",
+          "last_state": {},
+          "name": "app",
+          "ready": false,
+          "restart_count": 0,
+          "state": {
+            "message": "configmap \"missing-config\" not found",
+            "reason": "CreateContainerConfigError",
+            "state": "waiting"
+          }
+        }
+      ],
+      "labels": {
+        "app": "cfg-app",
+        "pod-template-hash": "fd66bdd64"
+      },
+      "name": "cfg-app-fd66bdd64-7qmmg",
+      "node": "vm-154",
+      "phase": "Pending",
+      "pod_ip": "10.42.3.4"
+    }
+  ],
+  "pvc": [],
+  "services": []
+}

@@ -1,0 +1,22 @@
+id: k8s-hard-configmap-key-missing
+title: eval-hard-key 的 key-app 报 couldn't find key
+description: key-app 引用了存在的 ConfigMap app-config，但环境变量取的 key 不在里面，Pod 一直 CreateContainerConfigError。
+fixture: eval-hard-key
+namespace: eval-hard-key
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: key-app 通过 configMapKeyRef 引用 app-config 的 missing-key，但该 key 不存在，kubelet 报 couldn't find key。
+  root_cause_terms:
+    - ["missing-key", "key"]
+    - ["configmap", "app-config"]
+    - ["couldn't find key", "not found", "不存在"]
+  evidence_terms:
+    - "couldn't find key"
+    - "missing-key"
+    - "createcontainerconfigerror"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+tags: ["k8s", "hard", "configmap-key"]

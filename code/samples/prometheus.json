@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "source": "prometheus",
+    "kind": "metrics",
+    "fake": true,
+    "description": "编造的指标数据，代替真实 Prometheus。目标名全是 svc-xxx 这种假名字，没有真实 IP 和主机名。",
+    "generated_at": "2026-11-12T10:05:00Z",
+    "window": "2026-11-12T09:55:00Z ~ 10:05:00Z"
+  },
+  "scenarios": {
+    "normal": {
+      "data_status": "ok",
+      "note": "时间窗内采到了样本，可以据此下结论",
+      "items": [
+        {"id": "m-001", "observed_at": "2026-11-12T10:00:00Z", "target": "svc-order-1", "metric": "cpu_usage", "value": 0.93, "unit": "ratio", "detail": "CPU 连续 10 分钟高于 0.90"},
+        {"id": "m-002", "observed_at": "2026-11-12T10:01:00Z", "target": "svc-order-1", "metric": "http_5xx_rate", "value": 0.08, "unit": "ratio", "detail": "5xx 比例从 0.01 抬到 0.08"},
+        {"id": "m-003", "observed_at": "2026-11-12T10:02:00Z", "target": "svc-order-1", "metric": "p99_latency_ms", "value": 1840, "unit": "ms", "detail": "P99 延迟明显升高"},
+        {"id": "m-004", "observed_at": "2026-11-12T10:03:00Z", "target": "svc-pay-1", "metric": "cpu_usage", "value": 0.31, "unit": "ratio", "detail": "对照组：支付服务 CPU 平稳"}
+      ]
+    },
+    "no_data": {
+      "data_status": "no_data",
+      "note": "这个时间窗内一条指标都没采到。无数据就是无数据，不能当成正常。",
+      "items": []
+    },
+    "unknown": {
+      "data_status": "unknown",
+      "note": "只采到 2 个副本里的 1 个，存量未知，不能据此判断整体状态",
+      "items": [
+        {"id": "m-101", "observed_at": "2026-11-12T10:00:00Z", "target": "svc-order-2", "metric": "cpu_usage", "value": 0.44, "unit": "ratio", "detail": "只看到这一个副本", "completeness": "partial"}
+      ]
+    }
+  }
+}

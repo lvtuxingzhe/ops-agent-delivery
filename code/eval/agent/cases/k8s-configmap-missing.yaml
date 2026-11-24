@@ -1,0 +1,22 @@
+id: k8s-configmap-missing
+title: eval-config 的 cfg-app 一直 CreateContainerConfigError
+description: cfg-app 的 Pod 调度成功，但容器一直无法创建，STATUS 长期停在 CreateContainerConfigError。
+fixture: eval-config
+namespace: eval-config
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: Deployment 通过 envFrom 引用了 ConfigMap missing-config，但该 ConfigMap 不存在，kubelet 无法生成容器环境变量。
+  root_cause_terms:
+    - ["configmap", "配置字典"]
+    - ["missing-config"]
+    - ["不存在", "not found", "缺失"]
+  evidence_terms:
+    - "missing-config"
+    - "configmap"
+    - "createcontainerconfigerror"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+tags: ["k8s", "configmap", "missing"]

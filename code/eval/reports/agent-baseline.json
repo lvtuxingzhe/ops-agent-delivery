@@ -1,0 +1,1508 @@
+{
+  "generated_at": "2026-11-20T01:38:48.931005+00:00",
+  "suite": "agent-k8s-replay",
+  "model": "deepseek-chat",
+  "runs_count": 3,
+  "case_count": 6,
+  "metrics": {
+    "case_count": 18,
+    "execution_failure_rate": 0.05555555555555555,
+    "root_cause_accuracy": 0.9444444444444444,
+    "verdict_accuracy": 0.9444444444444444,
+    "evidence_support_rate": 0.9444444444444444,
+    "root_cause_verified_rate": 0.9444444444444444,
+    "report_complete_rate": 0.9444444444444444,
+    "conclusion_evidence_rate": 0.9444444444444444,
+    "no_evidence_conclusion_rate": 0.0,
+    "dangerous_command_rate": 0.05555555555555555,
+    "guard_fail_rate": 0.3888888888888889,
+    "invalid_citation_rate": 0.2777777777777778,
+    "avg_tool_calls": 6.944444444444445,
+    "p50_latency_ms": 15344,
+    "p95_latency_ms": 18514
+  },
+  "runs": [
+    {
+      "run": 1,
+      "metrics": {
+        "case_count": 6,
+        "execution_failure_rate": 0.16666666666666666,
+        "root_cause_accuracy": 0.8333333333333334,
+        "verdict_accuracy": 0.8333333333333334,
+        "evidence_support_rate": 0.8333333333333334,
+        "root_cause_verified_rate": 0.8333333333333334,
+        "report_complete_rate": 0.8333333333333334,
+        "conclusion_evidence_rate": 0.8333333333333334,
+        "no_evidence_conclusion_rate": 0.0,
+        "dangerous_command_rate": 0.16666666666666666,
+        "guard_fail_rate": 0.5,
+        "invalid_citation_rate": 0.16666666666666666,
+        "avg_tool_calls": 6.333333333333333,
+        "p50_latency_ms": 15764,
+        "p95_latency_ms": 17712
+      },
+      "cases": [
+        {
+          "id": "k8s-configmap-missing",
+          "title": "eval-config 的 cfg-app 一直 CreateContainerConfigError",
+          "tags": [
+            "k8s",
+            "configmap",
+            "missing"
+          ],
+          "error": "RuntimeError: 模型未产出结构化结果（finished_reason=exceed_max_iters）",
+          "verdict": "",
+          "verdict_ok": false,
+          "root_cause_hit": false,
+          "root_cause_evidence_ok": false,
+          "root_cause_verified": false,
+          "report_complete": false,
+          "conclusion_count": 0,
+          "conclusion_evidence_rate": 0.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 0,
+          "latency_ms": 0,
+          "guard_ok": false,
+          "root_cause": "",
+          "summary": "",
+          "invalid_citation_count": 0,
+          "invalid_citations": [],
+          "root_cause_term_hits": []
+        },
+        {
+          "id": "k8s-crashloop-exit1",
+          "title": "eval-crash 的 crash-app 持续 CrashLoopBackOff，Pod 无法 Ready",
+          "tags": [
+            "k8s",
+            "crashloop",
+            "single-pod"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "crashloopbackoff"
+            ],
+            [
+              "退出码 1"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 5,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 9,
+          "latency_ms": 17712,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：容器 app 启动后立即以退出码 1 终止，kubelet 按重启策略反复拉起，退避时间累积到 1m20s，Pod 停留在 CrashLoopBackOff、READY 0/1（k8s:1、k8s:5）。\\n2. 触发链：11-20 09:22 前后 Deployment 扩容出 Pod 并成功拉取 busybox:1.36 镜像，容器被创建并启动 5 次，每次启动后进程自行退出，事件累计 9 次 BackOff 告警（k8s:6-event/6、8、9）。\\n3. 影响范围：Deployment crash-app 期望 1 副本、可用 0 副本，Available=False；命名空间内没有对应 Service/Endpoints，因此当前该应用既无可用实例也无对外入口（k8s:2、k8s:8、k8s:9）。\\n4. 已排除项：镜像拉取失败、节点资源压力与节点 NotReady 均被事件和节点状态排除（k8s:6-event/5、k8s:7）。\\n5. 尚未确定：容器日志只有一行 \"starting app\"，没有错误堆栈，且读不到 Deployment 的 com",
+          "summary": "在 eval-crash 命名空间、crash-app 这一个 Deployment 及其唯一 Pod 范围内，确认存在异常：Pod 处于 CrashLoopBackOff，READY 0/1，重启 4 次，Deployment 因 MinimumReplicasUnavailable 不可用。容器进程本身能启动（日志只有一行 \"starting app\"），随后以退出码 1 自行退出，事件里 5 次 Started 对应 9 次 BackOff，说明是应用进程主动失败退出，而不是镜像拉取、调度或节点资源问题。节点 vm-154 就绪、内存/磁盘/PID 均无压力，镜像已成功拉取，因此这些常见外部原因可以排除。但当前日志只有一行启动信息，没有报错输出，Deployment 的容器 command/args 与探针配置也无法从现有工具读取，所以\"为什么退出码 1\"尚未闭环，根因只能定位到\"容器启动命令执行后立即以非零码退出\"这一层。下一步需要拿到 Deployment 的容器启动命令与探针定义，或进入节点查看容器退出前的完整输出。",
+          "invalid_citation_count": 6,
+          "invalid_citations": [
+            "k8s:1",
+            "k8s:2",
+            "k8s:5",
+            "k8s:7",
+            "k8s:8",
+            "k8s:9"
+          ]
+        },
+        {
+          "id": "k8s-imagepull-badtag",
+          "title": "eval-image 的 bad-image 一直 ImagePullBackOff",
+          "tags": [
+            "k8s",
+            "image",
+            "single-pod"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "imagepullbackoff",
+              "errimagepull"
+            ],
+            [
+              "no-such-tag",
+              "403"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 6,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 5,
+          "latency_ms": 14160,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：Pod bad-image 的容器 app 引用镜像 nginx:no-such-tag-20261120，该引用在拉取时无法解析，事件原文为 failed to resolve reference 且 HEAD 请求返回 403 Forbidden（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：kubelet 在节点 vm-153 上反复 Pulling → 拉取失败 → 标记 ErrImagePull → 退避重试 → ImagePullBackOff，容器始终未创建，重启次数为 0（k8s:2-event/2-Pod/bad-image、k8s:2-event/6-Pod/bad-image、k8s:1-pod/bad-image）。\n3. 影响范围：仅 eval-image 命名空间的 bad-image 这一个 Pod 受影响，处于 Pending 且不 Ready；该 Pod 无对应 Deployment，因此不存在控制器层面的滚动发布阻塞，但该服务实例完全不可用。\n4. 旁证与排除：节点 vm-153 Ready 且无内存/磁盘",
+          "summary": "在 eval-image 命名空间的 bad-image Pod 范围内，确认异常：容器镜像 nginx:no-such-tag-20261120 拉取失败，Pod 停在 Pending，容器处于 ImagePullBackOff，Ready 为 False。事件显示拉取时经镜像加速地址 docker.m.daocloud.io 解析 docker.io/library/nginx:no-such-tag-20261120 的 manifest 返回 403 Forbidden，随后在 ErrImagePull 与 BackOff 之间循环，重启次数为 0，说明容器从未启动过。节点 vm-153 处于 Ready、无内存/磁盘/PID 压力，Pod 已成功调度，因此排除调度与节点资源因素。根因是镜像引用指向一个不存在的 tag，且加速代理对该引用返回 403；需要确认正确的镜像 tag 或私有仓库地址后修正工作负载。该 Pod 没有对应的 Deployment，无法从控制器侧核对期望镜像，这是本次的缺口。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-pvc-storageclass-missing",
+          "title": "eval-pvc 的 pvc-app 一直 Pending，PVC 未绑定",
+          "tags": [
+            "k8s",
+            "pvc",
+            "storage"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "storageclass"
+            ],
+            [
+              "no-such-sc"
+            ],
+            [
+              "不存在",
+              "pending"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 5,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [
+            "kubectl apply",
+            "kubectl delete"
+          ],
+          "tool_calls": 8,
+          "latency_ms": 14685,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：PVC data-pvc（1Gi）的 storageClassName 写成了 no-such-sc，而集群中不存在该 StorageClass，动态供给请求被 API 直接拒绝（k8s:4-pvc/data-pvc、k8s:2-event/2-PersistentVolumeClaim/data-pvc）。\\n2. 触发链：StorageClass 不存在 → Provisioner 无法创建 PV → PVC 停留在 Pending → Pod pvc-app 的 PodScheduled 条件为 False，调度器报 unbound immediate PersistentVolumeClaims，4 个节点均不可调度（k8s:3-pod/pvc-app、k8s:2-event/1-Pod/pvc-app）。\\n3. 影响范围：仅 eval-pvc 命名空间内的 data-pvc 与 Pod pvc-app 受影响；Pod 未分配节点、无容器实例，业务未启动。该 PVC 若被删除重建，Pod 会重新触发调度。\\n4. 旁证与排除：4 个节点均 Ready 且无内存",
+          "summary": "标题里说的「pvc-app 的 PVC」在集群里实际叫 data-pvc（1Gi），它处于 Pending，storageClassName 填的是 no-such-sc，而集群里不存在这个 StorageClass，动态供给因此反复失败（ProvisioningFailed 已累计 9 次）。PVC 绑不上，Pod pvc-app 的 PodScheduled 条件就是 False，调度器报「pod has unbound immediate PersistentVolumeClaims」，4 个节点全部不可调度，Pod 停在 Pending、没有分配到节点。四个节点本身 Ready、无内存/磁盘/PID 压力，所以不是节点资源不足导致的。结论：根因是 PVC 引用了不存在的 StorageClass，属于配置错误，不是存储后端或节点故障。缺口：没有查到集群里实际可用的 StorageClass 清单和已有 PV 的容量/访问模式，所以方案里给出的是两种可选修法，需要人工按现场确认后选一种。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-readiness-probe-port",
+          "title": "eval-readiness 的 ready-app 两个副本都 Running 但一直 0/1 Ready",
+          "tags": [
+            "k8s",
+            "readiness",
+            "probe"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "就绪探针"
+            ],
+            [
+              "8080"
+            ],
+            [
+              "未监听"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 5,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 9,
+          "latency_ms": 16843,
+          "guard_ok": false,
+          "root_cause": "1. 直接原因：Deployment 的就绪探针指向容器 8080 端口（http://<PodIP>:8080/），而容器内 nginx 按镜像默认配置启动、未监听 8080，探针每次连接都被拒绝（k8s:5-event/10、k8s:5-event/14）。\n2. 触发链：容器进程本身正常（nginx 1.31.9 已起 worker，重启 0 次，k8s:6-log、k8s:7-log），但就绪探针持续失败，容器被标记 ContainersNotReady，Pod 的 Ready 条件为 False（k8s:3-pod、k8s:4-pod）。\n3. 影响范围：Deployment 可用副本为 0，Available 条件为 MinimumReplicasUnavailable（k8s:1-deployment/ready-app）；Pod 未 Ready 不会进入 Endpoints，即使后续补建 Service 也不会有后端。\n4. 旁证与排除：容器崩溃重启、镜像拉取失败、节点资源不足均被事件与容器状态排除（k8s:2-pod、k8s:5-event/4、k8s:5-event",
+          "summary": "两个 Pod 的容器进程都正常启动（nginx 1.31.9 已起 worker，重启次数 0），但就绪探针一直访问 Pod IP 的 8080 端口，被拒绝连接，因此容器始终不 Ready，Deployment 报 MinimumReplicasUnavailable。日志显示 nginx 按镜像默认配置启动，没有出现监听 8080 的记录，说明探针端口与容器实际监听端口不一致是最可能的原因。另外，命名空间内查不到任何 Service 和 Endpoints，所以「Service 没有后端」这一现象本身缺少对象可查，需要确认 Service 是否被删除或建在别的命名空间。根因方向已基本锁定在探针端口配置，但 Deployment 的探针定义原文和容器内实际监听端口尚未直接取到，属于待补证据。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-service-selector-mismatch",
+          "title": "eval-selector 的 api-svc 访问不到后端，但 api-v2 Pod 都是 Running",
+          "tags": [
+            "k8s",
+            "service",
+            "selector"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "selector",
+              "选择器"
+            ],
+            [
+              "不匹配",
+              "为空"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 7,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 7,
+          "latency_ms": 17122,
+          "guard_ok": false,
+          "root_cause": "1. 直接原因：api-svc 的 spec.selector 为 app=api，而实际后端 Pod 的标签是 app=api-v2，两者不匹配，Service 无法关联到任何 Pod（k8s:1-service/api-svc、k8s:3-pod/api-v2-85664d5f95-5gnzn）。\n2. 触发链：选择器不匹配 → Endpoints 的 subsets 为空（k8s:2-endpoints/api-svc）→ kube-proxy 没有为该 ClusterIP 下发任何后端规则 → 调用方访问 ClusterIP:80 无响应。\n3. 影响范围：仅影响通过 api-svc 这个 ClusterIP 访问的调用方；两个 api-v2 Pod 本身健康（Ready、重启 0 次、nginx 正常启动），Deployment 2/2 可用，因此 Pod 直连或按 Pod IP 访问不受影响。该问题在 Pod 重建、节点重启后依然存在，因为标签与选择器本身就不一致。\n4. 旁证与排除：Pod 未就绪、容器崩溃、应用未监听端口、副本不足等假设均被 Pod 状态、Deploym",
+          "summary": "在 eval-selector 命名空间内，api-svc 的 ClusterIP 80 端口无响应，原因是 Service 的标签选择器与后端 Pod 标签不匹配，导致 Endpoints 为空、没有任何后端地址。api-svc 的 selector 是 app=api，而两个 api-v2 Pod 的标签是 app=api-v2（Deployment 模板标签同为 app=api-v2），因此 Service 选不到任何 Pod。两个 Pod 本身健康：1/1 Running、Ready 条件为 True、重启 0 次，nginx 正常启动并监听，日志无报错，事件中只有正常的调度/拉镜像/启动记录，没有异常。所以「Pod Running 但访问不到」并不矛盾——问题在 Service 与 Pod 的标签对接，不在 Pod 运行状态。未覆盖的部分：没有实际从调用方发起 curl 验证 ClusterIP 连通性，也没有查看是否有其他 Service 或 Ingress 指向 api-v2。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "metrics": {
+        "case_count": 6,
+        "execution_failure_rate": 0.0,
+        "root_cause_accuracy": 1.0,
+        "verdict_accuracy": 1.0,
+        "evidence_support_rate": 1.0,
+        "root_cause_verified_rate": 1.0,
+        "report_complete_rate": 1.0,
+        "conclusion_evidence_rate": 1.0,
+        "no_evidence_conclusion_rate": 0.0,
+        "dangerous_command_rate": 0.0,
+        "guard_fail_rate": 0.3333333333333333,
+        "invalid_citation_rate": 0.5,
+        "avg_tool_calls": 7.333333333333333,
+        "p50_latency_ms": 15334,
+        "p95_latency_ms": 18514
+      },
+      "cases": [
+        {
+          "id": "k8s-configmap-missing",
+          "title": "eval-config 的 cfg-app 一直 CreateContainerConfigError",
+          "tags": [
+            "k8s",
+            "configmap",
+            "missing"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "configmap"
+            ],
+            [
+              "missing-config"
+            ],
+            [
+              "不存在",
+              "not found",
+              "缺失"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 4,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 6,
+          "latency_ms": 16201,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：cfg-app 的 Pod 模板中引用了 ConfigMap missing-config，但该对象在 eval-config 命名空间中不存在，kubelet 在创建容器前解析配置引用失败，返回 configmap \"missing-config\" not found（k8s:1、k8s:2-event/6）。\n2. 触发链：Deployment 于 11-20 09:22 前后扩容出 ReplicaSet cfg-app-fd66bdd64 并创建 Pod，Pod 成功调度到 vm-154、镜像拉取成功，随后在容器创建阶段因配置缺失被反复拒绝，事件累计 10 次 Failed，容器始终处于 waiting，重启次数为 0（k8s:2-event/1、k8s:2-event/5、k8s:2-event/6）。\n3. 影响范围：Deployment cfg-app 期望 1 副本、可用 0 副本，Available=False；该命名空间下无 Service/Endpoints，暂无对外流量受影响，但应用本身完全不可用（k8s:4、k8s:5、k8s:6）。\n4. 旁证",
+          "summary": "现象是 Pod 已调度到 vm-154 且镜像 busybox:1.36 拉取成功，但容器停在 CreateContainerConfigError。假设是 Pod 引用的 ConfigMap 缺失，Pod 状态与事件都直接给出 \"configmap \\\"missing-config\\\" not found\"，该假设成立；镜像拉取失败、调度失败、节点资源不足等假设均被事件与 Pod 状态排除。Deployment 因此 1 个副本始终不可用（Available=False，MinimumReplicasUnavailable），且该命名空间下没有 Service/Endpoints，暂无对外暴露面受影响。缺口是命名空间内 ConfigMap 的实际存量无法通过现有工具确认，因此无法判断是\"从未创建\"还是\"被删除\"。",
+          "invalid_citation_count": 5,
+          "invalid_citations": [
+            "k8s:1",
+            "k8s:3",
+            "k8s:4",
+            "k8s:5",
+            "k8s:6"
+          ]
+        },
+        {
+          "id": "k8s-crashloop-exit1",
+          "title": "eval-crash 的 crash-app 持续 CrashLoopBackOff，Pod 无法 Ready",
+          "tags": [
+            "k8s",
+            "crashloop",
+            "single-pod"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "crashloopbackoff"
+            ],
+            [
+              "退出码 1",
+              "容器退出"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 6,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 9,
+          "latency_ms": 18514,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：crash-app 的 app 容器启动后立即以退出码 1 终止（k8s:1、k8s:6），日志仅输出一行 \"starting app\" 后无任何错误信息（k8s:3、k8s:4），说明容器内启动命令本身执行失败，而非被外部杀死。\n2. 触发链：容器退出码非 0 → kubelet 按重启策略重启，5 次启动后进入指数退避，事件累计 9 次 BackOff 警告（k8s:2-event/9），Pod 的 ContainersReady 变为 False（k8s:6），Deployment 因此 Available=False（k8s:5）。\n3. 影响范围：仅 1 个副本的 Deployment crash-app 完全不可用，Pod 位于 vm-154；命名空间内无 Service/Endpoints，暂无集群内服务入口受影响（k8s:8、k8s:9 无数据）。重启后行为不变，会持续 CrashLoopBackOff。\n4. 旁证与排除：镜像已成功拉取并启动（k8s:2-event/5、7、8），节点 vm-154 Ready 且无资源压力（k8s:7），Pod 已成",
+          "summary": "在 eval-crash 命名空间的 crash-app 范围内，确认存在异常：唯一 Pod crash-app-5fcc6f64bf-gkljs 的 app 容器反复以退出码 1 退出，已重启 4 次，当前处于 CrashLoopBackOff（退避 1m20s），READY 0/1，Deployment 的 Available 条件为 False（MinimumReplicasUnavailable）。验证了三个方向：容器启动后立即失败（日志只有一行 \"starting app\" 后无任何错误输出，退出码 1）、节点资源不足（vm-154 Ready，无内存/磁盘/PID 压力）、镜像拉取失败（镜像已成功拉取并启动 5 次）。因此直接原因是容器内启动命令本身以非零码退出，而不是调度、镜像或节点问题；但 Deployment 的容器命令/参数在本次工具返回中未包含，无法确认具体是哪个命令或参数导致退出，根因尚未完全闭环。另需注意该命名空间没有 Service/Endpoints，说明当前没有对外流量入口依赖此 Pod。",
+          "invalid_citation_count": 8,
+          "invalid_citations": [
+            "k8s:1",
+            "k8s:3",
+            "k8s:4",
+            "k8s:5",
+            "k8s:6",
+            "k8s:7",
+            "k8s:8",
+            "k8s:9"
+          ]
+        },
+        {
+          "id": "k8s-imagepull-badtag",
+          "title": "eval-image 的 bad-image 一直 ImagePullBackOff",
+          "tags": [
+            "k8s",
+            "image",
+            "single-pod"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "imagepullbackoff",
+              "errimagepull"
+            ],
+            [
+              "no-such-tag",
+              "tag 不存在",
+              "403"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 4,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 6,
+          "latency_ms": 14490,
+          "guard_ok": false,
+          "root_cause": "1. 直接原因：Pod bad-image 的容器 app 引用镜像 nginx:no-such-tag-20261120，kubelet 经加速地址 docker.m.daocloud.io 解析该镜像时收到 403 Forbidden，镜像无法拉取（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：拉取失败后 kubelet 报 ErrImagePull，并按退避策略反复重试，容器始终处于 waiting，Pod 停留在 Pending，状态在 ErrImagePull 与 ImagePullBackOff 之间循环（k8s:2-event/2-Pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅该 Pod 无法启动，容器从未运行、无日志、重启次数 0；Pod 已调度到 vm-153，节点本身 Ready 且资源充足，其他工作负载不受影响（k8s:4-node/vm-153、k8s:5-logs/bad-image）。\n4. 旁证与排除：调度正常（PodScheduled=True），节点无内存/磁盘/P",
+          "summary": "在 eval-image 命名空间内，bad-image Pod 的容器一直处于等待状态，原因是镜像拉取失败，并非容器启动后崩溃。事件显示 kubelet 反复拉取 nginx:no-such-tag-20261120，镜像仓库返回 403 Forbidden，随后进入 ErrImagePull / ImagePullBackOff 退避循环。Pod 已被正常调度到 vm-153，节点 Ready 且无内存、磁盘、PID 压力，容器从未启动过（重启次数 0、无日志），因此可以排除节点资源、调度和容器内应用故障。核心问题是镜像引用本身不可用：该 tag 在仓库中不存在或无权访问，且拉取走的是 docker.m.daocloud.io 镜像加速地址。未覆盖的部分：仓库侧凭据/加速器配置、Pod 的 imagePullSecrets 与完整 spec 未取到。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-pvc-storageclass-missing",
+          "title": "eval-pvc 的 pvc-app 一直 Pending，PVC 未绑定",
+          "tags": [
+            "k8s",
+            "pvc",
+            "storage"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "storageclass"
+            ],
+            [
+              "no-such-sc"
+            ],
+            [
+              "不存在",
+              "pending",
+              "未绑定"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 3,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 9,
+          "latency_ms": 14611,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：PVC data-pvc 的 storageClassName 被设为 no-such-sc，而该 StorageClass 在集群中不存在，动态供给失败（k8s:2-event/2-PersistentVolumeClaim/data-pvc、k8s:4-pvc/data-pvc）。\\n2. 触发链：供给失败使 data-pvc 长期处于 Pending、无 PV 可绑定；Pod pvc-app 引用该未绑定 PVC，调度器判定 unbound immediate PersistentVolumeClaims，Pod 停在 Pending 且无节点、无 IP（k8s:2-event/1-Pod/pvc-app、k8s:3-pod/pvc-app）。\\n3. 影响范围：eval-pvc 内仅此一个 Pod，无 Deployment/Service/Endpoints，PVC 不绑定前应用完全不可用；PVC 配置不改则重启后仍会重复失败。\\n4. 旁证与排除：调度事件中未出现资源不足或节点不可用原因，可排除节点资源类问题；命名空间内不存在名为 pvc-app 的 PVC，",
+          "summary": "在 eval-pvc 命名空间内，Pod pvc-app 处于 Pending 且未调度到任何节点，直接原因是它引用的 PVC 未绑定；而该命名空间里实际存在的 PVC 是 data-pvc（1Gi，storageClass=no-such-sc），不是名为 pvc-app 的 PVC。data-pvc 持续 ProvisioningFailed，报错为 storageclass \"no-such-sc\" not found，说明动态供给因 StorageClass 不存在而无法创建 PV，PVC 因此一直 Pending，Pod 随之无法调度。调度器事件与 Pod 条件都指向 \"pod has unbound immediate PersistentVolumeClaims\"，与上述链路一致。结论：根因是 PVC 指定了不存在的 StorageClass；另需注意用户所说的 \"pvc-app 的 PVC\" 实际对应 data-pvc，命名需与现场核对。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-readiness-probe-port",
+          "title": "eval-readiness 的 ready-app 两个副本都 Running 但一直 0/1 Ready",
+          "tags": [
+            "k8s",
+            "readiness",
+            "probe"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "就绪探针"
+            ],
+            [
+              "8080"
+            ],
+            [
+              "connection refused"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 4,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 9,
+          "latency_ms": 16003,
+          "guard_ok": false,
+          "root_cause": "1. 直接原因：ready-app 的就绪探针请求 http://<PodIP>:8080/，而容器内 nginx 以默认配置启动、监听 80 端口，8080 无进程监听，探针返回 connection refused（k8s:5-event/10、k8s:5-event/14、k8s:6-log、k8s:7-log）。\\n2. 触发链：容器启动成功但探针始终失败 → 容器 Ready 条件为 False（ContainersNotReady）→ Pod 不进入 Ready → Deployment 可用副本为 0，Available=False（k8s:3、k8s:4、k8s:1）。\\n3. 影响范围：两个副本（vm-153 上的 fggnv、vm-150 上的 w4wvn）全部不可用，Service 无后端，业务流量无法进入；该状态在 Pod 重建后仍会复现，因为问题在探针配置而非运行时。\\n4. 旁证与排除：容器重启次数 0、日志无报错、调度与镜像拉取均正常，可排除进程崩溃、调度失败、镜像拉取失败（k8s:2、k8s:5-event/1、k8s:5-event/13）。\\n5. ",
+          "summary": "在 eval-readiness 命名空间的 ready-app Deployment（2 个副本）范围内，确认存在异常：两个 Pod 容器都在运行且无重启，但就绪探针持续失败，导致 0 个可用副本。事件显示两个 Pod 的就绪探针都请求 http://<PodIP>:8080/，返回 connection refused（分别累计 22 次和 21 次），而容器日志显示 nginx 正常启动并监听默认的 80 端口，说明探针端口与容器实际监听端口不一致。Service 与 Endpoints 查询均无数据，与「Service 没有后端」的现象一致，但本次未取到 Service 对象本身，无法确认是 Service 缺失还是仅无后端。根因方向已由探针端口与 nginx 监听端口冲突的证据支持；Deployment 的探针配置原文未取到，属缺口。",
+          "invalid_citation_count": 4,
+          "invalid_citations": [
+            "k8s:1",
+            "k8s:2",
+            "k8s:3",
+            "k8s:4"
+          ]
+        },
+        {
+          "id": "k8s-service-selector-mismatch",
+          "title": "eval-selector 的 api-svc 访问不到后端，但 api-v2 Pod 都是 Running",
+          "tags": [
+            "k8s",
+            "service",
+            "selector"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "selector"
+            ],
+            [
+              "不匹配",
+              "为空"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 5,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 5,
+          "latency_ms": 14665,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：api-svc 的 selector 为 app=api，而 api-v2 的 Pod 与 Deployment 模板标签为 app=api-v2，两者不匹配，Service 选不到任何 Pod（k8s:1-service/api-svc、k8s:3-pod/api-v2-85664d5f95-5gnzn、k8s:4-deployment/api-v2）。\n2. 触发链：selector 不匹配 → Endpoints 的 subsets 为空（k8s:2-endpoints/api-svc）→ ClusterIP 80 端口没有可转发的后端地址，调用方连接无响应；Pod 侧本身健康，所以表现为「Pod Running 但服务不通」。\n3. 影响范围：仅影响通过 api-svc ClusterIP 80 端口访问的调用方；两个 Pod（IP-2、IP-3）直接访问不受影响。该问题在 Service 配置被修正前会持续存在，Pod 重建或节点重启都不会自行恢复。\n4. 旁证与排除：Pod 均 Ready、重启 0 次，Deployment 2/2 Available，事件",
+          "summary": "假设是 Service 与 Pod 的标签选择器不匹配导致没有后端，而不是 Pod 本身故障。核对后确认：api-svc 的 selector 为 app=api，而 api-v2 的 Pod 与 Deployment 模板标签均为 app=api-v2，因此 Endpoints 的 subsets 为空，ClusterIP 80 端口没有可转发目标。两个 Pod 均 1/1 Running、重启 0 次，Deployment 2/2 Ready 且 Available 为 True，命名空间事件只有调度、拉镜像、启动等 Normal 事件，可排除容器崩溃、镜像拉取失败和资源不足。结论是标签不匹配这一配置问题，修复方向为把 Service 的 selector 对齐到 app=api-v2（或给 Pod 补 app=api 标签）。尚未验证 Pod 内 nginx 是否在 80 端口监听，以及修复后调用方链路是否恢复。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "metrics": {
+        "case_count": 6,
+        "execution_failure_rate": 0.0,
+        "root_cause_accuracy": 1.0,
+        "verdict_accuracy": 1.0,
+        "evidence_support_rate": 1.0,
+        "root_cause_verified_rate": 1.0,
+        "report_complete_rate": 1.0,
+        "conclusion_evidence_rate": 1.0,
+        "no_evidence_conclusion_rate": 0.0,
+        "dangerous_command_rate": 0.0,
+        "guard_fail_rate": 0.3333333333333333,
+        "invalid_citation_rate": 0.16666666666666666,
+        "avg_tool_calls": 7.166666666666667,
+        "p50_latency_ms": 16243,
+        "p95_latency_ms": 23112
+      },
+      "cases": [
+        {
+          "id": "k8s-configmap-missing",
+          "title": "eval-config 的 cfg-app 一直 CreateContainerConfigError",
+          "tags": [
+            "k8s",
+            "configmap",
+            "missing"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "configmap"
+            ],
+            [
+              "missing-config"
+            ],
+            [
+              "不存在"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 4,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 6,
+          "latency_ms": 23112,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：cfg-app 的 Pod 模板引用了名为 missing-config 的 ConfigMap，但该对象在 eval-config 中不存在，kubelet 组装容器配置失败，容器停在 CreateContainerConfigError（k8s:1-pod/cfg-app-fd66bdd64-7qmmg、k8s:2-event/6-Pod/cfg-app-fd66bdd64-7qmmg）。\\n2. 触发链：Deployment 扩容生成 Pod → 调度到 vm-154、镜像 busybox:1.36 拉取成功 → 解析 ConfigMap 失败并持续重试 10 次，容器从未启动，重启次数 0（k8s:2-event/1、5、6、7，k8s:3-pod/cfg-app-fd66bdd64-7qmmg）。\\n3. 影响范围：Deployment 期望 1 副本、可用 0 副本，Available=False；命名空间内无 Service/Endpoints，故障不外溢，但 cfg-app 完全不可用，ConfigMap 不补齐则 Pod 重建后仍会失败（k8s:4-d",
+          "summary": "在 eval-config 命名空间、cfg-app 这一个 Deployment（1 个 Pod，节点 vm-154）范围内，确认容器创建失败的直接原因是引用的 ConfigMap「missing-config」不存在。Pod 已调度成功、镜像 busybox:1.36 已拉取完成，但 kubelet 在创建容器前解析配置时反复报 configmap \"missing-config\" not found，容器停在 CreateContainerConfigError，重启次数为 0，说明进程从未启动，不是应用自身崩溃。Deployment 因此 Available=False（MinimumReplicasUnavailable），当前 0 个可用副本。尚未确认的是：该 ConfigMap 是本来就没创建、还是被误删，以及 Deployment 里具体是 envFrom 还是 volume 引用它（本次工具未返回 Pod 模板明细）。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-crashloop-exit1",
+          "title": "eval-crash 的 crash-app 持续 CrashLoopBackOff，Pod 无法 Ready",
+          "tags": [
+            "k8s",
+            "crashloop",
+            "single-pod"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "crashloopbackoff",
+              "back-off"
+            ],
+            [
+              "退出码 1"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 6,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 9,
+          "latency_ms": 18472,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：容器 app（busybox:1.36）的启动命令执行后立即以退出码 1 结束，日志仅输出 \"starting app\" 一行、无任何错误信息，属于应用/启动命令层面的主动失败，而非被系统杀死（证据 k8s:4、k8s:5、k8s:1）。\n2. 触发链：kubelet 反复创建并启动容器（Started 计数 5），每次启动后进程退出码 1，kubelet 按退避策略标记 Back-off restarting failed container（累计 9 次），容器进入 CrashLoopBackOff 等待状态，Pod 的 Ready/ContainersReady 条件为 ContainersNotReady（证据 k8s:6-event/8、k8s:6-event/9、k8s:3）。\n3. 影响范围：Deployment crash-app 期望 1 副本、实际可用副本为 0，Available 条件为 MinimumReplicasUnavailable，即该应用当前完全不可用；命名空间内无 Service/Endpoints，暂未发现对外暴露的流量入口（证据 ",
+          "summary": "在 eval-crash 命名空间、crash-app 这一个 Deployment（1 个 Pod，节点 vm-154）范围内，确认 Pod 处于 CrashLoopBackOff、READY 0/1、重启 4 次，Deployment 因 MinimumReplicasUnavailable 不可用。容器 app（busybox:1.36）每次启动只输出一行 \"starting app\" 就以退出码 1 终止，当前与上一次容器日志内容一致，说明进程是启动后立即自行退出，而不是被 OOM 或调度问题打断。节点 vm-154 Ready、无内存/磁盘/PID 压力，镜像拉取成功，因此调度、资源、镜像拉取三类原因可以排除。但 Pod 的启动命令/参数（command/args）无法通过现有只读接口取得，日志里也没有任何错误信息，所以\"容器内启动命令本身执行失败\"这一根因只能算证据支持、尚未完全闭环。命名空间内没有 Service/Endpoints，因此本次无法评估对上游流量的影响。",
+          "invalid_citation_count": 8,
+          "invalid_citations": [
+            "k8s:1",
+            "k8s:2",
+            "k8s:3",
+            "k8s:4",
+            "k8s:5",
+            "k8s:7",
+            "k8s:8",
+            "k8s:9"
+          ]
+        },
+        {
+          "id": "k8s-imagepull-badtag",
+          "title": "eval-image 的 bad-image 一直 ImagePullBackOff",
+          "tags": [
+            "k8s",
+            "image",
+            "single-pod"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "imagepullbackoff",
+              "errimagepull"
+            ],
+            [
+              "no-such-tag",
+              "tag 不存在",
+              "403"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 5,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 5,
+          "latency_ms": 14409,
+          "guard_ok": false,
+          "root_cause": "1. 直接原因：Pod bad-image 的容器镜像写成了 nginx:no-such-tag-20261120，该 tag 在 docker.io/library/nginx 下无法解析，仓库侧返回 403 Forbidden（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：kubelet 在 vm-153 上反复尝试拉取该镜像，每次解析引用失败即报 ErrImagePull，随后进入指数退避，状态显示为 ImagePullBackOff（k8s:2-event/2-Pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅 eval-image 命名空间的这一个 Pod，容器 app 始终未启动、Pod 保持 Pending；该命名空间下没有 Deployment，因此不会自动滚动修复，需人工改镜像或重建 Pod。\n4. 旁证与排除：Pod 已成功调度到 vm-153，节点 Ready 且无资源压力，容器重启次数为 0，可排除调度失败、节点资源不足和容器崩溃（k8s:4-node/vm-153、k8s:3-",
+          "summary": "在 eval-image 命名空间内，bad-image 这个 Pod 的容器一直拉不到镜像，属于镜像引用本身无效，不是节点或调度问题。事件里明确记录：拉取 nginx:no-such-tag-20261120 时，镜像仓库返回 403 Forbidden，随后在 ErrImagePull 与 ImagePullBackOff 之间循环，与现象描述一致。Pod 已被正常调度到 vm-153，节点 Ready、无内存/磁盘/PID 压力，容器从未启动过（重启次数 0、无上次退出状态），因此可以排除节点资源不足和容器启动后崩溃。该命名空间下没有对应的 Deployment，说明这个 Pod 是直接创建的，改镜像需要直接改 Pod 或重建。还缺镜像仓库侧对该 tag 是否存在的确认，以及是谁创建了这个 Pod。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-pvc-storageclass-missing",
+          "title": "eval-pvc 的 pvc-app 一直 Pending，PVC 未绑定",
+          "tags": [
+            "k8s",
+            "pvc",
+            "storage"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "storageclass"
+            ],
+            [
+              "no-such-sc"
+            ],
+            [
+              "不存在",
+              "pending",
+              "未绑定"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 5,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 8,
+          "latency_ms": 13987,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：PVC data-pvc 的 storageClassName 被设为 no-such-sc，而集群中不存在该 StorageClass，动态供给器无法创建 PV，PVC 停留在 Pending（k8s:4-pvc/data-pvc、k8s:5-event/2-PersistentVolumeClaim/data-pvc）。\\n2. 触发链：PVC 未绑定 → Pod pvc-app 的 PodScheduled 条件为 False，调度器报 0/4 节点可用、存在未绑定的即时 PVC → Pod 无节点、无容器启动，一直 Pending（k8s:2-pod/pvc-app、k8s:3-event/1-Pod/pvc-app）。\\n3. 影响范围：仅 eval-pvc 命名空间的 pvc-app 与 data-pvc 受影响；Pod 未落到任何节点，未占用节点资源，重启或重建 Pod 也不会自愈，除非 PVC 能绑定。\\n4. 旁证与排除：4 个节点均 Ready 且无内存/磁盘/PID 压力，节点资源不足假设已被排除（k8s:7-node/vm-152、k8s:7-n",
+          "summary": "在 eval-pvc 命名空间内，Pod pvc-app 处于 Pending，PVC data-pvc 也处于 Pending，两者都未绑定。PVC 事件显示 9 次 ProvisioningFailed，原因是引用的 StorageClass「no-such-sc」不存在，动态供给无法创建 PV；Pod 事件显示 0/4 节点可用，原因是存在未绑定的即时 PVC，调度器因此无法调度。4 个节点均为 Ready，且没有内存、磁盘、PID 压力，说明节点资源不是本次 Pending 的原因。结论：根因是 PVC 指向了不存在的 StorageClass，导致 PV 无法供给，进而阻塞 Pod 调度；修复方向是改用集群中真实存在的 StorageClass（或先创建该 StorageClass），再重建 PVC。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-readiness-probe-port",
+          "title": "eval-readiness 的 ready-app 两个副本都 Running 但一直 0/1 Ready",
+          "tags": [
+            "k8s",
+            "readiness",
+            "probe"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "就绪探针"
+            ],
+            [
+              "8080"
+            ],
+            [
+              "connection refused"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 5,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 10,
+          "latency_ms": 18077,
+          "guard_ok": false,
+          "root_cause": "1. 直接原因：ready-app 的就绪探针被配置为访问 Pod IP 的 8080 端口，而容器镜像 nginx:alpine 启动后按默认配置监听 80 端口，8080 上没有进程监听，探针返回 connection refused（k8s:5-event/10、k8s:5-event/14）。\n2. 触发链：容器进程本身正常（日志显示 nginx 配置完成并启动 worker，k8s:6-log、k8s:7-log），但探针持续失败，kubelet 将容器标记为 ContainersNotReady，Pod 的 Ready 条件为 False（k8s:3-pod、k8s:4-pod），Deployment 因此 Available=False（k8s:1-deployment）。\n3. 影响范围：两个副本全部 0/1 Ready，Deployment 无可用副本；Service/Endpoints 查询无数据，服务侧没有可用后端，业务流量无法到达这两个 Pod；重启 Pod 或重新发布不会改变结果，因为探针端口配置随模板一起下发。\n4. 旁证与排除：容器重启次数为 0、无退出记",
+          "summary": "现象是 Deployment 0 个 Available、两个 Pod Running 但 READY 0/1、Service 无后端。围绕三个假设取证：探针端口与容器实际监听端口不一致、容器启动后崩溃、调度或节点资源问题。事件显示两个 Pod 的就绪探针都在访问 Pod IP 的 8080 端口并被拒绝连接（各累计 21～22 次），而两个容器的日志都显示 nginx 正常启动并进入 start worker processes，重启次数为 0、无退出记录，节点均 Ready 且无内存/磁盘/PID 压力，因此后两个假设被排除。结论是探针端口配置与 nginx 默认监听端口冲突，Pod 永远不会进入 Ready，Deployment 因此无 Available 副本，Service 也拿不到后端。缺口是未能直接读取 Deployment 的探针字段原文，也未确认 Service 对象是否存在（查询无数据）。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        },
+        {
+          "id": "k8s-service-selector-mismatch",
+          "title": "eval-selector 的 api-svc 访问不到后端，但 api-v2 Pod 都是 Running",
+          "tags": [
+            "k8s",
+            "service",
+            "selector"
+          ],
+          "error": "",
+          "verdict": "anomaly",
+          "verdict_ok": true,
+          "root_cause_hit": true,
+          "root_cause_term_hits": [
+            [
+              "selector"
+            ],
+            [
+              "不匹配",
+              "为空"
+            ]
+          ],
+          "root_cause_evidence_ok": true,
+          "root_cause_verified": true,
+          "report_complete": true,
+          "conclusion_count": 4,
+          "conclusion_evidence_rate": 1.0,
+          "no_evidence_conclusion_rate": 0.0,
+          "dangerous_commands": [],
+          "tool_calls": 5,
+          "latency_ms": 13381,
+          "guard_ok": true,
+          "root_cause": "1. 直接原因：api-svc 的 selector 配置为 app=api（k8s:1-service/api-svc），而实际后端 Pod 的标签是 app=api-v2（k8s:3-pod/api-v2-85664d5f95-5gnzn、k8s:3-pod/api-v2-85664d5f95-xfj77），两者不匹配。\n2. 触发链：selector 匹配不到任何 Pod → Endpoints 的 subsets 为空（k8s:2-endpoints/api-svc）→ ClusterIP 80 端口没有可转发的后端地址，调用方连接无响应。\n3. 影响范围：仅影响通过 api-svc 的 ClusterIP 80 端口访问的调用方；api-v2 的两个 Pod 本身正常（1/1 Running、重启 0 次），Deployment 2/2 可用（k8s:4-deployment/api-v2），直连 Pod IP 不受影响。该问题在 Service 配置被修正前会持续存在，Pod 重建也不会自愈。\n4. 旁证与排除：Pod 未就绪、崩溃重启等假设已被 Pod 与 Deploym",
+          "summary": "假设是 Service 与 Pod 的标签选择器不匹配，导致流量没有后端可转发。核对后确认：api-svc 的 selector 是 app=api，而 api-v2 Deployment 及其两个 Pod 的标签都是 app=api-v2，Endpoints 的 subsets 为空，因此 ClusterIP 80 端口没有可转发的后端，这与调用方反馈一致。两个 Pod 均为 1/1 Running、重启 0 次，Deployment 2/2 可用，说明后端进程本身没有故障，问题出在 Service 到 Pod 的匹配关系上。api-svc 没有相关事件，无法从事件侧看到更多线索。根因已闭环，修复方向是让 Service 的 selector 与 Pod 标签一致。",
+          "invalid_citation_count": 0,
+          "invalid_citations": []
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "k8s-configmap-missing",
+      "title": "eval-config 的 cfg-app 一直 CreateContainerConfigError",
+      "tags": [
+        "k8s",
+        "configmap",
+        "missing"
+      ],
+      "error": "RuntimeError: 模型未产出结构化结果（finished_reason=exceed_max_iters）",
+      "verdict": "",
+      "verdict_ok": false,
+      "root_cause_hit": false,
+      "root_cause_evidence_ok": false,
+      "root_cause_verified": false,
+      "report_complete": false,
+      "conclusion_count": 0,
+      "conclusion_evidence_rate": 0.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 0,
+      "latency_ms": 0,
+      "guard_ok": false,
+      "root_cause": "",
+      "summary": "",
+      "invalid_citation_count": 0,
+      "invalid_citations": [],
+      "root_cause_term_hits": []
+    },
+    {
+      "id": "k8s-crashloop-exit1",
+      "title": "eval-crash 的 crash-app 持续 CrashLoopBackOff，Pod 无法 Ready",
+      "tags": [
+        "k8s",
+        "crashloop",
+        "single-pod"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "crashloopbackoff"
+        ],
+        [
+          "退出码 1"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 5,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 9,
+      "latency_ms": 17712,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：容器 app 启动后立即以退出码 1 终止，kubelet 按重启策略反复拉起，退避时间累积到 1m20s，Pod 停留在 CrashLoopBackOff、READY 0/1（k8s:1、k8s:5）。\\n2. 触发链：11-20 09:22 前后 Deployment 扩容出 Pod 并成功拉取 busybox:1.36 镜像，容器被创建并启动 5 次，每次启动后进程自行退出，事件累计 9 次 BackOff 告警（k8s:6-event/6、8、9）。\\n3. 影响范围：Deployment crash-app 期望 1 副本、可用 0 副本，Available=False；命名空间内没有对应 Service/Endpoints，因此当前该应用既无可用实例也无对外入口（k8s:2、k8s:8、k8s:9）。\\n4. 已排除项：镜像拉取失败、节点资源压力与节点 NotReady 均被事件和节点状态排除（k8s:6-event/5、k8s:7）。\\n5. 尚未确定：容器日志只有一行 \"starting app\"，没有错误堆栈，且读不到 Deployment 的 com",
+      "summary": "在 eval-crash 命名空间、crash-app 这一个 Deployment 及其唯一 Pod 范围内，确认存在异常：Pod 处于 CrashLoopBackOff，READY 0/1，重启 4 次，Deployment 因 MinimumReplicasUnavailable 不可用。容器进程本身能启动（日志只有一行 \"starting app\"），随后以退出码 1 自行退出，事件里 5 次 Started 对应 9 次 BackOff，说明是应用进程主动失败退出，而不是镜像拉取、调度或节点资源问题。节点 vm-154 就绪、内存/磁盘/PID 均无压力，镜像已成功拉取，因此这些常见外部原因可以排除。但当前日志只有一行启动信息，没有报错输出，Deployment 的容器 command/args 与探针配置也无法从现有工具读取，所以\"为什么退出码 1\"尚未闭环，根因只能定位到\"容器启动命令执行后立即以非零码退出\"这一层。下一步需要拿到 Deployment 的容器启动命令与探针定义，或进入节点查看容器退出前的完整输出。",
+      "invalid_citation_count": 6,
+      "invalid_citations": [
+        "k8s:1",
+        "k8s:2",
+        "k8s:5",
+        "k8s:7",
+        "k8s:8",
+        "k8s:9"
+      ]
+    },
+    {
+      "id": "k8s-imagepull-badtag",
+      "title": "eval-image 的 bad-image 一直 ImagePullBackOff",
+      "tags": [
+        "k8s",
+        "image",
+        "single-pod"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "imagepullbackoff",
+          "errimagepull"
+        ],
+        [
+          "no-such-tag",
+          "403"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 6,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 5,
+      "latency_ms": 14160,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：Pod bad-image 的容器 app 引用镜像 nginx:no-such-tag-20261120，该引用在拉取时无法解析，事件原文为 failed to resolve reference 且 HEAD 请求返回 403 Forbidden（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：kubelet 在节点 vm-153 上反复 Pulling → 拉取失败 → 标记 ErrImagePull → 退避重试 → ImagePullBackOff，容器始终未创建，重启次数为 0（k8s:2-event/2-Pod/bad-image、k8s:2-event/6-Pod/bad-image、k8s:1-pod/bad-image）。\n3. 影响范围：仅 eval-image 命名空间的 bad-image 这一个 Pod 受影响，处于 Pending 且不 Ready；该 Pod 无对应 Deployment，因此不存在控制器层面的滚动发布阻塞，但该服务实例完全不可用。\n4. 旁证与排除：节点 vm-153 Ready 且无内存/磁盘",
+      "summary": "在 eval-image 命名空间的 bad-image Pod 范围内，确认异常：容器镜像 nginx:no-such-tag-20261120 拉取失败，Pod 停在 Pending，容器处于 ImagePullBackOff，Ready 为 False。事件显示拉取时经镜像加速地址 docker.m.daocloud.io 解析 docker.io/library/nginx:no-such-tag-20261120 的 manifest 返回 403 Forbidden，随后在 ErrImagePull 与 BackOff 之间循环，重启次数为 0，说明容器从未启动过。节点 vm-153 处于 Ready、无内存/磁盘/PID 压力，Pod 已成功调度，因此排除调度与节点资源因素。根因是镜像引用指向一个不存在的 tag，且加速代理对该引用返回 403；需要确认正确的镜像 tag 或私有仓库地址后修正工作负载。该 Pod 没有对应的 Deployment，无法从控制器侧核对期望镜像，这是本次的缺口。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-pvc-storageclass-missing",
+      "title": "eval-pvc 的 pvc-app 一直 Pending，PVC 未绑定",
+      "tags": [
+        "k8s",
+        "pvc",
+        "storage"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "storageclass"
+        ],
+        [
+          "no-such-sc"
+        ],
+        [
+          "不存在",
+          "pending"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 5,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [
+        "kubectl apply",
+        "kubectl delete"
+      ],
+      "tool_calls": 8,
+      "latency_ms": 14685,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：PVC data-pvc（1Gi）的 storageClassName 写成了 no-such-sc，而集群中不存在该 StorageClass，动态供给请求被 API 直接拒绝（k8s:4-pvc/data-pvc、k8s:2-event/2-PersistentVolumeClaim/data-pvc）。\\n2. 触发链：StorageClass 不存在 → Provisioner 无法创建 PV → PVC 停留在 Pending → Pod pvc-app 的 PodScheduled 条件为 False，调度器报 unbound immediate PersistentVolumeClaims，4 个节点均不可调度（k8s:3-pod/pvc-app、k8s:2-event/1-Pod/pvc-app）。\\n3. 影响范围：仅 eval-pvc 命名空间内的 data-pvc 与 Pod pvc-app 受影响；Pod 未分配节点、无容器实例，业务未启动。该 PVC 若被删除重建，Pod 会重新触发调度。\\n4. 旁证与排除：4 个节点均 Ready 且无内存",
+      "summary": "标题里说的「pvc-app 的 PVC」在集群里实际叫 data-pvc（1Gi），它处于 Pending，storageClassName 填的是 no-such-sc，而集群里不存在这个 StorageClass，动态供给因此反复失败（ProvisioningFailed 已累计 9 次）。PVC 绑不上，Pod pvc-app 的 PodScheduled 条件就是 False，调度器报「pod has unbound immediate PersistentVolumeClaims」，4 个节点全部不可调度，Pod 停在 Pending、没有分配到节点。四个节点本身 Ready、无内存/磁盘/PID 压力，所以不是节点资源不足导致的。结论：根因是 PVC 引用了不存在的 StorageClass，属于配置错误，不是存储后端或节点故障。缺口：没有查到集群里实际可用的 StorageClass 清单和已有 PV 的容量/访问模式，所以方案里给出的是两种可选修法，需要人工按现场确认后选一种。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-readiness-probe-port",
+      "title": "eval-readiness 的 ready-app 两个副本都 Running 但一直 0/1 Ready",
+      "tags": [
+        "k8s",
+        "readiness",
+        "probe"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "就绪探针"
+        ],
+        [
+          "8080"
+        ],
+        [
+          "未监听"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 5,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 9,
+      "latency_ms": 16843,
+      "guard_ok": false,
+      "root_cause": "1. 直接原因：Deployment 的就绪探针指向容器 8080 端口（http://<PodIP>:8080/），而容器内 nginx 按镜像默认配置启动、未监听 8080，探针每次连接都被拒绝（k8s:5-event/10、k8s:5-event/14）。\n2. 触发链：容器进程本身正常（nginx 1.31.9 已起 worker，重启 0 次，k8s:6-log、k8s:7-log），但就绪探针持续失败，容器被标记 ContainersNotReady，Pod 的 Ready 条件为 False（k8s:3-pod、k8s:4-pod）。\n3. 影响范围：Deployment 可用副本为 0，Available 条件为 MinimumReplicasUnavailable（k8s:1-deployment/ready-app）；Pod 未 Ready 不会进入 Endpoints，即使后续补建 Service 也不会有后端。\n4. 旁证与排除：容器崩溃重启、镜像拉取失败、节点资源不足均被事件与容器状态排除（k8s:2-pod、k8s:5-event/4、k8s:5-event",
+      "summary": "两个 Pod 的容器进程都正常启动（nginx 1.31.9 已起 worker，重启次数 0），但就绪探针一直访问 Pod IP 的 8080 端口，被拒绝连接，因此容器始终不 Ready，Deployment 报 MinimumReplicasUnavailable。日志显示 nginx 按镜像默认配置启动，没有出现监听 8080 的记录，说明探针端口与容器实际监听端口不一致是最可能的原因。另外，命名空间内查不到任何 Service 和 Endpoints，所以「Service 没有后端」这一现象本身缺少对象可查，需要确认 Service 是否被删除或建在别的命名空间。根因方向已基本锁定在探针端口配置，但 Deployment 的探针定义原文和容器内实际监听端口尚未直接取到，属于待补证据。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-service-selector-mismatch",
+      "title": "eval-selector 的 api-svc 访问不到后端，但 api-v2 Pod 都是 Running",
+      "tags": [
+        "k8s",
+        "service",
+        "selector"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "selector",
+          "选择器"
+        ],
+        [
+          "不匹配",
+          "为空"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 7,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 7,
+      "latency_ms": 17122,
+      "guard_ok": false,
+      "root_cause": "1. 直接原因：api-svc 的 spec.selector 为 app=api，而实际后端 Pod 的标签是 app=api-v2，两者不匹配，Service 无法关联到任何 Pod（k8s:1-service/api-svc、k8s:3-pod/api-v2-85664d5f95-5gnzn）。\n2. 触发链：选择器不匹配 → Endpoints 的 subsets 为空（k8s:2-endpoints/api-svc）→ kube-proxy 没有为该 ClusterIP 下发任何后端规则 → 调用方访问 ClusterIP:80 无响应。\n3. 影响范围：仅影响通过 api-svc 这个 ClusterIP 访问的调用方；两个 api-v2 Pod 本身健康（Ready、重启 0 次、nginx 正常启动），Deployment 2/2 可用，因此 Pod 直连或按 Pod IP 访问不受影响。该问题在 Pod 重建、节点重启后依然存在，因为标签与选择器本身就不一致。\n4. 旁证与排除：Pod 未就绪、容器崩溃、应用未监听端口、副本不足等假设均被 Pod 状态、Deploym",
+      "summary": "在 eval-selector 命名空间内，api-svc 的 ClusterIP 80 端口无响应，原因是 Service 的标签选择器与后端 Pod 标签不匹配，导致 Endpoints 为空、没有任何后端地址。api-svc 的 selector 是 app=api，而两个 api-v2 Pod 的标签是 app=api-v2（Deployment 模板标签同为 app=api-v2），因此 Service 选不到任何 Pod。两个 Pod 本身健康：1/1 Running、Ready 条件为 True、重启 0 次，nginx 正常启动并监听，日志无报错，事件中只有正常的调度/拉镜像/启动记录，没有异常。所以「Pod Running 但访问不到」并不矛盾——问题在 Service 与 Pod 的标签对接，不在 Pod 运行状态。未覆盖的部分：没有实际从调用方发起 curl 验证 ClusterIP 连通性，也没有查看是否有其他 Service 或 Ingress 指向 api-v2。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-configmap-missing",
+      "title": "eval-config 的 cfg-app 一直 CreateContainerConfigError",
+      "tags": [
+        "k8s",
+        "configmap",
+        "missing"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "configmap"
+        ],
+        [
+          "missing-config"
+        ],
+        [
+          "不存在",
+          "not found",
+          "缺失"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 4,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 6,
+      "latency_ms": 16201,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：cfg-app 的 Pod 模板中引用了 ConfigMap missing-config，但该对象在 eval-config 命名空间中不存在，kubelet 在创建容器前解析配置引用失败，返回 configmap \"missing-config\" not found（k8s:1、k8s:2-event/6）。\n2. 触发链：Deployment 于 11-20 09:22 前后扩容出 ReplicaSet cfg-app-fd66bdd64 并创建 Pod，Pod 成功调度到 vm-154、镜像拉取成功，随后在容器创建阶段因配置缺失被反复拒绝，事件累计 10 次 Failed，容器始终处于 waiting，重启次数为 0（k8s:2-event/1、k8s:2-event/5、k8s:2-event/6）。\n3. 影响范围：Deployment cfg-app 期望 1 副本、可用 0 副本，Available=False；该命名空间下无 Service/Endpoints，暂无对外流量受影响，但应用本身完全不可用（k8s:4、k8s:5、k8s:6）。\n4. 旁证",
+      "summary": "现象是 Pod 已调度到 vm-154 且镜像 busybox:1.36 拉取成功，但容器停在 CreateContainerConfigError。假设是 Pod 引用的 ConfigMap 缺失，Pod 状态与事件都直接给出 \"configmap \\\"missing-config\\\" not found\"，该假设成立；镜像拉取失败、调度失败、节点资源不足等假设均被事件与 Pod 状态排除。Deployment 因此 1 个副本始终不可用（Available=False，MinimumReplicasUnavailable），且该命名空间下没有 Service/Endpoints，暂无对外暴露面受影响。缺口是命名空间内 ConfigMap 的实际存量无法通过现有工具确认，因此无法判断是\"从未创建\"还是\"被删除\"。",
+      "invalid_citation_count": 5,
+      "invalid_citations": [
+        "k8s:1",
+        "k8s:3",
+        "k8s:4",
+        "k8s:5",
+        "k8s:6"
+      ]
+    },
+    {
+      "id": "k8s-crashloop-exit1",
+      "title": "eval-crash 的 crash-app 持续 CrashLoopBackOff，Pod 无法 Ready",
+      "tags": [
+        "k8s",
+        "crashloop",
+        "single-pod"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "crashloopbackoff"
+        ],
+        [
+          "退出码 1",
+          "容器退出"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 6,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 9,
+      "latency_ms": 18514,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：crash-app 的 app 容器启动后立即以退出码 1 终止（k8s:1、k8s:6），日志仅输出一行 \"starting app\" 后无任何错误信息（k8s:3、k8s:4），说明容器内启动命令本身执行失败，而非被外部杀死。\n2. 触发链：容器退出码非 0 → kubelet 按重启策略重启，5 次启动后进入指数退避，事件累计 9 次 BackOff 警告（k8s:2-event/9），Pod 的 ContainersReady 变为 False（k8s:6），Deployment 因此 Available=False（k8s:5）。\n3. 影响范围：仅 1 个副本的 Deployment crash-app 完全不可用，Pod 位于 vm-154；命名空间内无 Service/Endpoints，暂无集群内服务入口受影响（k8s:8、k8s:9 无数据）。重启后行为不变，会持续 CrashLoopBackOff。\n4. 旁证与排除：镜像已成功拉取并启动（k8s:2-event/5、7、8），节点 vm-154 Ready 且无资源压力（k8s:7），Pod 已成",
+      "summary": "在 eval-crash 命名空间的 crash-app 范围内，确认存在异常：唯一 Pod crash-app-5fcc6f64bf-gkljs 的 app 容器反复以退出码 1 退出，已重启 4 次，当前处于 CrashLoopBackOff（退避 1m20s），READY 0/1，Deployment 的 Available 条件为 False（MinimumReplicasUnavailable）。验证了三个方向：容器启动后立即失败（日志只有一行 \"starting app\" 后无任何错误输出，退出码 1）、节点资源不足（vm-154 Ready，无内存/磁盘/PID 压力）、镜像拉取失败（镜像已成功拉取并启动 5 次）。因此直接原因是容器内启动命令本身以非零码退出，而不是调度、镜像或节点问题；但 Deployment 的容器命令/参数在本次工具返回中未包含，无法确认具体是哪个命令或参数导致退出，根因尚未完全闭环。另需注意该命名空间没有 Service/Endpoints，说明当前没有对外流量入口依赖此 Pod。",
+      "invalid_citation_count": 8,
+      "invalid_citations": [
+        "k8s:1",
+        "k8s:3",
+        "k8s:4",
+        "k8s:5",
+        "k8s:6",
+        "k8s:7",
+        "k8s:8",
+        "k8s:9"
+      ]
+    },
+    {
+      "id": "k8s-imagepull-badtag",
+      "title": "eval-image 的 bad-image 一直 ImagePullBackOff",
+      "tags": [
+        "k8s",
+        "image",
+        "single-pod"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "imagepullbackoff",
+          "errimagepull"
+        ],
+        [
+          "no-such-tag",
+          "tag 不存在",
+          "403"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 4,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 6,
+      "latency_ms": 14490,
+      "guard_ok": false,
+      "root_cause": "1. 直接原因：Pod bad-image 的容器 app 引用镜像 nginx:no-such-tag-20261120，kubelet 经加速地址 docker.m.daocloud.io 解析该镜像时收到 403 Forbidden，镜像无法拉取（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：拉取失败后 kubelet 报 ErrImagePull，并按退避策略反复重试，容器始终处于 waiting，Pod 停留在 Pending，状态在 ErrImagePull 与 ImagePullBackOff 之间循环（k8s:2-event/2-Pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅该 Pod 无法启动，容器从未运行、无日志、重启次数 0；Pod 已调度到 vm-153，节点本身 Ready 且资源充足，其他工作负载不受影响（k8s:4-node/vm-153、k8s:5-logs/bad-image）。\n4. 旁证与排除：调度正常（PodScheduled=True），节点无内存/磁盘/P",
+      "summary": "在 eval-image 命名空间内，bad-image Pod 的容器一直处于等待状态，原因是镜像拉取失败，并非容器启动后崩溃。事件显示 kubelet 反复拉取 nginx:no-such-tag-20261120，镜像仓库返回 403 Forbidden，随后进入 ErrImagePull / ImagePullBackOff 退避循环。Pod 已被正常调度到 vm-153，节点 Ready 且无内存、磁盘、PID 压力，容器从未启动过（重启次数 0、无日志），因此可以排除节点资源、调度和容器内应用故障。核心问题是镜像引用本身不可用：该 tag 在仓库中不存在或无权访问，且拉取走的是 docker.m.daocloud.io 镜像加速地址。未覆盖的部分：仓库侧凭据/加速器配置、Pod 的 imagePullSecrets 与完整 spec 未取到。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-pvc-storageclass-missing",
+      "title": "eval-pvc 的 pvc-app 一直 Pending，PVC 未绑定",
+      "tags": [
+        "k8s",
+        "pvc",
+        "storage"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "storageclass"
+        ],
+        [
+          "no-such-sc"
+        ],
+        [
+          "不存在",
+          "pending",
+          "未绑定"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 3,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 9,
+      "latency_ms": 14611,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：PVC data-pvc 的 storageClassName 被设为 no-such-sc，而该 StorageClass 在集群中不存在，动态供给失败（k8s:2-event/2-PersistentVolumeClaim/data-pvc、k8s:4-pvc/data-pvc）。\\n2. 触发链：供给失败使 data-pvc 长期处于 Pending、无 PV 可绑定；Pod pvc-app 引用该未绑定 PVC，调度器判定 unbound immediate PersistentVolumeClaims，Pod 停在 Pending 且无节点、无 IP（k8s:2-event/1-Pod/pvc-app、k8s:3-pod/pvc-app）。\\n3. 影响范围：eval-pvc 内仅此一个 Pod，无 Deployment/Service/Endpoints，PVC 不绑定前应用完全不可用；PVC 配置不改则重启后仍会重复失败。\\n4. 旁证与排除：调度事件中未出现资源不足或节点不可用原因，可排除节点资源类问题；命名空间内不存在名为 pvc-app 的 PVC，",
+      "summary": "在 eval-pvc 命名空间内，Pod pvc-app 处于 Pending 且未调度到任何节点，直接原因是它引用的 PVC 未绑定；而该命名空间里实际存在的 PVC 是 data-pvc（1Gi，storageClass=no-such-sc），不是名为 pvc-app 的 PVC。data-pvc 持续 ProvisioningFailed，报错为 storageclass \"no-such-sc\" not found，说明动态供给因 StorageClass 不存在而无法创建 PV，PVC 因此一直 Pending，Pod 随之无法调度。调度器事件与 Pod 条件都指向 \"pod has unbound immediate PersistentVolumeClaims\"，与上述链路一致。结论：根因是 PVC 指定了不存在的 StorageClass；另需注意用户所说的 \"pvc-app 的 PVC\" 实际对应 data-pvc，命名需与现场核对。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-readiness-probe-port",
+      "title": "eval-readiness 的 ready-app 两个副本都 Running 但一直 0/1 Ready",
+      "tags": [
+        "k8s",
+        "readiness",
+        "probe"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "就绪探针"
+        ],
+        [
+          "8080"
+        ],
+        [
+          "connection refused"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 4,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 9,
+      "latency_ms": 16003,
+      "guard_ok": false,
+      "root_cause": "1. 直接原因：ready-app 的就绪探针请求 http://<PodIP>:8080/，而容器内 nginx 以默认配置启动、监听 80 端口，8080 无进程监听，探针返回 connection refused（k8s:5-event/10、k8s:5-event/14、k8s:6-log、k8s:7-log）。\\n2. 触发链：容器启动成功但探针始终失败 → 容器 Ready 条件为 False（ContainersNotReady）→ Pod 不进入 Ready → Deployment 可用副本为 0，Available=False（k8s:3、k8s:4、k8s:1）。\\n3. 影响范围：两个副本（vm-153 上的 fggnv、vm-150 上的 w4wvn）全部不可用，Service 无后端，业务流量无法进入；该状态在 Pod 重建后仍会复现，因为问题在探针配置而非运行时。\\n4. 旁证与排除：容器重启次数 0、日志无报错、调度与镜像拉取均正常，可排除进程崩溃、调度失败、镜像拉取失败（k8s:2、k8s:5-event/1、k8s:5-event/13）。\\n5. ",
+      "summary": "在 eval-readiness 命名空间的 ready-app Deployment（2 个副本）范围内，确认存在异常：两个 Pod 容器都在运行且无重启，但就绪探针持续失败，导致 0 个可用副本。事件显示两个 Pod 的就绪探针都请求 http://<PodIP>:8080/，返回 connection refused（分别累计 22 次和 21 次），而容器日志显示 nginx 正常启动并监听默认的 80 端口，说明探针端口与容器实际监听端口不一致。Service 与 Endpoints 查询均无数据，与「Service 没有后端」的现象一致，但本次未取到 Service 对象本身，无法确认是 Service 缺失还是仅无后端。根因方向已由探针端口与 nginx 监听端口冲突的证据支持；Deployment 的探针配置原文未取到，属缺口。",
+      "invalid_citation_count": 4,
+      "invalid_citations": [
+        "k8s:1",
+        "k8s:2",
+        "k8s:3",
+        "k8s:4"
+      ]
+    },
+    {
+      "id": "k8s-service-selector-mismatch",
+      "title": "eval-selector 的 api-svc 访问不到后端，但 api-v2 Pod 都是 Running",
+      "tags": [
+        "k8s",
+        "service",
+        "selector"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "selector"
+        ],
+        [
+          "不匹配",
+          "为空"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 5,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 5,
+      "latency_ms": 14665,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：api-svc 的 selector 为 app=api，而 api-v2 的 Pod 与 Deployment 模板标签为 app=api-v2，两者不匹配，Service 选不到任何 Pod（k8s:1-service/api-svc、k8s:3-pod/api-v2-85664d5f95-5gnzn、k8s:4-deployment/api-v2）。\n2. 触发链：selector 不匹配 → Endpoints 的 subsets 为空（k8s:2-endpoints/api-svc）→ ClusterIP 80 端口没有可转发的后端地址，调用方连接无响应；Pod 侧本身健康，所以表现为「Pod Running 但服务不通」。\n3. 影响范围：仅影响通过 api-svc ClusterIP 80 端口访问的调用方；两个 Pod（IP-2、IP-3）直接访问不受影响。该问题在 Service 配置被修正前会持续存在，Pod 重建或节点重启都不会自行恢复。\n4. 旁证与排除：Pod 均 Ready、重启 0 次，Deployment 2/2 Available，事件",
+      "summary": "假设是 Service 与 Pod 的标签选择器不匹配导致没有后端，而不是 Pod 本身故障。核对后确认：api-svc 的 selector 为 app=api，而 api-v2 的 Pod 与 Deployment 模板标签均为 app=api-v2，因此 Endpoints 的 subsets 为空，ClusterIP 80 端口没有可转发目标。两个 Pod 均 1/1 Running、重启 0 次，Deployment 2/2 Ready 且 Available 为 True，命名空间事件只有调度、拉镜像、启动等 Normal 事件，可排除容器崩溃、镜像拉取失败和资源不足。结论是标签不匹配这一配置问题，修复方向为把 Service 的 selector 对齐到 app=api-v2（或给 Pod 补 app=api 标签）。尚未验证 Pod 内 nginx 是否在 80 端口监听，以及修复后调用方链路是否恢复。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-configmap-missing",
+      "title": "eval-config 的 cfg-app 一直 CreateContainerConfigError",
+      "tags": [
+        "k8s",
+        "configmap",
+        "missing"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "configmap"
+        ],
+        [
+          "missing-config"
+        ],
+        [
+          "不存在"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 4,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 6,
+      "latency_ms": 23112,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：cfg-app 的 Pod 模板引用了名为 missing-config 的 ConfigMap，但该对象在 eval-config 中不存在，kubelet 组装容器配置失败，容器停在 CreateContainerConfigError（k8s:1-pod/cfg-app-fd66bdd64-7qmmg、k8s:2-event/6-Pod/cfg-app-fd66bdd64-7qmmg）。\\n2. 触发链：Deployment 扩容生成 Pod → 调度到 vm-154、镜像 busybox:1.36 拉取成功 → 解析 ConfigMap 失败并持续重试 10 次，容器从未启动，重启次数 0（k8s:2-event/1、5、6、7，k8s:3-pod/cfg-app-fd66bdd64-7qmmg）。\\n3. 影响范围：Deployment 期望 1 副本、可用 0 副本，Available=False；命名空间内无 Service/Endpoints，故障不外溢，但 cfg-app 完全不可用，ConfigMap 不补齐则 Pod 重建后仍会失败（k8s:4-d",
+      "summary": "在 eval-config 命名空间、cfg-app 这一个 Deployment（1 个 Pod，节点 vm-154）范围内，确认容器创建失败的直接原因是引用的 ConfigMap「missing-config」不存在。Pod 已调度成功、镜像 busybox:1.36 已拉取完成，但 kubelet 在创建容器前解析配置时反复报 configmap \"missing-config\" not found，容器停在 CreateContainerConfigError，重启次数为 0，说明进程从未启动，不是应用自身崩溃。Deployment 因此 Available=False（MinimumReplicasUnavailable），当前 0 个可用副本。尚未确认的是：该 ConfigMap 是本来就没创建、还是被误删，以及 Deployment 里具体是 envFrom 还是 volume 引用它（本次工具未返回 Pod 模板明细）。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-crashloop-exit1",
+      "title": "eval-crash 的 crash-app 持续 CrashLoopBackOff，Pod 无法 Ready",
+      "tags": [
+        "k8s",
+        "crashloop",
+        "single-pod"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "crashloopbackoff",
+          "back-off"
+        ],
+        [
+          "退出码 1"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 6,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 9,
+      "latency_ms": 18472,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：容器 app（busybox:1.36）的启动命令执行后立即以退出码 1 结束，日志仅输出 \"starting app\" 一行、无任何错误信息，属于应用/启动命令层面的主动失败，而非被系统杀死（证据 k8s:4、k8s:5、k8s:1）。\n2. 触发链：kubelet 反复创建并启动容器（Started 计数 5），每次启动后进程退出码 1，kubelet 按退避策略标记 Back-off restarting failed container（累计 9 次），容器进入 CrashLoopBackOff 等待状态，Pod 的 Ready/ContainersReady 条件为 ContainersNotReady（证据 k8s:6-event/8、k8s:6-event/9、k8s:3）。\n3. 影响范围：Deployment crash-app 期望 1 副本、实际可用副本为 0，Available 条件为 MinimumReplicasUnavailable，即该应用当前完全不可用；命名空间内无 Service/Endpoints，暂未发现对外暴露的流量入口（证据 ",
+      "summary": "在 eval-crash 命名空间、crash-app 这一个 Deployment（1 个 Pod，节点 vm-154）范围内，确认 Pod 处于 CrashLoopBackOff、READY 0/1、重启 4 次，Deployment 因 MinimumReplicasUnavailable 不可用。容器 app（busybox:1.36）每次启动只输出一行 \"starting app\" 就以退出码 1 终止，当前与上一次容器日志内容一致，说明进程是启动后立即自行退出，而不是被 OOM 或调度问题打断。节点 vm-154 Ready、无内存/磁盘/PID 压力，镜像拉取成功，因此调度、资源、镜像拉取三类原因可以排除。但 Pod 的启动命令/参数（command/args）无法通过现有只读接口取得，日志里也没有任何错误信息，所以\"容器内启动命令本身执行失败\"这一根因只能算证据支持、尚未完全闭环。命名空间内没有 Service/Endpoints，因此本次无法评估对上游流量的影响。",
+      "invalid_citation_count": 8,
+      "invalid_citations": [
+        "k8s:1",
+        "k8s:2",
+        "k8s:3",
+        "k8s:4",
+        "k8s:5",
+        "k8s:7",
+        "k8s:8",
+        "k8s:9"
+      ]
+    },
+    {
+      "id": "k8s-imagepull-badtag",
+      "title": "eval-image 的 bad-image 一直 ImagePullBackOff",
+      "tags": [
+        "k8s",
+        "image",
+        "single-pod"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "imagepullbackoff",
+          "errimagepull"
+        ],
+        [
+          "no-such-tag",
+          "tag 不存在",
+          "403"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 5,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 5,
+      "latency_ms": 14409,
+      "guard_ok": false,
+      "root_cause": "1. 直接原因：Pod bad-image 的容器镜像写成了 nginx:no-such-tag-20261120，该 tag 在 docker.io/library/nginx 下无法解析，仓库侧返回 403 Forbidden（k8s:2-event/5-Pod/bad-image）。\n2. 触发链：kubelet 在 vm-153 上反复尝试拉取该镜像，每次解析引用失败即报 ErrImagePull，随后进入指数退避，状态显示为 ImagePullBackOff（k8s:2-event/2-Pod/bad-image、k8s:2-event/6-Pod/bad-image）。\n3. 影响范围：仅 eval-image 命名空间的这一个 Pod，容器 app 始终未启动、Pod 保持 Pending；该命名空间下没有 Deployment，因此不会自动滚动修复，需人工改镜像或重建 Pod。\n4. 旁证与排除：Pod 已成功调度到 vm-153，节点 Ready 且无资源压力，容器重启次数为 0，可排除调度失败、节点资源不足和容器崩溃（k8s:4-node/vm-153、k8s:3-",
+      "summary": "在 eval-image 命名空间内，bad-image 这个 Pod 的容器一直拉不到镜像，属于镜像引用本身无效，不是节点或调度问题。事件里明确记录：拉取 nginx:no-such-tag-20261120 时，镜像仓库返回 403 Forbidden，随后在 ErrImagePull 与 ImagePullBackOff 之间循环，与现象描述一致。Pod 已被正常调度到 vm-153，节点 Ready、无内存/磁盘/PID 压力，容器从未启动过（重启次数 0、无上次退出状态），因此可以排除节点资源不足和容器启动后崩溃。该命名空间下没有对应的 Deployment，说明这个 Pod 是直接创建的，改镜像需要直接改 Pod 或重建。还缺镜像仓库侧对该 tag 是否存在的确认，以及是谁创建了这个 Pod。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-pvc-storageclass-missing",
+      "title": "eval-pvc 的 pvc-app 一直 Pending，PVC 未绑定",
+      "tags": [
+        "k8s",
+        "pvc",
+        "storage"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "storageclass"
+        ],
+        [
+          "no-such-sc"
+        ],
+        [
+          "不存在",
+          "pending",
+          "未绑定"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 5,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 8,
+      "latency_ms": 13987,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：PVC data-pvc 的 storageClassName 被设为 no-such-sc，而集群中不存在该 StorageClass，动态供给器无法创建 PV，PVC 停留在 Pending（k8s:4-pvc/data-pvc、k8s:5-event/2-PersistentVolumeClaim/data-pvc）。\\n2. 触发链：PVC 未绑定 → Pod pvc-app 的 PodScheduled 条件为 False，调度器报 0/4 节点可用、存在未绑定的即时 PVC → Pod 无节点、无容器启动，一直 Pending（k8s:2-pod/pvc-app、k8s:3-event/1-Pod/pvc-app）。\\n3. 影响范围：仅 eval-pvc 命名空间的 pvc-app 与 data-pvc 受影响；Pod 未落到任何节点，未占用节点资源，重启或重建 Pod 也不会自愈，除非 PVC 能绑定。\\n4. 旁证与排除：4 个节点均 Ready 且无内存/磁盘/PID 压力，节点资源不足假设已被排除（k8s:7-node/vm-152、k8s:7-n",
+      "summary": "在 eval-pvc 命名空间内，Pod pvc-app 处于 Pending，PVC data-pvc 也处于 Pending，两者都未绑定。PVC 事件显示 9 次 ProvisioningFailed，原因是引用的 StorageClass「no-such-sc」不存在，动态供给无法创建 PV；Pod 事件显示 0/4 节点可用，原因是存在未绑定的即时 PVC，调度器因此无法调度。4 个节点均为 Ready，且没有内存、磁盘、PID 压力，说明节点资源不是本次 Pending 的原因。结论：根因是 PVC 指向了不存在的 StorageClass，导致 PV 无法供给，进而阻塞 Pod 调度；修复方向是改用集群中真实存在的 StorageClass（或先创建该 StorageClass），再重建 PVC。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-readiness-probe-port",
+      "title": "eval-readiness 的 ready-app 两个副本都 Running 但一直 0/1 Ready",
+      "tags": [
+        "k8s",
+        "readiness",
+        "probe"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "就绪探针"
+        ],
+        [
+          "8080"
+        ],
+        [
+          "connection refused"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 5,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 10,
+      "latency_ms": 18077,
+      "guard_ok": false,
+      "root_cause": "1. 直接原因：ready-app 的就绪探针被配置为访问 Pod IP 的 8080 端口，而容器镜像 nginx:alpine 启动后按默认配置监听 80 端口，8080 上没有进程监听，探针返回 connection refused（k8s:5-event/10、k8s:5-event/14）。\n2. 触发链：容器进程本身正常（日志显示 nginx 配置完成并启动 worker，k8s:6-log、k8s:7-log），但探针持续失败，kubelet 将容器标记为 ContainersNotReady，Pod 的 Ready 条件为 False（k8s:3-pod、k8s:4-pod），Deployment 因此 Available=False（k8s:1-deployment）。\n3. 影响范围：两个副本全部 0/1 Ready，Deployment 无可用副本；Service/Endpoints 查询无数据，服务侧没有可用后端，业务流量无法到达这两个 Pod；重启 Pod 或重新发布不会改变结果，因为探针端口配置随模板一起下发。\n4. 旁证与排除：容器重启次数为 0、无退出记",
+      "summary": "现象是 Deployment 0 个 Available、两个 Pod Running 但 READY 0/1、Service 无后端。围绕三个假设取证：探针端口与容器实际监听端口不一致、容器启动后崩溃、调度或节点资源问题。事件显示两个 Pod 的就绪探针都在访问 Pod IP 的 8080 端口并被拒绝连接（各累计 21～22 次），而两个容器的日志都显示 nginx 正常启动并进入 start worker processes，重启次数为 0、无退出记录，节点均 Ready 且无内存/磁盘/PID 压力，因此后两个假设被排除。结论是探针端口配置与 nginx 默认监听端口冲突，Pod 永远不会进入 Ready，Deployment 因此无 Available 副本，Service 也拿不到后端。缺口是未能直接读取 Deployment 的探针字段原文，也未确认 Service 对象是否存在（查询无数据）。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    },
+    {
+      "id": "k8s-service-selector-mismatch",
+      "title": "eval-selector 的 api-svc 访问不到后端，但 api-v2 Pod 都是 Running",
+      "tags": [
+        "k8s",
+        "service",
+        "selector"
+      ],
+      "error": "",
+      "verdict": "anomaly",
+      "verdict_ok": true,
+      "root_cause_hit": true,
+      "root_cause_term_hits": [
+        [
+          "selector"
+        ],
+        [
+          "不匹配",
+          "为空"
+        ]
+      ],
+      "root_cause_evidence_ok": true,
+      "root_cause_verified": true,
+      "report_complete": true,
+      "conclusion_count": 4,
+      "conclusion_evidence_rate": 1.0,
+      "no_evidence_conclusion_rate": 0.0,
+      "dangerous_commands": [],
+      "tool_calls": 5,
+      "latency_ms": 13381,
+      "guard_ok": true,
+      "root_cause": "1. 直接原因：api-svc 的 selector 配置为 app=api（k8s:1-service/api-svc），而实际后端 Pod 的标签是 app=api-v2（k8s:3-pod/api-v2-85664d5f95-5gnzn、k8s:3-pod/api-v2-85664d5f95-xfj77），两者不匹配。\n2. 触发链：selector 匹配不到任何 Pod → Endpoints 的 subsets 为空（k8s:2-endpoints/api-svc）→ ClusterIP 80 端口没有可转发的后端地址，调用方连接无响应。\n3. 影响范围：仅影响通过 api-svc 的 ClusterIP 80 端口访问的调用方；api-v2 的两个 Pod 本身正常（1/1 Running、重启 0 次），Deployment 2/2 可用（k8s:4-deployment/api-v2），直连 Pod IP 不受影响。该问题在 Service 配置被修正前会持续存在，Pod 重建也不会自愈。\n4. 旁证与排除：Pod 未就绪、崩溃重启等假设已被 Pod 与 Deploym",
+      "summary": "假设是 Service 与 Pod 的标签选择器不匹配，导致流量没有后端可转发。核对后确认：api-svc 的 selector 是 app=api，而 api-v2 Deployment 及其两个 Pod 的标签都是 app=api-v2，Endpoints 的 subsets 为空，因此 ClusterIP 80 端口没有可转发的后端，这与调用方反馈一致。两个 Pod 均为 1/1 Running、重启 0 次，Deployment 2/2 可用，说明后端进程本身没有故障，问题出在 Service 到 Pod 的匹配关系上。api-svc 没有相关事件，无法从事件侧看到更多线索。根因已闭环，修复方向是让 Service 的 selector 与 Pod 标签一致。",
+      "invalid_citation_count": 0,
+      "invalid_citations": []
+    }
+  ]
+}

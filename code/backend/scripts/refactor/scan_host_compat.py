@@ -1,0 +1,99 @@
+"""
+扫描主机域重构前的旧 import / patch 路径。
+
+用法（在 code 目录执行）：
+    backend\\.venv\\Scripts\\python.exe backend/scripts/refactor/scan_host_compat.py
+
+输出：
+    docs/refactor/hosts-compat-scan.json
+    docs/refactor/hosts-compat-scan.md
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+CODE_ROOT = Path(__file__).resolve().parents[3]
+DOCS_DIR = CODE_ROOT.parent / "docs" / "refactor"
+
+EXCLUDE_DIRS = {
+    ".git",
+    ".venv",
+    "__pycache__",
+    "node_modules",
+    "var",
+    "release",
+    "dist",
+}
+
+PATTERNS = (
+    ("api_private_import", re.compile(r"from\s+app\.api\.hosts\s+import\s+(?P<symbols>.+)")),
+    ("service_import", re.compile(r"from\s+app\.services\.exec_hosts\s+import\s+(?P<symbols>.+)")),
+    ("service_module_import", re.compile(r"import\s+app\.services\.exec_hosts")),
+    ("patch_service", re.compile(r"patch\(\s*['\"]app\.services\.exec_hosts(?P<symbol>[^'\"]*)")),
+    ("patch_api", re.compile(r"patch\(\s*['\"]app\.api\.hosts(?P<symbol>[^'\"]*)")),
+    ("monkeypatch_exec_hosts", re.compile(r"monkeypatch\.setattr\(\s*(?:[A-Za-z_][\w.]*\.)?exec_hosts\s*,\s*['\"](?P<symbol>[^'\"]+)")),
+    ("relative_exec_hosts_import", re.compile(r"from\s+\.\s+import\s+exec_hosts")),
+    ("service_reference", re.compile(r"\bexec_hosts\.")),
+)
+
+
+def iter_source_files(root: Path):
+    for path in root.rglob("*.py"):
+        if any(part in EXCLUDE_DIRS for part in path.parts):
+            continue
+        yield path
+
+
+def main() -> None:
+    rows: list[dict[str, object]] = []
+    for path in iter_source_files(CODE_ROOT):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            for kind, pattern in PATTERNS:
+                match = pattern.search(line)
+                if not match:
+                    continue
+                groups = match.groupdict()
+                rows.append({
+                    "kind": kind,
+                    "file": str(path.relative_to(CODE_ROOT)).replace("\\", "/"),
+                    "line": line_no,
+                    "symbol": (groups.get("symbol") or groups.get("symbols") or "").strip(),
+                    "text": line.strip(),
+                })
+                break
+
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    json_path = DOCS_DIR / "hosts-compat-scan.json"
+    md_path = DOCS_DIR / "hosts-compat-scan.md"
+    json_path.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    lines = [
+        "# 主机域兼容性扫描",
+        "",
+        f"- 扫描根目录：`{CODE_ROOT}`",
+        f"- 命中条目：{len(rows)}",
+        "",
+        "| 类型 | 文件 | 行 | 符号/上下文 | 原文 |",
+        "| --- | --- | ---: | --- | --- |",
+    ]
+    for row in rows:
+        text = str(row["text"]).replace("|", "\\|")
+        lines.append(
+            f"| {row['kind']} | `{row['file']}` | {row['line']} | "
+            f"`{row['symbol'] or '-'}` | `{text}` |"
+        )
+    md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"SCAN_JSON={json_path}")
+    print(f"SCAN_MD={md_path}")
+    print(f"HITS={len(rows)}")
+
+
+if __name__ == "__main__":
+    main()

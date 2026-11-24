@@ -1,0 +1,28 @@
+id: edge-template-apply-read
+title: apply 阶段把 scope 写成 read 必须拒绝
+suite: full
+kind: guard
+tags: [edge]
+input:
+  guard: template_scope
+  template:
+    name: 评估-apply scope 越权
+    platform: linux
+    os_family: rhel
+    package_manager: none
+    default_host: vm-150
+    operations:
+      - argv: [chmod, "000", /tmp/eval-apply-read]
+        scope: read
+        role: apply
+    verify:
+      - argv: [echo, verify-ok]
+        scope: read
+        role: verify
+        expect: {stdout_contains: verify-ok}
+    rollback:
+      - argv: [echo, rollback-ok]
+        scope: dangerous
+        role: rollback
+expected:
+  error_code: stage_scope_mismatch

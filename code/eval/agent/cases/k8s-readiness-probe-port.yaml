@@ -1,0 +1,23 @@
+id: k8s-readiness-probe-port
+title: eval-readiness 的 ready-app 两个副本都 Running 但一直 0/1 Ready
+description: ready-app 的 Deployment 显示 0 个 Available 副本，两个 Pod 都是 Running，但 READY 长期为 0/1，Service 没有后端。
+fixture: eval-readiness
+namespace: eval-readiness
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: readinessProbe 配置成 HTTP 8080，但 nginx 只监听 80，探针连接被拒绝，Pod 永远不会 Ready。
+  root_cause_terms:
+    - ["readiness", "就绪探针", "就绪检查"]
+    - ["8080"]
+    - ["connection refused", "拒绝连接", "端口不对", "未监听"]
+  evidence_terms:
+    - "readiness probe failed"
+    - "8080"
+    - "connection refused"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+    - "systemctl restart"
+tags: ["k8s", "readiness", "probe"]

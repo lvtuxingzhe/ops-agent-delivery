@@ -1,0 +1,404 @@
+{
+  "captured_at": "2026-11-20T01:24:43.614314Z",
+  "deployments": [
+    {
+      "available_replicas": null,
+      "conditions": [
+        {
+          "message": "Deployment does not have minimum availability.",
+          "reason": "MinimumReplicasUnavailable",
+          "status": "False",
+          "type": "Available"
+        },
+        {
+          "message": "ReplicaSet \"ready-app-6c44dd7f7\" is progressing.",
+          "reason": "ReplicaSetUpdated",
+          "status": "True",
+          "type": "Progressing"
+        }
+      ],
+      "name": "ready-app",
+      "ready_replicas": null,
+      "replicas": 2,
+      "selector": {
+        "app": "ready-app"
+      },
+      "template_labels": {
+        "app": "ready-app"
+      },
+      "updated_replicas": 2
+    }
+  ],
+  "endpoints": [],
+  "events": [
+    {
+      "count": null,
+      "involved_object": "Pod/ready-app-6c44dd7f7-w4wvn",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-readiness/ready-app-6c44dd7f7-w4wvn to vm-150",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": null,
+      "involved_object": "Pod/ready-app-6c44dd7f7-fggnv",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-readiness/ready-app-6c44dd7f7-fggnv to vm-153",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/ready-app-6c44dd7f7",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Created pod: ready-app-6c44dd7f7-w4wvn",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/ready-app-6c44dd7f7-fggnv",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Container image \"nginx:alpine\" already present on machine",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/ready-app-6c44dd7f7-fggnv",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Created container app",
+      "reason": "Created",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/ready-app",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Scaled up replica set ready-app-6c44dd7f7 to 2",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/ready-app-6c44dd7f7",
+      "last_timestamp": "2026-11-20T01:22:46Z",
+      "message": "Created pod: ready-app-6c44dd7f7-fggnv",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/ready-app-6c44dd7f7-fggnv",
+      "last_timestamp": "2026-11-20T01:22:47Z",
+      "message": "Started container app",
+      "reason": "Started",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/ready-app-6c44dd7f7-w4wvn",
+      "last_timestamp": "2026-11-20T01:23:29Z",
+      "message": "Pulling image \"nginx:alpine\"",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 22,
+      "involved_object": "Pod/ready-app-6c44dd7f7-fggnv",
+      "last_timestamp": "2026-11-20T01:23:52Z",
+      "message": "Readiness probe failed: Get \"http://10.42.1.5:8080/\": dial tcp 10.42.1.5:8080: connect: connection refused",
+      "reason": "Unhealthy",
+      "type": "Warning"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/ready-app-6c44dd7f7-w4wvn",
+      "last_timestamp": "2026-11-20T01:24:01Z",
+      "message": "Started container app",
+      "reason": "Started",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/ready-app-6c44dd7f7-w4wvn",
+      "last_timestamp": "2026-11-20T01:24:01Z",
+      "message": "Created container app",
+      "reason": "Created",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/ready-app-6c44dd7f7-w4wvn",
+      "last_timestamp": "2026-11-20T01:24:01Z",
+      "message": "Successfully pulled image \"nginx:alpine\" in 31.997s (31.997s including waiting)",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 21,
+      "involved_object": "Pod/ready-app-6c44dd7f7-w4wvn",
+      "last_timestamp": "2026-11-20T01:25:00Z",
+      "message": "Readiness probe failed: Get \"http://10.42.2.2:8080/\": dial tcp 10.42.2.2:8080: connect: connection refused",
+      "reason": "Unhealthy",
+      "type": "Warning"
+    }
+  ],
+  "logs": {
+    "ready-app-6c44dd7f7-fggnv/app": "/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration\n/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh\n10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf\n10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf\n/docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh\n/docker-entrypoint.sh: Configuration complete; ready for start up\n2026/11/20 01:22:47 [notice] 1#1: using the \"epoll\" event method\n2026/11/20 01:22:47 [notice] 1#1: nginx/1.31.9\n2026/11/20 01:22:47 [notice] 1#1: built by gcc 15.2.0 (Alpine 15.2.0) \n2026/11/20 01:22:47 [notice] 1#1: OS: Linux 3.10.0-1160.el7.x86_64\n2026/11/20 01:22:47 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576\n2026/11/20 01:22:47 [notice] 1#1: start worker processes\n2026/11/20 01:22:47 [notice] 1#1: start worker process 30\n2026/11/20 01:22:47 [notice] 1#1: start worker process 31\n2026/11/20 01:22:47 [notice] 1#1: start worker process 32\n2026/11/20 01:22:47 [notice] 1#1: start worker process 33\n",
+    "ready-app-6c44dd7f7-w4wvn/app": "/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration\n/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh\n10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf\n10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf\n/docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh\n/docker-entrypoint.sh: Configuration complete; ready for start up\n2026/11/20 01:24:01 [notice] 1#1: using the \"epoll\" event method\n2026/11/20 01:24:01 [notice] 1#1: nginx/1.31.9\n2026/11/20 01:24:01 [notice] 1#1: built by gcc 15.2.0 (Alpine 15.2.0) \n2026/11/20 01:24:01 [notice] 1#1: OS: Linux 3.10.0-1160.el7.x86_64\n2026/11/20 01:24:01 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576\n2026/11/20 01:24:01 [notice] 1#1: start worker processes\n2026/11/20 01:24:01 [notice] 1#1: start worker process 29\n2026/11/20 01:24:01 [notice] 1#1: start worker process 30\n"
+  },
+  "namespace": "eval-readiness",
+  "nodes": [
+    {
+      "allocatable": {
+        "cpu": "2",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "1838456Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-150"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-152"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-153"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-154"
+    }
+  ],
+  "pods": [
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "docker.io/library/nginx:alpine",
+          "last_state": {},
+          "name": "app",
+          "ready": false,
+          "restart_count": 0,
+          "state": {
+            "startedAt": "2026-11-20T01:22:47Z",
+            "state": "running"
+          }
+        }
+      ],
+      "labels": {
+        "app": "ready-app",
+        "pod-template-hash": "6c44dd7f7"
+      },
+      "name": "ready-app-6c44dd7f7-fggnv",
+      "node": "vm-153",
+      "phase": "Running",
+      "pod_ip": "10.42.1.5"
+    },
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "docker.io/library/nginx:alpine",
+          "last_state": {},
+          "name": "app",
+          "ready": false,
+          "restart_count": 0,
+          "state": {
+            "startedAt": "2026-11-20T01:24:01Z",
+            "state": "running"
+          }
+        }
+      ],
+      "labels": {
+        "app": "ready-app",
+        "pod-template-hash": "6c44dd7f7"
+      },
+      "name": "ready-app-6c44dd7f7-w4wvn",
+      "node": "vm-150",
+      "phase": "Running",
+      "pod_ip": "10.42.2.2"
+    }
+  ],
+  "pvc": [],
+  "services": []
+}

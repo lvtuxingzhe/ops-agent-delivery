@@ -1,0 +1,11 @@
+id: edge-approval-hash
+title: 审批时 plan_hash 不匹配必须拒绝
+suite: full
+kind: guard
+tags: [edge]
+input:
+  guard: approval_hash
+  template_id: tpl-51980cecc6
+  host: vm-150
+expected:
+  error_code: plan_hash_mismatch

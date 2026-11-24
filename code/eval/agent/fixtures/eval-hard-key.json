@@ -1,0 +1,521 @@
+{
+  "captured_at": "2026-11-20T02:50:59.264141Z",
+  "configmaps": [
+    {
+      "keys": [
+        "present"
+      ],
+      "name": "app-config"
+    },
+    {
+      "keys": [
+        "ca.crt"
+      ],
+      "name": "kube-root-ca.crt"
+    }
+  ],
+  "deployments": [
+    {
+      "available_replicas": null,
+      "conditions": [
+        {
+          "message": "Deployment does not have minimum availability.",
+          "reason": "MinimumReplicasUnavailable",
+          "status": "False",
+          "type": "Available"
+        },
+        {
+          "message": "ReplicaSet \"key-app-586fd75cc7\" has timed out progressing.",
+          "reason": "ProgressDeadlineExceeded",
+          "status": "False",
+          "type": "Progressing"
+        }
+      ],
+      "name": "key-app",
+      "ready_replicas": null,
+      "replicas": 1,
+      "selector": {
+        "app": "key-app"
+      },
+      "template_containers": [
+        {
+          "args": [],
+          "command": [],
+          "env": [
+            {
+              "config_map_key_ref": {
+                "key": "missing-key",
+                "name": "app-config"
+              },
+              "name": "APP_KEY",
+              "secret_key_ref": null,
+              "value": null
+            }
+          ],
+          "image": "busybox:1.36",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": []
+        }
+      ],
+      "template_labels": {
+        "app": "key-app"
+      },
+      "template_node_selector": {},
+      "template_volumes": [],
+      "updated_replicas": 1
+    }
+  ],
+  "endpoints": [],
+  "events": [
+    {
+      "count": null,
+      "involved_object": "Pod/key-app-5dddcc6d99-m47rp",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-hard-key/key-app-5dddcc6d99-m47rp to vm-153",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": null,
+      "involved_object": "Pod/key-app-586fd75cc7-8jhjb",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-hard-key/key-app-586fd75cc7-8jhjb to vm-150",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/key-app-5dddcc6d99",
+      "last_timestamp": "2026-11-20T02:39:00Z",
+      "message": "Created pod: key-app-5dddcc6d99-m47rp",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/key-app",
+      "last_timestamp": "2026-11-20T02:39:00Z",
+      "message": "Scaled up replica set key-app-5dddcc6d99 to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/key-app-5dddcc6d99-m47rp",
+      "last_timestamp": "2026-11-20T02:39:01Z",
+      "message": "Pulling image \"nginx:1.25\"",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/key-app",
+      "last_timestamp": "2026-11-20T02:40:29Z",
+      "message": "Scaled up replica set key-app-586fd75cc7 to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/key-app-586fd75cc7",
+      "last_timestamp": "2026-11-20T02:40:29Z",
+      "message": "Created pod: key-app-586fd75cc7-8jhjb",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/key-app-5dddcc6d99-m47rp",
+      "last_timestamp": "2026-11-20T02:40:41Z",
+      "message": "Successfully pulled image \"nginx:1.25\" in 1m40.724s (1m40.724s including waiting)",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/key-app-586fd75cc7-8jhjb",
+      "last_timestamp": "2026-11-20T02:41:08Z",
+      "message": "Pulling image \"busybox:1.36\"",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/key-app-586fd75cc7-8jhjb",
+      "last_timestamp": "2026-11-20T02:41:18Z",
+      "message": "Successfully pulled image \"busybox:1.36\" in 10.586s (10.586s including waiting)",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 12,
+      "involved_object": "Pod/key-app-5dddcc6d99-m47rp",
+      "last_timestamp": "2026-11-20T02:42:56Z",
+      "message": "Error: couldn't find key missing-key in ConfigMap eval-hard-key/app-config",
+      "reason": "Failed",
+      "type": "Warning"
+    },
+    {
+      "count": 12,
+      "involved_object": "Pod/key-app-586fd75cc7-8jhjb",
+      "last_timestamp": "2026-11-20T02:43:31Z",
+      "message": "Error: couldn't find key missing-key in ConfigMap eval-hard-key/app-config",
+      "reason": "Failed",
+      "type": "Warning"
+    },
+    {
+      "count": 39,
+      "involved_object": "Pod/key-app-5dddcc6d99-m47rp",
+      "last_timestamp": "2026-11-20T02:49:09Z",
+      "message": "Container image \"nginx:1.25\" already present on machine",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 46,
+      "involved_object": "Pod/key-app-586fd75cc7-8jhjb",
+      "last_timestamp": "2026-11-20T02:51:14Z",
+      "message": "Container image \"busybox:1.36\" already present on machine",
+      "reason": "Pulled",
+      "type": "Normal"
+    }
+  ],
+  "logs": {},
+  "namespace": "eval-hard-key",
+  "nodes": [
+    {
+      "allocatable": {
+        "cpu": "2",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "1838456Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-150"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-152"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-153"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-154"
+    }
+  ],
+  "pods": [
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "busybox:1.36",
+          "last_state": {},
+          "name": "app",
+          "ready": false,
+          "restart_count": 0,
+          "state": {
+            "message": "couldn't find key missing-key in ConfigMap eval-hard-key/app-config",
+            "reason": "CreateContainerConfigError",
+            "state": "waiting"
+          }
+        }
+      ],
+      "labels": {
+        "app": "key-app",
+        "pod-template-hash": "586fd75cc7"
+      },
+      "name": "key-app-586fd75cc7-8jhjb",
+      "node": "vm-150",
+      "node_selector": {},
+      "phase": "Pending",
+      "pod_ip": "10.42.2.4",
+      "service_account": "default",
+      "spec_containers": [
+        {
+          "args": [],
+          "command": [],
+          "env": [
+            {
+              "config_map_key_ref": {
+                "key": "missing-key",
+                "name": "app-config"
+              },
+              "name": "APP_KEY",
+              "secret_key_ref": null,
+              "value": null
+            }
+          ],
+          "image": "busybox:1.36",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": [
+            {
+              "mount_path": "/var/run/secrets/kubernetes.io/serviceaccount",
+              "name": "kube-api-access-9xt7t",
+              "sub_path": null
+            }
+          ]
+        }
+      ],
+      "volumes": [
+        {
+          "config_map": null,
+          "name": "kube-api-access-9xt7t",
+          "pvc": null,
+          "secret": null
+        }
+      ]
+    },
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "nginx:1.25",
+          "last_state": {},
+          "name": "app",
+          "ready": false,
+          "restart_count": 0,
+          "state": {
+            "message": "couldn't find key missing-key in ConfigMap eval-hard-key/app-config",
+            "reason": "CreateContainerConfigError",
+            "state": "waiting"
+          }
+        }
+      ],
+      "labels": {
+        "app": "key-app",
+        "pod-template-hash": "5dddcc6d99"
+      },
+      "name": "key-app-5dddcc6d99-m47rp",
+      "node": "vm-153",
+      "node_selector": {},
+      "phase": "Pending",
+      "pod_ip": "10.42.1.7",
+      "service_account": "default",
+      "spec_containers": [
+        {
+          "args": [],
+          "command": [],
+          "env": [
+            {
+              "config_map_key_ref": {
+                "key": "missing-key",
+                "name": "app-config"
+              },
+              "name": "APP_KEY",
+              "secret_key_ref": null,
+              "value": null
+            }
+          ],
+          "image": "nginx:1.25",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": [
+            {
+              "mount_path": "/var/run/secrets/kubernetes.io/serviceaccount",
+              "name": "kube-api-access-bvkhv",
+              "sub_path": null
+            }
+          ]
+        }
+      ],
+      "volumes": [
+        {
+          "config_map": null,
+          "name": "kube-api-access-bvkhv",
+          "pvc": null,
+          "secret": null
+        }
+      ]
+    }
+  ],
+  "pvc": [],
+  "resource_quotas": [],
+  "services": []
+}

@@ -1,0 +1,72 @@
+# 生产后台镜像：builder 装依赖，runtime 只带运行环境。
+#
+# 构建上下文是仓库根 code/，因为镜像里需要：
+#   backend/app        后台服务
+#   backend/scripts    初始化与运维脚本，供一次性 init 容器复用
+#   backend/migrations 数据库迁移
+#   packages           共享的 ops_guard / ops_contract
+#   worker             排查/执行子进程脚本（不安装 AgentScope，实际执行由独立 worker 容器完成）
+#
+# 依赖源默认走阿里云，构建时可用
+#   --build-arg PIP_INDEX_URL=https://pypi.org/simple
+# 覆盖；密码、地址、模型 Key 一律运行时注入，不写进镜像。
+
+# 国内构建默认走镜像站；能直连 Docker Hub 时用
+#   --build-arg PYTHON_IMAGE=python:3.13-slim
+# 覆盖。
+ARG PYTHON_IMAGE=docker.1ms.run/library/python:3.13-slim
+
+FROM ${PYTHON_IMAGE} AS builder
+
+ARG PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+
+ENV PIP_DEFAULT_TIMEOUT=60 \
+    PIP_RETRIES=5 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /build
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY backend/requirements.txt ./backend/requirements.txt
+RUN pip install --no-cache-dir --no-compile \
+    --index-url "${PIP_INDEX_URL}" \
+    -r backend/requirements.txt \
+ && find /opt/venv -type d -name __pycache__ -prune -exec rm -rf {} +
+
+FROM ${PYTHON_IMAGE} AS runtime
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    PYTHONPATH=/srv/backend:/srv/packages \
+    APP_ENV=production
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libgomp1 \
+ && rm -rf /var/lib/apt/lists/* \
+ && groupadd --system ops \
+ && useradd --system --gid ops --home-dir /srv --shell /usr/sbin/nologin ops
+
+WORKDIR /srv
+
+COPY --from=builder /opt/venv /opt/venv
+COPY --chown=ops:ops backend/app ./backend/app
+COPY --chown=ops:ops backend/scripts ./backend/scripts
+COPY --chown=ops:ops backend/migrations ./backend/migrations
+COPY --chown=ops:ops packages ./packages
+COPY --chown=ops:ops worker ./worker
+
+RUN mkdir -p /srv/var && chown -R ops:ops /srv/var
+
+USER ops
+
+WORKDIR /srv/backend
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --retries=5 \
+    CMD python -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health',timeout=3)"
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

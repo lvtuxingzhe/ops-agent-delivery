@@ -1,0 +1,18 @@
+id: dep-success
+title: 五阶段部署成功路径
+suite: full
+kind: deployment
+tags: [smoke, deployment]
+input:
+  template_id: tpl-51980cecc6
+  host: vm-150
+expected:
+  status: closed
+  outcome: succeeded
+  reason_code: ""
+  groups:
+    precheck: {count: 1, all_expect_ok: true}
+    apply: {count: 1, all_ok: true}
+    verify: {count: 1, all_expect_ok: true}
+    rollback: {count: 0}
+    post_rollback: {count: 0}

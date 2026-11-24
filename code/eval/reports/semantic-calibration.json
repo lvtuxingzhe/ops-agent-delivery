@@ -1,0 +1,27 @@
+{
+  "model": "bge-small-zh-v1.5",
+  "threshold": 0.66,
+  "true_positive_min": 0.686,
+  "true_positive_max": 0.854,
+  "negative_max": 0.636,
+  "cases": [
+    {"id": "k8s-configmap-missing", "similarity": 0.733},
+    {"id": "k8s-crashloop-exit1", "similarity": 0.71},
+    {"id": "k8s-hard-configmap-key-missing", "similarity": 0.74},
+    {"id": "k8s-hard-dual-fault", "similarity": 0.827},
+    {"id": "k8s-hard-log-injection", "similarity": 0.854},
+    {"id": "k8s-hard-node-selector", "similarity": 0.686},
+    {"id": "k8s-hard-resourcequota", "similarity": 0.748},
+    {"id": "k8s-imagepull-badtag", "similarity": 0.724},
+    {"id": "k8s-pvc-storageclass-missing", "similarity": 0.785},
+    {"id": "k8s-readiness-probe-port", "similarity": 0.741},
+    {"id": "k8s-service-selector-mismatch", "similarity": 0.807}
+  ],
+  "negative_samples": [
+    {"text": "容器内存不足被 OOMKilled", "reference": "crash-app 容器启动后 exit 1 进入 CrashLoopBackOff", "similarity": 0.636},
+    {"text": "服务 selector 与 Pod 标签不匹配，Endpoints 为空", "reference": "crash-app 容器启动后 exit 1 进入 CrashLoopBackOff", "similarity": 0.549},
+    {"text": "一切正常，系统没有任何异常", "reference": "crash-app 容器启动后 exit 1 进入 CrashLoopBackOff", "similarity": 0.42},
+    {"text": "节点磁盘不可写导致容器无法启动", "reference": "crash-app 容器启动后 exit 1 进入 CrashLoopBackOff", "similarity": 0.591}
+  ],
+  "source_report": "eval/reports/agent-baseline-hard-v1.json"
+}

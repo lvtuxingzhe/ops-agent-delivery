@@ -1,0 +1,22 @@
+id: k8s-crashloop-exit1
+title: eval-crash 的 crash-app 持续 CrashLoopBackOff，Pod 无法 Ready
+description: 巡检发现 crash-app 的 Pod 在最近 5 分钟内反复重启，RESTARTS 持续增加，READY 一直是 0/1。
+fixture: eval-crash
+namespace: eval-crash
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: 容器启动命令执行 echo 后立即以退出码 1 结束，kubelet 按重启策略反复拉起，最终进入 CrashLoopBackOff。
+  root_cause_terms:
+    - ["crashloopbackoff", "崩溃循环", "反复重启", "back-off"]
+    - ["exit 1", "退出码 1", "exitcode", "非零退出", "命令退出", "容器退出"]
+  evidence_terms:
+    - "starting app"
+    - "crashloopbackoff"
+    - "exitcode"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl apply"
+    - "systemctl restart"
+tags: ["k8s", "crashloop", "single-pod"]

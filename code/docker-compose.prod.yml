@@ -1,0 +1,200 @@
+# 生产编排。所有密码/令牌来自 .env.production，首次启动时由 migrate
+# 一次性容器建表、建角色、建管理员；镜像本身不含业务数据。
+#
+# 启动入口只用 ops/deploy/deploy.sh；不要直接 up，否则可能绕过 .env 校验。
+
+name: ops-agent
+
+x-app-environment: &app-environment
+  APP_ENV: production
+  APP_NAME: ${APP_NAME:-运维 Agent 平台}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  METRICS_TOKEN: ${METRICS_TOKEN:-}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+  DATABASE_URL: postgresql://${DB_APP_ROLE}:${DB_APP_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DB_ADMIN_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DB_AUDIT_READER_URL: postgresql://${DB_AUDIT_READER_ROLE}:${DB_AUDIT_READER_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DB_AUTH_URL: postgresql://${DB_AUTH_ROLE}:${DB_AUTH_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DB_USER_ADMIN_URL: postgresql://${DB_USER_ADMIN_ROLE}:${DB_USER_ADMIN_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DB_APP_ROLE: ${DB_APP_ROLE}
+  DB_AUDIT_READER_ROLE: ${DB_AUDIT_READER_ROLE}
+  DB_AUTH_ROLE: ${DB_AUTH_ROLE}
+  DB_USER_ADMIN_ROLE: ${DB_USER_ADMIN_ROLE}
+  DB_USER_ADMIN_PASSWORD: ${DB_USER_ADMIN_PASSWORD}
+  DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+  DB_AUTH_PASSWORD: ${DB_AUTH_PASSWORD}
+  DB_AUDIT_READER_PASSWORD: ${DB_AUDIT_READER_PASSWORD}
+  AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET}
+  AUTH_TOKEN_TTL_MINUTES: ${AUTH_TOKEN_TTL_MINUTES:-480}
+  AUTH_TOTP_ISSUER: ${AUTH_TOTP_ISSUER:-ops-agent}
+  TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:-}
+  CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:-}
+  SMS_CHANNEL: ${SMS_CHANNEL}
+  SMS_CODE_TTL_SECONDS: ${SMS_CODE_TTL_SECONDS:-300}
+  LOGIN_LOCKOUT_THRESHOLD: ${LOGIN_LOCKOUT_THRESHOLD:-5}
+  LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
+  PBKDF2_ROUNDS: ${PBKDF2_ROUNDS:-100000}
+  ADMIN_USERNAME: ${ADMIN_USERNAME}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+  ADMIN_PHONE: ${ADMIN_PHONE}
+  REDIS_URL: redis://redis:6379/0
+  MINIO_ENDPOINT: http://minio:9000
+  MINIO_USER: ${MINIO_USER}
+  MINIO_PASSWORD: ${MINIO_PASSWORD}
+  MINIO_BUCKET: ${MINIO_BUCKET}
+  MINIO_SCREENSHOT_BUCKET: ${MINIO_SCREENSHOT_BUCKET}
+  MINIO_AUDIT_BUCKET: ${MINIO_AUDIT_BUCKET}
+  EXEC_PERMIT_SECRET: ${EXEC_PERMIT_SECRET}
+  ALERT_WEBHOOK_TOKEN: ${ALERT_WEBHOOK_TOKEN}
+  ALERT_WEBHOOK_MAX_BYTES: ${ALERT_WEBHOOK_MAX_BYTES:-65536}
+  DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-}
+  DEEPSEEK_LIVE_KEY: ${DEEPSEEK_LIVE_KEY:-}
+  SSH_KNOWN_HOSTS_FILE: /srv/ssh/known_hosts
+  SSH_HOST_KEY_POLICY: ${SSH_HOST_KEY_POLICY:-prompt}
+  SSH_HOST_KEY_INSECURE_ACK: ${SSH_HOST_KEY_INSECURE_ACK:-}
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-docker.1ms.run/pgvector/pgvector:0.8.0-pg16}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - /data/ops-agent-data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  redis:
+    image: ${REDIS_IMAGE:-docker.1ms.run/library/redis:7.4.12-alpine}
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - /data/ops-agent-data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  minio:
+    image: ${MINIO_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/minio:RELEASE.2025-03-12T18-04-18Z}
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - /data/ops-agent-data/minio:/data
+    restart: unless-stopped
+
+  minio-init:
+    image: ${MINIO_CLIENT_IMAGE:-swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/minio/mc:RELEASE.2025-03-12T17-29-24Z}
+    depends_on:
+      minio:
+        condition: service_started
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_USER: ${MINIO_USER}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_SCREENSHOT_BUCKET: ${MINIO_SCREENSHOT_BUCKET}
+      MINIO_AUDIT_BUCKET: ${MINIO_AUDIT_BUCKET}
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS:-90}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        until mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}" 2>/dev/null; do
+          echo "等待 MinIO 就绪..."; sleep 2
+        done
+        mc mb --ignore-existing "local/$${MINIO_BUCKET}"
+        mc mb --ignore-existing "local/$${MINIO_SCREENSHOT_BUCKET}"
+        mc mb --ignore-existing --with-lock "local/$${MINIO_AUDIT_BUCKET}"
+        mc retention set --default COMPLIANCE "$${AUDIT_RETENTION_DAYS}d" "local/$${MINIO_AUDIT_BUCKET}"
+        # 应用使用独立 MinIO 账号，不能让后端拿 root 凭据。
+        if [ "$${MINIO_USER}" != "$${MINIO_ROOT_USER}" ]; then
+          mc admin user add local "$${MINIO_USER}" "$${MINIO_PASSWORD}" || true
+          mc admin policy attach local readwrite --user "$${MINIO_USER}"
+        fi
+        mc ls local
+    restart: "no"
+
+  migrate:
+    image: ops-agent-backend:${OPS_IMAGE_TAG:-prod}
+    working_dir: /srv
+    env_file:
+      - .env.production
+    environment: *app-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        python backend/scripts/init_db.py --seed-only
+        python backend/scripts/init_auth.py --seed-only
+        python backend/scripts/init_config.py --seed-only
+        python backend/scripts/init_audit_v3.py --seed-only
+        python backend/scripts/init_credentials.py
+        python backend/scripts/init_user_admin.py
+        python backend/scripts/init_alert_system_user.py
+        python backend/scripts/init_deployment_templates.py
+    restart: "no"
+
+  backend:
+    image: ops-agent-backend:${OPS_IMAGE_TAG:-prod}
+    env_file:
+      - .env.production
+    environment: *app-environment
+    volumes:
+      # 本地 embedding 模型不进镜像，避免 tar 里重复两份；部署时解压到 ./var/models。
+      - ./var/models:/srv/var/models:ro
+      # 主机公钥登记文件由平台写入；backend 需要可写，worker 只读。
+      - ./var/ssh/known_hosts:/srv/ssh/known_hosts:rw
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  worker:
+    image: ops-agent-worker:${OPS_IMAGE_TAG:-prod}
+    env_file:
+      - .env.production
+    environment: *app-environment
+    volumes:
+      - ./var/models:/srv/code/var/models:ro
+      - ./var/ssh/known_hosts:/srv/ssh/known_hosts:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  frontend:
+    image: ops-agent-frontend:${OPS_IMAGE_TAG:-prod}
+    ports:
+      - "${EDGE_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

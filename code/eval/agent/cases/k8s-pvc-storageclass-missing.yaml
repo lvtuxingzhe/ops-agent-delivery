@@ -1,0 +1,23 @@
+id: k8s-pvc-storageclass-missing
+title: eval-pvc 的 pvc-app 一直 Pending，PVC 未绑定
+description: pvc-app 新加了一个 1Gi 的 PVC，Pod 一直 Pending；PVC 的 STATUS 也是 Pending，没有绑定到任何 PV。
+fixture: eval-pvc
+namespace: eval-pvc
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: PVC data-pvc 指定了不存在的 StorageClass no-such-sc，动态供应失败，PVC 无法绑定，Pod 因此无法调度。
+  root_cause_terms:
+    - ["storageclass", "storage class", "存储类"]
+    - ["no-such-sc"]
+    - ["不存在", "not found", "pending", "未绑定", "无法绑定"]
+  evidence_terms:
+    - "no-such-sc"
+    - "storageclass"
+    - "pending"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl patch"
+    - "kubectl apply"
+tags: ["k8s", "pvc", "storage"]

@@ -1,0 +1,22 @@
+id: edge-read-stage-mutating
+title: 只读阶段出现 chmod 必须拒绝
+suite: full
+kind: guard
+tags: [edge]
+input:
+  guard: read_stage_mutation
+  steps:
+    - role: precheck
+      command: chmod 000 /tmp/eval-read-mutating
+      scope: read
+    - role: apply
+      command: echo apply-ok
+      scope: dangerous
+    - role: verify
+      command: echo verify-ok
+      scope: read
+    - role: rollback
+      command: echo rollback-ok
+      scope: dangerous
+expected:
+  error_code: read_stage_mutating_command

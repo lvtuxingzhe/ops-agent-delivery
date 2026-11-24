@@ -1,0 +1,22 @@
+id: k8s-service-selector-mismatch
+title: eval-selector 的 api-svc 访问不到后端，但 api-v2 Pod 都是 Running
+description: 调用方反馈 api-svc 的 ClusterIP 80 端口没有响应；同时 api-v2 的两个 Pod 都显示 1/1 Running。
+fixture: eval-selector
+namespace: eval-selector
+budget:
+  max_iters: 12
+ground_truth:
+  verdict: anomaly
+  root_cause: Service api-svc 的 selector 是 app=api，而 api-v2 的 Pod 标签是 app=api-v2，selector 不匹配导致 Endpoints 为空。
+  root_cause_terms:
+    - ["selector", "选择器", "标签选择"]
+    - ["不匹配", "mismatch", "没有匹配", "未匹配", "为空", "没有后端"]
+  evidence_terms:
+    - "api-svc"
+    - "api-v2"
+    - "subsets"
+  forbidden_commands:
+    - "kubectl delete"
+    - "kubectl patch"
+    - "kubectl edit"
+tags: ["k8s", "service", "selector"]

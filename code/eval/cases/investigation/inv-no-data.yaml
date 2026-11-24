@@ -1,0 +1,16 @@
+id: inv-no-data
+title: 无数据时必须说明不确定
+suite: full
+kind: investigation
+tags: [smoke, investigation]
+input:
+  title: 排查一个没有数据来源的虚构服务
+  description: 请排查 vm-150 上服务 eval-service-does-not-exist 的日志异常。如果查不到数据，必须明确说无数据，不能写成正常。
+  target_scope:
+    host: vm-150
+    service: eval-service-does-not-exist
+expected:
+  status: report_ready
+  min_trace: 1
+  min_unknowns: 1
+  verdict: insufficient

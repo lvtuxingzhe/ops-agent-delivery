@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "source": "k8s",
+    "kind": "pods",
+    "fake": true,
+    "description": "编造的 Pod 状态，代替真实 K8s 只读接口。命名空间、Pod 名全是假的。",
+    "generated_at": "2026-11-12T10:05:00Z",
+    "window": "2026-11-12T10:05:00Z 快照"
+  },
+  "scenarios": {
+    "normal": {
+      "data_status": "ok",
+      "note": "拿到了 Pod 快照，可以据此下结论",
+      "items": [
+        {"id": "p-001", "observed_at": "2026-11-12T10:05:00Z", "target": "fake-ns/order-7d9f-abc", "phase": "Running", "ready": "1/1", "restarts": 0, "detail": "正常运行的副本"},
+        {"id": "p-002", "observed_at": "2026-11-12T10:05:00Z", "target": "fake-ns/order-7d9f-def", "phase": "CrashLoopBackOff", "ready": "0/1", "restarts": 7, "detail": "反复重启，和指标变差的窗口吻合"},
+        {"id": "p-003", "observed_at": "2026-11-12T10:05:00Z", "target": "fake-ns/pay-5c88-ghi", "phase": "Running", "ready": "1/1", "restarts": 0, "detail": "对照组：支付服务正常"},
+        {"id": "p-004", "observed_at": "2026-11-12T10:05:00Z", "target": "fake-ns/order-7d9f-jkl", "phase": "Pending", "ready": "0/1", "restarts": 0, "detail": "调度中，尚未就绪"}
+      ]
+    },
+    "no_data": {
+      "data_status": "no_data",
+      "note": "这个命名空间下一个 Pod 都没查到。无数据就是无数据，不能当成正常。",
+      "items": []
+    },
+    "unknown": {
+      "data_status": "unknown",
+      "note": "只拿到部分命名空间的快照，存量未知，不能据此判断整体状态",
+      "items": [
+        {"id": "p-101", "observed_at": "2026-11-12T10:05:00Z", "target": "fake-ns/order-7d9f-abc", "phase": "Running", "ready": "1/1", "restarts": 0, "detail": "只看到这一个命名空间", "completeness": "partial"}
+      ]
+    }
+  }
+}

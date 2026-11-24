@@ -1,0 +1,17 @@
+id: inv-cpu-high
+title: 排查 vm-150 CPU 使用率是否偏高
+suite: full
+kind: investigation
+tags: [smoke, investigation]
+input:
+  title: 排查 vm-150 CPU 使用率是否偏高
+  description: 请检查 vm-150 当前 CPU 使用率和 1/5/15 分钟负载是否偏高，结论必须引用实际指标证据。
+  target_scope:
+    host: vm-150
+    service: nginx
+expected:
+  status: report_ready
+  min_trace: 1
+  min_conclusions: 1
+  min_evidence: 1
+  data_quality_any: [有数据, 部分数据]

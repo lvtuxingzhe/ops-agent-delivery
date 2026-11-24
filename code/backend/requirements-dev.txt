@@ -1,0 +1,6 @@
+# 开发/CI 依赖（不装也能跑服务，只影响测试与静态检查）
+# 安装：python -m pip install -r requirements-dev.txt
+pytest>=8.0,<10.0
+fakeredis>=2.20,<3.0
+ruff>=0.9,<1.0
+mypy>=1.11,<3.0

@@ -1,0 +1,565 @@
+{
+  "captured_at": "2026-11-20T02:51:04.388392Z",
+  "configmaps": [
+    {
+      "keys": [
+        "ca.crt"
+      ],
+      "name": "kube-root-ca.crt"
+    }
+  ],
+  "deployments": [
+    {
+      "available_replicas": 1,
+      "conditions": [
+        {
+          "message": "Deployment has minimum availability.",
+          "reason": "MinimumReplicasAvailable",
+          "status": "True",
+          "type": "Available"
+        },
+        {
+          "message": "ReplicaSet \"api-v2-78fc574455\" has successfully progressed.",
+          "reason": "NewReplicaSetAvailable",
+          "status": "True",
+          "type": "Progressing"
+        }
+      ],
+      "name": "api-v2",
+      "ready_replicas": 1,
+      "replicas": 1,
+      "selector": {
+        "app": "api-v2"
+      },
+      "template_containers": [
+        {
+          "args": [],
+          "command": [],
+          "env": [],
+          "image": "nginx:1.25",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": []
+        }
+      ],
+      "template_labels": {
+        "app": "api-v2"
+      },
+      "template_node_selector": {},
+      "template_volumes": [],
+      "updated_replicas": 1
+    },
+    {
+      "available_replicas": null,
+      "conditions": [
+        {
+          "message": "ReplicaSet \"crash-app-5fcc6f64bf\" has successfully progressed.",
+          "reason": "NewReplicaSetAvailable",
+          "status": "True",
+          "type": "Progressing"
+        },
+        {
+          "message": "Deployment does not have minimum availability.",
+          "reason": "MinimumReplicasUnavailable",
+          "status": "False",
+          "type": "Available"
+        }
+      ],
+      "name": "crash-app",
+      "ready_replicas": null,
+      "replicas": 1,
+      "selector": {
+        "app": "crash-app"
+      },
+      "template_containers": [
+        {
+          "args": [],
+          "command": [
+            "sh",
+            "-c",
+            "echo starting app; exit 1"
+          ],
+          "env": [],
+          "image": "busybox:1.36",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": []
+        }
+      ],
+      "template_labels": {
+        "app": "crash-app"
+      },
+      "template_node_selector": {},
+      "template_volumes": [],
+      "updated_replicas": 1
+    }
+  ],
+  "endpoints": [
+    {
+      "name": "api-svc",
+      "subsets": []
+    }
+  ],
+  "events": [
+    {
+      "count": null,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-q8bz8",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-hard-dual/crash-app-5fcc6f64bf-q8bz8 to vm-154",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": null,
+      "involved_object": "Pod/api-v2-78fc574455-pgsvd",
+      "last_timestamp": null,
+      "message": "Successfully assigned eval-hard-dual/api-v2-78fc574455-pgsvd to vm-154",
+      "reason": "Scheduled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/api-v2-78fc574455-pgsvd",
+      "last_timestamp": "2026-11-20T02:39:02Z",
+      "message": "Pulling image \"nginx:1.25\"",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/crash-app",
+      "last_timestamp": "2026-11-20T02:39:02Z",
+      "message": "Scaled up replica set crash-app-5fcc6f64bf to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/crash-app-5fcc6f64bf",
+      "last_timestamp": "2026-11-20T02:39:02Z",
+      "message": "Created pod: crash-app-5fcc6f64bf-q8bz8",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "ReplicaSet/api-v2-78fc574455",
+      "last_timestamp": "2026-11-20T02:39:02Z",
+      "message": "Created pod: api-v2-78fc574455-pgsvd",
+      "reason": "SuccessfulCreate",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Deployment/api-v2",
+      "last_timestamp": "2026-11-20T02:39:02Z",
+      "message": "Scaled up replica set api-v2-78fc574455 to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 5,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-q8bz8",
+      "last_timestamp": "2026-11-20T02:40:34Z",
+      "message": "Created container app",
+      "reason": "Created",
+      "type": "Normal"
+    },
+    {
+      "count": 5,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-q8bz8",
+      "last_timestamp": "2026-11-20T02:40:34Z",
+      "message": "Container image \"busybox:1.36\" already present on machine",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 5,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-q8bz8",
+      "last_timestamp": "2026-11-20T02:40:35Z",
+      "message": "Started container app",
+      "reason": "Started",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/api-v2-78fc574455-pgsvd",
+      "last_timestamp": "2026-11-20T02:40:45Z",
+      "message": "Started container app",
+      "reason": "Started",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/api-v2-78fc574455-pgsvd",
+      "last_timestamp": "2026-11-20T02:40:45Z",
+      "message": "Created container app",
+      "reason": "Created",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "involved_object": "Pod/api-v2-78fc574455-pgsvd",
+      "last_timestamp": "2026-11-20T02:40:45Z",
+      "message": "Successfully pulled image \"nginx:1.25\" in 1m42.315s (1m42.315s including waiting)",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 46,
+      "involved_object": "Pod/crash-app-5fcc6f64bf-q8bz8",
+      "last_timestamp": "2026-11-20T02:49:02Z",
+      "message": "Back-off restarting failed container app in pod crash-app-5fcc6f64bf-q8bz8_eval-hard-dual(7443e6cf-7c1c-4a55-9628-2c778e5149e6)",
+      "reason": "BackOff",
+      "type": "Warning"
+    }
+  ],
+  "logs": {
+    "api-v2-78fc574455-pgsvd/app": "/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration\n/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh\n10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf\n10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf\n/docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh\n/docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh\n/docker-entrypoint.sh: Configuration complete; ready for start up\n2026/11/20 02:40:45 [notice] 1#1: using the \"epoll\" event method\n2026/11/20 02:40:45 [notice] 1#1: nginx/1.25.5\n2026/11/20 02:40:45 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) \n2026/11/20 02:40:45 [notice] 1#1: OS: Linux 3.10.0-1160.el7.x86_64\n2026/11/20 02:40:45 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576\n2026/11/20 02:40:45 [notice] 1#1: start worker processes\n2026/11/20 02:40:45 [notice] 1#1: start worker process 30\n2026/11/20 02:40:45 [notice] 1#1: start worker process 31\n2026/11/20 02:40:45 [notice] 1#1: start worker process 32\n2026/11/20 02:40:45 [notice] 1#1: start worker process 33\n",
+    "crash-app-5fcc6f64bf-q8bz8/app": "starting app\n",
+    "crash-app-5fcc6f64bf-q8bz8/app-previous": "starting app\n"
+  },
+  "namespace": "eval-hard-dual",
+  "nodes": [
+    {
+      "allocatable": {
+        "cpu": "2",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "1838456Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-150"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-152"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-153"
+    },
+    {
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "17326984384",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "memory": "3861292Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "message": "kubelet has sufficient memory available",
+          "reason": "KubeletHasSufficientMemory",
+          "status": "False",
+          "type": "MemoryPressure"
+        },
+        {
+          "message": "kubelet has no disk pressure",
+          "reason": "KubeletHasNoDiskPressure",
+          "status": "False",
+          "type": "DiskPressure"
+        },
+        {
+          "message": "kubelet has sufficient PID available",
+          "reason": "KubeletHasSufficientPID",
+          "status": "False",
+          "type": "PIDPressure"
+        },
+        {
+          "message": "kubelet is posting ready status",
+          "reason": "KubeletReady",
+          "status": "True",
+          "type": "Ready"
+        }
+      ],
+      "name": "vm-154"
+    }
+  ],
+  "pods": [
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "docker.io/library/nginx:1.25",
+          "last_state": {},
+          "name": "app",
+          "ready": true,
+          "restart_count": 0,
+          "state": {
+            "startedAt": "2026-11-20T02:40:45Z",
+            "state": "running"
+          }
+        }
+      ],
+      "labels": {
+        "app": "api-v2",
+        "pod-template-hash": "78fc574455"
+      },
+      "name": "api-v2-78fc574455-pgsvd",
+      "node": "vm-154",
+      "node_selector": {},
+      "phase": "Running",
+      "pod_ip": "10.42.3.6",
+      "service_account": "default",
+      "spec_containers": [
+        {
+          "args": [],
+          "command": [],
+          "env": [],
+          "image": "nginx:1.25",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": [
+            {
+              "mount_path": "/var/run/secrets/kubernetes.io/serviceaccount",
+              "name": "kube-api-access-jhwml",
+              "sub_path": null
+            }
+          ]
+        }
+      ],
+      "volumes": [
+        {
+          "config_map": null,
+          "name": "kube-api-access-jhwml",
+          "pvc": null,
+          "secret": null
+        }
+      ]
+    },
+    {
+      "conditions": [
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "message": "containers with unready status: [app]",
+          "reason": "ContainersNotReady",
+          "status": "False",
+          "type": "ContainersReady"
+        },
+        {
+          "message": null,
+          "reason": null,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containers": [
+        {
+          "image": "docker.io/library/busybox:1.36",
+          "last_state": {
+            "exitCode": 1,
+            "finishedAt": "2026-11-20T02:50:04Z",
+            "reason": "Error",
+            "startedAt": "2026-11-20T02:50:04Z",
+            "state": "terminated"
+          },
+          "name": "app",
+          "ready": false,
+          "restart_count": 7,
+          "state": {
+            "message": "back-off 5m0s restarting failed container=app pod=crash-app-5fcc6f64bf-q8bz8_eval-hard-dual(7443e6cf-7c1c-4a55-9628-2c778e5149e6)",
+            "reason": "CrashLoopBackOff",
+            "state": "waiting"
+          }
+        }
+      ],
+      "labels": {
+        "app": "crash-app",
+        "pod-template-hash": "5fcc6f64bf"
+      },
+      "name": "crash-app-5fcc6f64bf-q8bz8",
+      "node": "vm-154",
+      "node_selector": {},
+      "phase": "Running",
+      "pod_ip": "10.42.3.5",
+      "service_account": "default",
+      "spec_containers": [
+        {
+          "args": [],
+          "command": [
+            "sh",
+            "-c",
+            "echo starting app; exit 1"
+          ],
+          "env": [],
+          "image": "busybox:1.36",
+          "name": "app",
+          "ports": [],
+          "probes": {},
+          "resources": {},
+          "volume_mounts": [
+            {
+              "mount_path": "/var/run/secrets/kubernetes.io/serviceaccount",
+              "name": "kube-api-access-gslct",
+              "sub_path": null
+            }
+          ]
+        }
+      ],
+      "volumes": [
+        {
+          "config_map": null,
+          "name": "kube-api-access-gslct",
+          "pvc": null,
+          "secret": null
+        }
+      ]
+    }
+  ],
+  "pvc": [],
+  "resource_quotas": [],
+  "services": [
+    {
+      "cluster_ip": "10.43.118.228",
+      "name": "api-svc",
+      "ports": [
+        {
+          "port": 80,
+          "protocol": "TCP",
+          "target_port": 80
+        }
+      ],
+      "selector": {
+        "app": "api"
+      },
+      "type": "ClusterIP"
+    }
+  ]
+}

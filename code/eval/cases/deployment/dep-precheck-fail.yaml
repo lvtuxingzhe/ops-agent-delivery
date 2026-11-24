@@ -1,0 +1,19 @@
+id: dep-precheck-fail
+title: precheck 期望不匹配时阻止 apply
+suite: full
+kind: deployment
+tags: [smoke, deployment]
+input:
+  template_id: tpl-0117c6ee00
+  host: vm-150
+expected:
+  status: closed
+  outcome: failed
+  reason_code: precheck_expect_mismatch
+  failure_code: precheck_expect_mismatch
+  groups:
+    precheck: {count: 1, all_expect_ok: false}
+    apply: {count: 0}
+    verify: {count: 0}
+    rollback: {count: 0}
+    post_rollback: {count: 0}
