@@ -11,7 +11,7 @@
 ## 运行
 
 ```powershell
-cd D:\workbudy\work\ops-agent-delivery\code
+cd code
 .\backend\.venv\Scripts\python.exe eval\run_eval.py --suite smoke --runs 1
 .\backend\.venv\Scripts\python.exe eval\run_eval.py --suite full --runs 3
 ```
@@ -41,29 +41,28 @@ cd D:\workbudy\work\ops-agent-delivery\code
 - `run_pass_rate`：所有运行中的通过比例；
 - 报告保留每条失败的结构化原因，不保存模型原始上下文、命令 stdout/stderr 全量和凭据。
 
-## RAG 检索评估（2026-11-20）
+## RAG 检索评估
 
 ```powershell
-cd D:\workbudy\work\ops-agent-delivery\code
+cd code
 .\backend\.venv\Scripts\python.exe eval\run_rag_eval.py
 ```
 
 - 用例：`eval/rag_cases.json`，按 `expected_titles` 判断命中，不绑定条目 ID；
 - 指标：`Recall@5`、`MRR`、`empty_retrieval_rate`、`dangerous_false_recall_rate`；
-- `dangerous_false_recall_rate` 只在标注了 `dangerous_terms` 的用例上统计，无标签显示 `N/A`，不能当成 0；
-- 当前 30 条开发种子查询，覆盖端口、systemd、MySQL 复制、Redis、K8s、inode、DNS、防火墙、TLS、Nginx 502；验证通过不代表覆盖真实故障分布，仍需扩到 30～50 条以上并人工核对。
+- `dangerous_false_recall_rate` 只在标注了 `dangerous_terms` 的用例上统计，无标签显示 `N/A`；
+- 当前 30 条种子查询，覆盖端口、systemd、MySQL 复制、Redis、K8s、inode、DNS、防火墙、TLS、Nginx 502；真实故障分布的覆盖尚未验证。
 - 报告：`eval/reports/rag-baseline.json` / `.md`。
 
-## 当前基线（2026-11-16）
+## 基线结果
 
 - `eval/reports/baseline-3x-final.json` / `.md`：15 条用例 × 3 次；
 - `pass@1 = 1.0`、`pass^k = 1.0`、`run_pass_rate = 1.0`，中位耗时 13.863 s；
-- smoke 阶段曾暴露两个评估装置问题并已修正：rollback 失败模板缺少 verify 失败前置；无数据用例的 `data_quality` 规则过严，改为校验 `verdict=insufficient`；
-- 这批基线没有产品失败项，因此本轮未改业务主流程；全绿只说明“当前用例和边界通过”，不代表 Agent 的结论事实正确率已经足够。
+- 全绿只说明当前用例和边界通过，不代表 Agent 的结论事实正确率已经足够。
 
 ## 边界
 
 - 评估依赖本地已启动的队列 worker；worker 未运行时排查用例会超时，不会伪造报告。
-- 部署使用测试环境 + 本地无害命令；不要把 `eval-five-stage-*` 模板改到真实主机上执行。
-- 排查用例当前检查“有结论、有证据、无数据时承认不确定”，不检查结论与真实故障的语义一致；下一阶段应补人工标注和事实核对。
-- 评估只读观测，不改业务主流程；要改运行器/验证器时先补回归测试。
+- 部署使用测试环境 + 本地无害命令；`eval-five-stage-*` 模板只在测试环境使用。
+- 排查用例检查“有结论、有证据、无数据时承认不确定”，不检查结论与真实故障的语义一致；人工标注和事实核对尚未覆盖。
+- 评估只读观测，不改业务主流程；运行器与验证器的改动有配套回归测试覆盖。

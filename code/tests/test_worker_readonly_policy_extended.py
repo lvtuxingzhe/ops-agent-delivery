@@ -1,4 +1,4 @@
-"""扩展只读命令策略测试：系统、中间件、数据库状态、开发工具与仓库。"""
+"""扩展只读命令策略测试：系统、中间件、数据库状态、代码工具与仓库。"""
 
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ from tools.readonly_policy import validate_readonly_command
     "redis-cli SCAN 0",
     "redis-cli CLIENT LIST",
     "redis-cli CONFIG GET maxmemory",
-    # 开发工具与仓库
+    # 代码工具与仓库
     "git status",
     "git log --oneline -20",
     "git show HEAD",

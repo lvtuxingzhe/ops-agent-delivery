@@ -14,7 +14,7 @@ class SmsChannel(Protocol):
 
 
 class TestChannel:
-    """开发测试通道：不发送短信。
+    """测试通道：不发送短信。
 
     验证码由登录接口在 SMS_CHANNEL=test 时通过 dev_code 字段返回。
     接入真实短信服务商时实现 SmsChannel 并在 get_sms_channel 中注册。
@@ -22,7 +22,7 @@ class TestChannel:
 
     def send_code(self, phone: str, code: str, trace_id: str) -> None:
         # 故意什么都不做。phone 也只是收着，不打印 —— 习惯从测试通道就开始养
-        """发送验证码；测试通道只在开发期回显，便于本地自检。"""
+        """发送验证码；测试通道只在测试环境回显，便于本地自检。"""
         return None
 
 
@@ -39,7 +39,7 @@ class DisabledChannel:
 
 def get_sms_channel(settings: Settings) -> SmsChannel:
     """
-    按配置选通道。test 只允许开发/演练；real 可用 disabled 关闭短信登录。
+    按配置选通道。test 只允许测试/演练；production 可用 disabled 关闭短信登录。
     未知通道名直接报错而不是悄悄降级成 test —— 静默降级会掩盖配置错误。
     """
     if settings.sms_channel == "test":

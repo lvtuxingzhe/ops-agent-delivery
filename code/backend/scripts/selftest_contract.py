@@ -113,7 +113,7 @@ def check_contract_logic() -> None:
         unknown_rejected = True
     record("未知旧状态明确报错（不静默降级）", unknown_rejected, "StateError")
 
-    # 铁律：无数据不显示为正常
+    # 显示规则：无数据不显示为正常
     ok = (contract.data_quality_text("no_data") == "无数据"
           and contract.data_quality_text("unknown") == "未知存量"
           and "正常" not in contract.data_quality_text("no_data")
@@ -252,7 +252,7 @@ def check_database() -> None:
 def main() -> int:
     """按顺序跑完所有检查，打印汇总并返回退出码。"""
     print("=" * 66)
-    print("v1.1 第 ① 步完成标志实测（五态契约 + 4 张表）")
+    print("完成标志实测（五态契约 + 4 张表）")
     print("=" * 66)
     check_contract_logic()
     check_database()

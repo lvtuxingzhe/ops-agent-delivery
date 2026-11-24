@@ -28,7 +28,7 @@ def login_methods_enabled(settings: Settings) -> dict[str, bool]:
 # =============================================================================
 
 def get_user_with_roles(conn: Any, user_id: int) -> dict | None:
-    """按 id 查用户的角色。每个请求都要重查一遍（方案 3.4），不信任令牌缓存。"""
+    """按 id 查用户的角色。每个请求都要重查一遍，不信任令牌缓存。"""
     row = conn.execute(
         "SELECT id, username, display_name, is_active, roles FROM v3_users "
         "WHERE id = %s AND deleted_at IS NULL",

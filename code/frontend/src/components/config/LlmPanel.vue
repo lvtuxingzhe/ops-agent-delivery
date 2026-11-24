@@ -350,8 +350,8 @@ async function deleteItem(item: LlmConfig) {
         <label>协议
           <select v-model="form.protocol">
             <option value="openai_compatible">统一兼容协议</option>
-            <option value="native_claude">Claude 原生（第一期仅登记）</option>
-            <option value="native_gemini">Gemini 原生（第一期仅登记）</option>
+            <option value="native_claude">Claude 原生（当前版本仅登记）</option>
+            <option value="native_gemini">Gemini 原生（当前版本仅登记）</option>
           </select>
         </label>
         <label class="wide">接口地址（选模板后自动带出，可改成内网网关 / 自建端点）

@@ -28,7 +28,7 @@ class ArchiveBackendNotReadyError(ArchiveError):
 class ArchiveConfig:
     backend: str = "local"          # local | s3
     local_dir: str = ""             # 空 = 用 code/runtime-data/audit-archive
-    s3_endpoint: str = ""           # 上线时填，本轮不使用
+    s3_endpoint: str = ""           # 上线时填，当前版本不使用
     s3_bucket: str = ""
     s3_credential_ref: str = ""     # 只存引用名，不是密钥
     retention_days: int = 365       # 对象锁保留期【待确认】
@@ -71,7 +71,7 @@ def load_config(settings: Settings) -> ArchiveConfig:
 
 
 def default_local_dir() -> Path:
-    """本地开发归档目录：code/runtime-data/audit-archive（已被 .gitignore 排除）。"""
+    """本地归档目录：code/runtime-data/audit-archive（已被 .gitignore 排除）。"""
     return Path(__file__).resolve().parents[2] / "runtime-data" / "audit-archive"
 
 
@@ -98,7 +98,7 @@ def _read_manifest(path: Path) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# 本地后端（开发期，把链路走通；不是真 WORM）
+# 本地后端（用于走通链路；不是真 WORM）
 # ---------------------------------------------------------------------------
 def write_local(events: list[dict], config: ArchiveConfig, day: str | None = None) -> ArchiveResult:
     """
@@ -124,7 +124,7 @@ def write_local(events: list[dict], config: ArchiveConfig, day: str | None = Non
         raise ArchiveError(f"当天的归档已存在且内容不同，拒绝覆盖：{day}")
 
     data_file.write_bytes(encoded)
-    # 只读是开发期的"别手滑改到"提示，不是安全边界；真 WORM 靠对象锁。
+    # 只读是防手滑的提示，不是安全边界；真 WORM 靠对象锁。
     os.chmod(data_file, 0o444)
 
     manifest = {
@@ -137,7 +137,7 @@ def write_local(events: list[dict], config: ArchiveConfig, day: str | None = Non
         "object_lock": False,
         "retention_days": config.retention_days,
         "generated_at": datetime.now(UTC).isoformat(),
-        "note": "本地开发后端，不是真 WORM；上线改用 S3 Object Lock 合规模式",
+        "note": "本地后端，不是真 WORM；上线改用 S3 Object Lock 合规模式",
     }
     manifest_file.write_text(
         json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2), encoding="utf-8"
@@ -164,7 +164,7 @@ def verify_local(config: ArchiveConfig, day: str) -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
-# S3 / MinIO 对象锁后端（接口骨架，本轮不实现网络调用）
+# S3 / MinIO 对象锁后端（接口骨架，当前版本不实现网络调用）
 # ---------------------------------------------------------------------------
 def write_s3(events: list[dict], config: ArchiveConfig, day: str | None = None) -> ArchiveResult:
     """

@@ -3,28 +3,27 @@
  *
  * 它有多薄？薄到只负责开一个窗口、把前端页面装进去。
  *
- * 为什么这么薄（这几条是定稿里的桌面端红线）
+ * 桌面端的职责边界
  * ------------------------------------------
- *  - 桌面端【不是另一套系统】，它和网页版打开的是同一份前端代码、
- *    调的是同一个后台接口、走的是同一套权限与审批、记的是同一本审计记录。
- *  - 桌面端【不能直接 SSH 连生产】：所有查询、所有写操作都发请求给后台，
- *    由后台执行。本文件里不出现任何 SSH / 生产主机 / 凭据相关的代码。
- *  - 桌面端【不能本地存凭据】：不写密码、不写长期令牌，登录令牌短时有效、
- *    退出即清。所以这里也没有 keystore / localStorage 持久化登录态的逻辑。
- *  - 桌面端【不能自己算权限】：菜单能不能点由服务端说了算，
- *    前端藏起来只是为了好看，不是安全边界。
- *  - 【不能因为「在本机」或「我是管理员」就免审批】：动生产的结构化确认、
- *    二次认证、方案指纹一次都不能少，全在后台判断。
+ *  - 桌面端和网页版打开的是同一份前端代码、同一个后台接口、
+ *    同一套权限与审批、同一本审计记录。
+ *  - 桌面端的查询和写操作都发给后台，由后台执行；本文件不包含 SSH、
+ *    生产主机或凭据相关代码。
+ *  - 登录令牌短时有效，退出即清；这里没有 keystore / localStorage
+ *    持久化登录态的逻辑。
+ *  - 菜单是否可用由服务端返回的权限决定；前端隐藏只影响展示，
+ *    不作为安全边界。
+ *  - 动生产的结构化确认、二次认证、方案指纹由后台校验。
  *
  * 前端从哪来（复用，不复制）
  * --------------------------
- *  开发期：加载 Vite 开发服务器地址，默认 http://127.0.0.1:5173
+ *  本地运行：加载 Vite 服务地址，默认 http://127.0.0.1:5173
  *  打包期：加载 ../frontend/dist/index.html（前端构建产物）
  *  两种情况都由环境变量 FRONTEND_URL / 打包标志决定，代码里不写死业务地址。
  *
- * 第 ① 步只做到「能弹出窗口、能看到登录页」。
+ * 本文件只负责弹出窗口、显示登录页。
  * 托盘告警、本地文件拖入只读分析、离线脱敏摘要、导出留痕，
- * 是后面步骤的事，不在这里提前铺。
+ * 不在主进程里实现。
  */
 
 const { app, BrowserWindow, shell } = require('electron');
@@ -38,7 +37,7 @@ const os = require('node:os');
 // 少一个依赖，Windows / macOS 行为也一致。
 const FORCE_PROD = process.argv.includes('--prod');
 
-// 开发期前端地址从环境变量读；没配就用本机默认地址。
+// 前端地址从环境变量读；没配就用本机默认地址。
 // 注意这是「本机页面地址」，不是任何生产系统地址，也不含账号密码。
 const DEV_FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5173';
 
@@ -65,7 +64,7 @@ function resolveFrontendEntry() {
   if (FORCE_PROD) {
     return { kind: 'file', target: path.join(__dirname, '../frontend/dist/index.html') };
   }
-  // 开发时直接连 Vite，改前端代码能热更新
+  // 本地运行时直接连 Vite，改前端代码能热更新
   return { kind: 'url', target: DEV_FRONTEND_URL };
 }
 
@@ -87,7 +86,7 @@ function createWindow() {
     },
   });
 
-  // 页面里点开的链接一律交给系统浏览器；不在壳里新开窗口。
+  // 页面里点开的链接统一交给系统浏览器；不在壳里新开窗口。
   // 不做这一层，页面里的 <a target="_blank"> 会弹出一个没有 preload、
   // 也没人管权限的新窗口，等于绕开了壳的安全设置。
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -137,7 +136,7 @@ function createWindow() {
     });
   }
 
-  // 开发期才开调试工具；打包后不开，避免把内部结构暴露出去
+  // 本地运行时才开调试工具；打包后不开，避免把内部结构暴露出去
   if (!app.isPackaged && process.env.OPEN_DEVTOOLS === '1') {
     win.webContents.openDevTools();
   }
@@ -164,7 +163,7 @@ app.whenReady().then(() => {
   createWindow();
 
   // macOS 习惯：点 dock 图标且没窗口时重新开一个。
-  // 本项目第一期是 Windows，但留着不影响。
+  // 本项目当前主要面向 Windows，但保留 macOS 行为不影响。
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

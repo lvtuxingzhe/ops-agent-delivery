@@ -6,16 +6,18 @@
 # 用法（在任意 PowerShell 窗口）：
 #   .\register-audit-maintenance.ps1                 # 注册（每天 00:05）
 #   .\register-audit-maintenance.ps1 -Time 00:20     # 改时间
+#   .\register-audit-maintenance.ps1 -UseDocker      # 镜像部署，用 docker compose 执行
 #   .\register-audit-maintenance.ps1 -Show           # 只看状态
 #   .\register-audit-maintenance.ps1 -Unregister     # 撤销
 #
-# 为什么用「当前用户 + 只在登录时运行」：这台是开发机，任务要读 code\.env 里的
-# 假凭据；换成服务账号反而要去配一套权限。生产机上请改成专用服务账号。
+# 源码部署读取 code\.env，镜像部署读取 .env.production；
+# 换服务账号时需要单独配置该账号的权限。生产环境通常使用专用服务账号。
 
 [CmdletBinding()]
 param(
     [string]$TaskName = "OpsAgent-AuditMaintenance",
     [string]$Time = "00:05",
+    [switch]$UseDocker,
     [switch]$Unregister,
     [switch]$Show
 )
@@ -45,17 +47,26 @@ if ($Unregister) {
     exit 0
 }
 
-foreach ($path in @($Python, $Script)) {
-    if (-not (Test-Path -LiteralPath $path)) { throw "找不到：$path" }
-}
 if (-not (Test-Path -LiteralPath $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
 
-# 用 PowerShell 包一层是为了把输出追加到日志文件；退出码透传给任务计划
-$Inner = "& '{0}' '{1}' *>> '{2}'" -f $Python, $Script, $LogFile
+$useDocker = $UseDocker -or -not (Test-Path -LiteralPath $Python)
+if (-not $useDocker -and -not (Test-Path -LiteralPath $Script)) { throw "找不到：$Script" }
+if ($useDocker) {
+    $dockerCommand = Get-Command docker -ErrorAction SilentlyContinue
+    if ($null -eq $dockerCommand) { throw "找不到 $Python，也没有 docker 命令" }
+    $composeFile = Join-Path $CodeRoot "docker-compose.prod.yml"
+    $envFile = Join-Path $CodeRoot ".env.production"
+    foreach ($path in @($composeFile, $envFile)) {
+        if (-not (Test-Path -LiteralPath $path)) { throw "找不到：$path" }
+    }
+    $Inner = "cd '{0}'; & '{1}' compose --env-file .env.production -f docker-compose.prod.yml run --rm --no-deps -T backend python scripts/audit_maintenance.py *>> '{2}'" -f $CodeRoot, $dockerCommand.Source, $LogFile
+} else {
+    $Inner = "& '{0}' '{1}' *>> '{2}'" -f $Python, $Script, $LogFile
+}
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument ("-NoProfile -ExecutionPolicy Bypass -Command `"{0}`"" -f $Inner) -WorkingDirectory $CodeRoot
 $Trigger = New-ScheduledTaskTrigger -Daily -At $Time
 # StartWhenAvailable：机器那天没开机，开机后补跑一次。
-# 注意：这一行必须写成单行 —— 反引号续行在部分环境会被拆成独立命令。
+# 这一行保持单行：反引号续行在部分环境会被拆成独立命令。
 $Settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 30)
 
 Register-ScheduledTask `

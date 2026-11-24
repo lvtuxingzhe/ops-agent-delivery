@@ -1,6 +1,6 @@
 # 生产部署手册
 
-目标机安装目录统一为 `/data/ops-agent`，不放在 `/root`；`/data` 建议单独挂一块盘。当前 153 环境仍是 `/root/ops-agent`，下次重装再切。
+目标机安装目录统一为 `/data/ops-agent`，不放在 `/root`；`/data` 建议单独挂一块盘。153 已于 2026-11-24 按该路径重新安装，旧 `/root/ops-agent` 已删除。
 
 ## 交付物
 
@@ -15,13 +15,14 @@
 | `ops/deploy/nginx-edge.conf` | 静态前端与 `/api` 反向代理 |
 | `ops/deploy/build-images.sh` | 构建三套镜像；缺 `.env.production` 时临时用模板 |
 | `ops/deploy/package-images.sh` | 构建并导出 `dist/ops-agent-docker-<tag>.tar.gz`，附 SHA256 |
+| `ops/deploy/install-audit-maintenance.sh` | 安装审计维护定时任务；写入 `/etc/cron.d/ops-agent-audit` |
 | `ops/deploy/deploy.sh` | 目标机唯一部署入口；只 load 镜像，不构建 |
 | `ops/deploy/clean-platform.sh` | 一键清理旧平台：容器、网络、卷、镜像、安装目录和中间件数据 |
 
 镜像内不包含数据库、对象存储和测试业务数据。首次部署由 `migrate`
 一次性容器建表、建角色、建管理员、初始化模板；中间件数据目录为空时才是干净环境。
 
-依赖组件固定版本（生产不使用 `latest`，升级必须同步改镜像和文档）：
+依赖组件使用固定版本号（生产环境不使用 `latest`）。升级时同步更新镜像和文档：
 
 | 组件 | 固定版本 | 默认镜像 |
 | --- | --- | --- |
@@ -95,19 +96,56 @@ bash ops/deploy/deploy.sh
 `sha256sum -c` 要在包所在目录执行，或把校验文件里的文件名替换成实际路径；
 它只校验内容，不会因为文件换目录而误判。
 
-`deploy.sh` 只做 `docker compose up`，不传 `--build`；启动前会检查
+`deploy.sh` 启动编排时不传 `--build`；启动前会检查
 `ops-agent-backend/worker/frontend:<OPS_IMAGE_TAG>` 是否存在，缺失时提示先
 `docker load`。没有 `var/models/bge-small-zh-v1.5` 时只提示，语义检索回退关键词。
 
-必须满足：
-
-- 生产编排固定 `APP_ENV=production`，不再填 `APP_MODE` 或 `REAL_MODE_ACK`
-- `SMS_CHANNEL` 不能是 `test`；只用密码 + TOTP 时设 `disabled`
-- `AUTH_TOKEN_SECRET`、`EXEC_PERMIT_SECRET` 至少 40 个字符
-- `ALERT_WEBHOOK_TOKEN` 必须设置，否则 Webhook 接口失败关闭（503）
-
 `deploy.sh` 会先做变量与 `docker compose config` 校验，默认拉取依赖组件镜像，
 再启动编排，等待 `/api/health` 通过；失败时非零退出并打印 `migrate` / `backend` 日志。
+
+前置条件：
+
+- 生产编排固定 `APP_ENV=production`，不再填 `APP_MODE` 或 `REAL_MODE_ACK`
+- `SMS_CHANNEL` 使用真实通道时不使用 `test`；只用密码 + TOTP 时设为 `disabled`
+- `AUTH_TOKEN_SECRET`、`EXEC_PERMIT_SECRET` 至少 40 个字符
+- `ALERT_WEBHOOK_TOKEN` 需要设置；未设置时 Webhook 接口返回 503（失败关闭）
+
+## 审计维护定时任务
+
+镜像里的 `backend/scripts/audit_maintenance.py` 由宿主机 cron 每天调用一次，不放在容器内运行。
+
+`deploy.sh` 在健康检查通过后，如果当前用户是 root，会执行：
+
+```bash
+bash ops/deploy/install-audit-maintenance.sh
+```
+
+脚本写入 `/etc/cron.d/ops-agent-audit`，每天 00:05 执行：
+
+```cron
+5 0 * * * <用户> cd '<部署根>' && <docker> compose --env-file .env.production -f docker-compose.prod.yml run --rm --no-deps -T backend python scripts/audit_maintenance.py >> '<部署根>/var/logs/audit-maintenance.log' 2>&1
+```
+
+部署用户不是 root 时，`deploy.sh` 会打印需要手动执行的命令：
+
+```bash
+sudo bash ops/deploy/install-audit-maintenance.sh
+```
+
+可用变量：
+
+| 变量 | 默认 | 作用 |
+|---|---|---|
+| `OPS_INSTALL_AUDIT_CRON` | `1` | 设为 `0` 时 `deploy.sh` 不安装定时任务 |
+| `OPS_CRON_USER` | 存在 `opsagent` 时用它，否则用 sudo 调用者/当前用户 | 指定 cron 以哪个用户执行 |
+
+手动执行一次，确认配置、数据库、MinIO 和归档都正常：
+
+```bash
+sudo -u opsagent bash -lc 'cd /data/ops-agent && /usr/bin/docker compose --env-file .env.production -f docker-compose.prod.yml run --rm --no-deps -T backend python scripts/audit_maintenance.py'
+```
+
+退出码 0 表示成功。状态文件写在 `var/audit-archive/maintenance-status.json`，该目录已挂载到 backend 容器，容器重建后仍保留。
 
 ## 首次初始化做了什么
 
@@ -156,7 +194,7 @@ docker exec ops-agent-postgres-1 pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" \
 ## 重装与升级
 
 按现行规则，换版本前先用 `clean-platform.sh` 清理旧平台。旧镜像不保留在本机，
-回退依赖机器外保存的旧发布包和数据库备份；不要指望机器上还有上一版镜像。
+回退依赖机器外保存的旧发布包和数据库备份；机器上不保留上一版镜像。
 
 ## SSH 主机公钥
 
@@ -179,4 +217,4 @@ docker exec ops-agent-postgres-1 pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" \
 - 当前只实现测试短信通道；生产用 `SMS_CHANNEL=disabled` 关闭手机验证码登录，
   只用账号密码 + TOTP。接真实短信服务商时在 `backend/app/core/sms.py` 注册实现。
 - TLS 不在 Compose 内终止；由宿主机 Nginx / 负载均衡负责 443。
-- 真实执行会实际跑 SSH 命令和部署模板，必须确认目标主机、模板和回滚预检。
+- 真实执行会实际跑 SSH 命令和部署模板；执行前确认目标主机、模板和回滚预检。

@@ -444,7 +444,7 @@ def group_f() -> None:
         external = [text for text in targets if not any(
             hostname in text for hostname in ("127.0.0.1", "::1", "localhost")
         )]
-        # 真实 load_config 路径：只该碰本机回环的本机开发库
+        # 真实 load_config 路径：只该碰本机回环的本机数据库
         targets.clear()
         cred.load_config(SETTINGS)
         live = list(targets)
@@ -466,7 +466,7 @@ def group_f() -> None:
            + ("（未捕到 Python 层连接也属正常）" if not live else ""))
 
     skip("容器内无 CRED_* 的真实路径",
-         "本轮只在本地脚本路径注入假值验过链路；容器侧只验了 no_data 降级，未起容器")
+         "本次只在本地脚本路径注入假值验过链路；容器侧只验了 no_data 降级，未起容器")
 
 
 # ================================================================ G 降级
@@ -520,7 +520,7 @@ def group_g() -> None:
 def group_h() -> None:
     """一组检查：旧代码无损与零新增表。"""
     print("\n--- H 旧代码无损与零新增表 ---")
-    record("第一期大模型硬闸口仍为 True（未擅自放宽）",
+    record("当前版本大模型硬闸口仍为 True（未擅自放宽）",
            llm_config_service.FIRST_PHASE_NO_REAL_CALL is True,
            "第 ④ 步云端出网仍需单独授权")
     record("六态契约常量未变",
@@ -557,9 +557,9 @@ def group_h() -> None:
 
 def main() -> int:
     """按顺序跑完所有检查，打印汇总并返回退出码。"""
-    os.environ[FAKE_ENV] = FAKE   # 开发期假值只在本进程，用完删
+    os.environ[FAKE_ENV] = FAKE   # 假值只在本进程，用完删
     print("=" * 68)
-    print("v1.1 第 ③ 步完成标志实测 · 凭据解析层（零联网 / 零真凭据）")
+    print("完成标志实测 · 凭据解析层（零联网 / 零真凭据）")
     print("=" * 68)
     try:
         group_a()

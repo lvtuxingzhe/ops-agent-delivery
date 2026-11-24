@@ -35,7 +35,7 @@ def assert_call_allowed(
         task_switch = get_setting(conn, "llm_enabled_by_task") == "true"
 
     # 第三道读配置；常量 FIRST_PHASE_NO_REAL_CALL 是它的默认值来源。
-    # load_gateway_config 只连本机开发库读 v3_configs，不产生外部连接。
+    # load_gateway_config 只连本机数据库读 v3_configs，不产生外部连接。
     try:
         gate_config = load_gateway_config(settings)
         no_real_call = gate_config.no_real_call
@@ -76,6 +76,6 @@ def assert_call_allowed(
         "config_not_found": "没有这条模型配置",
         "config_disabled": "这条模型配置已停用，请先启用",
         "task_switch_off": "平台「按任务开」总开关未打开",
-        "first_phase_no_outbound": "第一期未开通出网，真实模型调用一律拒绝（已留痕）",
+        "first_phase_no_outbound": "当前版本未开通出网，真实模型调用一律拒绝（已留痕）",
     }
     return {"allowed": False, "reason": reason, "message": messages[reason]}

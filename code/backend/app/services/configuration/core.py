@@ -153,8 +153,8 @@ _COMMAND_LIST_KEYS = {
 _COMMAND_LIST_META = (";", "|", "&", ">", "<", "`", "$(")
 
 
-# 类型白名单。含第 ⑩ 步蓝鲸两套接法（A 直连 / B 自包 MCP）和第 ⑧ 步语料
-# 三件套（obsidian / feishu / siyuan）—— 开工清单要求「都留接口」。
+# 类型白名单。蓝鲸两套接法（A 直连 / B 自包 MCP）和语料
+# 三件套（obsidian / feishu / siyuan）都保留接口。
 NETWORK_KINDS = {
     "prometheus", "elk", "k8s", "docker",
     "blueking_a", "blueking_b", "feishu", "siyuan",

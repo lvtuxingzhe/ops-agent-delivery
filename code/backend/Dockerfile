@@ -6,7 +6,7 @@ FROM python:3.13-slim
 
 # PYTHONUNBUFFERED：让日志实时打到容器输出，方便出问题时排查；
 # PYTHONDONTWRITEBYTECODE：不在容器里生成 __pycache__，镜像干净点；
-# APP_ENV：开发镜像默认测试环境；生产镜像由 Dockerfile.prod 固定 production。
+# APP_ENV：测试镜像默认测试环境；生产镜像由 Dockerfile.prod 固定 production。
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     APP_ENV=test

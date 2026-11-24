@@ -77,7 +77,7 @@ def init_seed(settings) -> None:
 def verify(settings) -> int:
     """跑一遍完成标志实测，逐条打印 PASS/FAIL 与汇总。"""
     print("=" * 66)
-    print("通用大模型配置 · 初始化实测（只连本机开发库）")
+    print("通用大模型配置 · 初始化实测（只连本机数据库）")
     print("=" * 66)
 
     # 1) 两张表都在

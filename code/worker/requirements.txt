@@ -1,14 +1,13 @@
 # worker 进程依赖
 #
-# 玉龙 2026-11-12 拍板：本轮就装 AgentScope，真接 DeepSeek，
-# 不要拿样例数据加规则引擎糊弄成 Agent。所以框架加在这里。
-# 已实测装好：agentscope==2.0.11（阿里云 PyPI 源，官方源太慢、
-# 清华源没这个包）。它自带 DeepSeekChatModel，正好对上给的 Key。
+# 排查侧使用 AgentScope 框架，连接 DeepSeek，不依赖样例数据和规则引擎。
+# 实测装好：agentscope==2.0.11（从可用的内网 PyPI 源安装）。
+# 它自带 DeepSeekChatModel，正好对上云端模型配置。
 #
-# 后台 backend/requirements.txt 永远不许出现它：
-# 两个进程能 import 的东西不一样，是「排查侧物理上拿不到写工具」的第一层。
+# 后台 backend/requirements.txt 不安装它：
+# 两个进程的可导入范围不同，排查侧因此拿不到后台的写工具。
 #
-# API Key 不写在这里、也不写进任何文件，只在运行时从环境变量读。
+# API Key 运行时从环境变量读取，不写入依赖文件和仓库。
 agentscope==2.0.11
 
 # SSH 远程执行（worker/tools/ssh_exec.py 在 import 时就依赖它）

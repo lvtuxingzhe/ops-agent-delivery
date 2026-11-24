@@ -1,21 +1,13 @@
 -- 008_drop_legacy.sql
--- 阶段 2 第二步：删除 20 张旧业务表。
+-- 删除 20 张旧业务表。
 --
--- ✅ 已于 2026-11-13 执行（负责人按 B 方案批准：先导出留档 + 演练库试跑，再删）。
---    执行前留档：
---      * 整库 dump：backup/fake_opsdb_before_008.dump（205,565 字节）
---      * 20 张表 JSONL：code/backup/legacy_export_20261113_131920（951 行）
---    演练：在 fake_opsdb_008_rehearsal 还原备份后先跑一遍，20 张表删除成功、
---          12 张 v3_* 表与数据完好；随后才在 fake_opsdb 执行。
---    执行结果：public schema 32 张表 → 12 张 v3_*；v3_tasks 28 / v3_audit_events 358 /
---          v3_users 3 / v3_configs 31 均未受影响。
---    新环境引导（init_db.py）自本次起包含 008，避免新库留 20 张空旧表。
---
--- 历史前置条件（已全部满足）：
---   1. 后端代码已不再引用这些表（grep = 0）；
+-- 执行前提（全部满足后才允许执行）：
+--   1. 后端代码已不再引用这些表；
 --   2. 007 已执行且演练库验证通过；
---   3. 已做 pg_dump 备份，并确认备份可还原；
---   4. 负责人二次确认删除范围（认证表也在列）。
+--   3. 已做数据库备份，并确认备份可还原；
+--   4. 删除范围已经确认。
+--
+-- 新环境引导（init_db.py）包含 008，避免新库留下 20 张空旧表。
 --
 -- 为什么按这个顺序删：先删子表（有外键指向别人的），再删父表，
 -- 否则 CASCADE 会把没预料到的边一起带走。这里仍显式写 CASCADE，
@@ -58,17 +50,17 @@ DROP TABLE IF EXISTS users CASCADE;
 COMMIT;
 
 -- ---------------------------------------------------------------------------
--- 执行前自检（必须全部为 0 才能执行上面的 DROP）
+-- 执行前自检（结果应全部为 0）
 -- ---------------------------------------------------------------------------
 -- 在仓库根执行：
 --   Select-String -Path "code\backend\app\*.py","code\backend\app\**\*.py" `
 --     -Pattern "FROM (tasks|plans|reports|evidences|task_steps|audit_events|users|user_roles|auth_credentials|sms_codes|phone_bindings|confirmation_tokens|roles|skills|whitelists|platform_settings|datasource_configs|execution_permits|llm_provider_configs|llm_provider_templates)\b"
 --
--- 截至 2026-11-13（审计写路径统一之后重算）的实测引用数：
+-- 执行前实测引用数：
 --   后端 app 层：audit_events 0 / tasks 0 / execution_permits 0
 --   20 张表全部为 0 —— 应用代码不再读写任何一张旧表。
 --
--- 这一轮是怎么清零的（S2-10）：
+-- 迁移后的调用关系：
 --   * core/audit.py 只保留 AuditEvent + insert_audit_event，内部委托
 --     audit_v3.insert_event 写 v3_audit_events；actor_role 折进 payload；
 --   * 哈希链（prev_hash / hash）、commit_transition、verify_chain 全部退役，
@@ -76,17 +68,17 @@ COMMIT;
 --   * init_db.py 改为顺序跑 001→007 + 对 v3 审计记录做自检；
 --   * 四个自检脚本 + init_auth 的负向权限测试改查 v3_audit_events。
 --
--- 执行后会影响什么（提前说清楚，别当成 bug）：
---   * 阶段 1/2 的一次性迁移工具仍会去数旧表行数（init_contract.py、
+-- 执行后会出现以下变化：
+--   * 早期的迁移核对工具仍会去数旧表行数（init_contract.py、
 --     selftest_contract.py），旧表没了它们会报错；它们只是迁移核对工具，
 --     已经跑完，不再需要在新环境重跑；
---   * ⑥ 步那两个旧审计记录专项自检（init_audit_v3.py / init_credentials.py、
+--   * 另外两个旧审计记录专项自检（init_audit_v3.py / init_credentials.py、
 --     selftest_audit_v3.py 的部分断言）检查的是「旧 audit_events 触发器是否还在」，
 --     删表后这类断言必然失败——v3 审计记录的等价检查已由 selftest_audit_v3 的
 --     v3 用例与 init_db 的 7 条覆盖；
 --   * 新环境引导走 init_db（001→007），它不包含 008，因此不受影响。
 --
--- 结论：已于 2026-11-13 执行完成。20 张旧表已不存在，认证表也在其中 ——
+-- 结论：执行完成后，20 张旧表不再存在，认证表也在其中 ——
 -- 登录、任务、配置、审计全部走 v3_*。
 --
 -- 退役的脚本（008 后不再有意义，已加显式校验，跑起来只打印「已退役」）：
@@ -95,12 +87,12 @@ COMMIT;
 --
 --
 -- ---------------------------------------------------------------------------
--- 删除范围与影响面（2026-11-13 实测，供二次确认用）
+-- 删除范围与影响面（执行前核对用）
 -- ---------------------------------------------------------------------------
 -- 会永久删除下面 20 张表（括号内为当前行数）：
 --
 --   旧审计记录
---     audit_events(865)             → 已迁 v3_audit_events；旧哈希链退役（S2-10）
+--     audit_events(865)             → 已迁 v3_audit_events；旧哈希链退役
 --
 --   任务执行链
 --     tasks(17)                     → 已迁 v3_tasks
@@ -108,9 +100,9 @@ COMMIT;
 --     reports(0) / evidences(0)     → 报告与证据 JSONB 折进 v3_tasks
 --     task_steps(0)                 → 步骤信息折进 v3_tasks
 --     confirmation_tokens(16)       → 确认走五态 contract + v3 审计记录，旧令牌不再可用
---     execution_permits(1)          → 执行许可走闸口（阶段 3 之后）
+--     execution_permits(1)          → 执行许可走闸口（执行许可上线之后）
 --
---   认证与会话（删了就只能走 v3_* 登录）
+--   认证与会话（认证统一走 v3_* 登录）
 --     users(2) / user_roles(2) / roles(6)   → 已迁 v3_users / v3_role_flags
 --     auth_credentials(1)           → 密码哈希迁 v3_users.password_hash
 --     phone_bindings(1)             → 手机绑定迁 v3_users
@@ -123,14 +115,13 @@ COMMIT;
 --     platform_settings(6)          → 已迁 v3_configs/setting
 --     skills(0) / whitelists(0)     → 未使用
 --
--- 已确认的迁移落点：v3_tasks / v3_audit_events / v3_configs / v3_users / v3_role_flags。
--- 001～007 + 009 全部执行过，v3 侧数据完整（v3 审计记录 130+ 条、v3 任务含端到端样例）。
+-- 迁移落点：v3_tasks / v3_audit_events / v3_configs / v3_users / v3_role_flags。
 --
--- 执行前提（缺一不可）：① 新备份并验证可还原；② 确认「旧 audit_events 不再需要
+-- 执行前提：① 新备份并验证可还原；② 确认「旧 audit_events 不再需要
 -- 留档」（865 条只存在于旧表，v3 审计记录不含这 865 条的原文）；③ 确认认证表可删；
 -- ④ 接受 init_contract / selftest_contract / init_audit_v3 / init_credentials
 --    这些一次性核对脚本在删表后失效。
 --
--- 建议执行顺序：pg_dump → 在演练库 fake_opsdb_stage2 先跑一遍 → 验证登录/提交/
+-- 建议执行顺序：pg_dump → 在临时演练库先跑一遍 → 验证登录/提交/
 -- 查状态/查报告四条链路 → 再在生产库执行。
 --

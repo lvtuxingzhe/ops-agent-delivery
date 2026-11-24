@@ -9,15 +9,15 @@
 前置：`docker compose --profile infra up -d` 已把 PostgreSQL 起起来。
 凭据全部来自 code/.env 或环境变量，代码里没有任何地址、账号、密码。
 
-阶段 2 起这个脚本的定位
+这个脚本做什么
 -----------------------
-旧版本（第 ② 步）建的是 `audit_events` 那套审计记录，还带哈希链自检；
-阶段 2 把审计统一到 `v3_audit_events` 之后，旧审计记录已不再被应用写入，
-本脚本跟着改成：
+旧版本建的是 `audit_events` 那套审计记录，还带哈希链自检；
+审计统一到 `v3_audit_events` 之后，旧审计记录已不再被应用写入，
+本脚本对应做这些事：
 
   * 迁移按文件名顺序跑 001→007（跳过 rollback 与 008 删表脚本）；
   * 审计自检对象改成 `v3_audit_events`（无哈希链，强一致仍靠同事务）；
-  * 负向权限、整笔回滚两条铁律照旧实测。
+  * 负向权限、整笔回滚两条约束照旧实测。
 
 为什么「建角色 / 授权」放在 Python 里而不写进 SQL
 ------------------------------------------------
@@ -32,7 +32,7 @@
   ops_app         日常业务；对 v3_audit_events 【只有 INSERT】，连读都不给
   ops_audit_reader 只用来按 trace_id 查审计记录，别的一概不给
 
-【本脚本会做什么】只操作本机开发库：建表、建角色、授权、写几条自检数据。
+【本脚本会做什么】只操作本机数据库：建表、建角色、授权、写几条自检数据。
 【不会做什么】不连任何真实环境、不连生产、不删表、不清历史数据。
 """
 
@@ -188,7 +188,7 @@ def audit_rows(settings, where: str = "", params: tuple = ()) -> list[dict]:
 def verify(settings) -> int:
     """跑三条完成标志：状态能写入数据库、事件能按 trace 查、越权被数据库拒绝。"""
     print("=" * 66)
-    print("审计写路径自检（v3 审计记录，只连本机开发库）")
+    print("审计写路径自检（v3 审计记录，只连本机数据库）")
     print("=" * 66)
 
     trace_id = f"step2-{uuid.uuid4()}"
@@ -246,10 +246,10 @@ def verify(settings) -> int:
                 conn.rollback()
         record(f"应用账号不能 {label} 审计表", denied, "数据库拒绝" if denied else "竟然成功了")
 
-    # --- 铁律：审计写不进去就不执行（整笔回滚） -------------------------
+    # --- 审计写入失败时不执行（整笔回滚） -------------------------
     # 做法：用管理账号临时撤掉应用账号对 v3 审计表的 INSERT，
     #       再走一遍正常的业务动作，看状态有没有偷偷写入数据库。
-    #       finally 里一定会把权限还回去，不会把开发库留在坏状态。
+    #       finally 里一定会把权限还回去，不会把数据库留在坏状态。
     revoke = sql.SQL("REVOKE INSERT ON public.v3_audit_events FROM {}").format(
         sql.Identifier(settings.db_app_role)
     )

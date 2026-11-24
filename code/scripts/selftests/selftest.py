@@ -227,7 +227,7 @@ def check_llm_config() -> None:
         path.read_text(encoding="utf-8") for path in service_paths if path.is_file()
     )
     gate_ok = "FIRST_PHASE_NO_REAL_CALL = True" in service and "llm.call.blocked" in service
-    record("第一期真实调用硬闸口写进了代码", gate_ok,
+    record("真实调用硬闸口写进了代码", gate_ok,
            "默认关 + 调用被拒留痕" if gate_ok else "硬闸口缺失，务必补上")
 
     ddl = (ROOT / "backend" / "migrations" / "004_llm.sql").read_text(encoding="utf-8")
@@ -346,12 +346,12 @@ def check_credentials() -> None:
     ddl = sorted(path.name for path in migrations.glob("*.sql"))
     core_ddl = [name for name in ddl if name[:3].isdigit() and int(name[:3]) <= 6]
     record("凭据仍走配置不走表（001～006 未改动）", len(core_ddl) == 6,
-           f"001～006 共 {len(core_ddl)} 个；另有阶段 2 迁移 {len(ddl) - len(core_ddl)} 个")
+           f"001～006 共 {len(core_ddl)} 个；另有后续迁移 {len(ddl) - len(core_ddl)} 个")
 
 
 def check_readability() -> None:
     """
-    代码可读性常驻断言（玉龙 11-12 定的规矩）。
+    代码可读性常驻断言。
 
     变量、函数参数不许用含糊缩写或单字母；函数必须有一句说明，
     而且说明不能是「内部辅助函数」这种套话。只查自研代码，
@@ -486,7 +486,7 @@ def check_compose() -> None:
 def main() -> int:
     """按顺序跑完所有检查，打印汇总并返回退出码。"""
     print("=" * 62)
-    print("运维 Agent 平台 · 离线静态自检（累计第 ①～⑤ 步 + v1.1 第 ①②③ 步）")
+    print("运维 Agent 平台 · 离线静态自检")
     print("不联网 / 不装依赖 / 不连任何外部系统")
     print("=" * 62)
 

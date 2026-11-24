@@ -132,7 +132,7 @@ def main() -> int:
         except service.UserAdminError as exc:
             record("软删除用户名不可复用", exc.code == "USERNAME_TAKEN", exc.code)
 
-        # 自检结束：先把软删除的墓碑行物理清掉，避免污染开发库。
+        # 自检结束：先把软删除的墓碑行物理清掉，避免污染数据库。
         cleanup(settings, user_id)
         user_id = 0
         record("清理临时账号", True)

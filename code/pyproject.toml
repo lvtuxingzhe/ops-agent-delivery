@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-# 只跑 tests/；阶段验收脚本（backend/scripts/selftest_*.py）要真库，
+# 只跑 tests/；验收脚本（backend/scripts/selftest_*.py）要真库，
 # 单独跑，不混进单元测试。
 testpaths = ["tests"]
 pythonpath = ["backend", "packages", "worker", "."]

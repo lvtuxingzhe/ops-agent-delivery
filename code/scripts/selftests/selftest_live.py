@@ -175,7 +175,7 @@ def check_backend() -> None:
 
 # ------------------------------------------------------------------ 2 前端
 def check_frontend() -> None:
-    """真起前端开发服务器，验证登录页能打开。"""
+    """真起前端服务，验证登录页能打开。"""
     node = shutil.which("node")
     if not VITE_JS.exists() or node is None:
         record("前端 Vite 能起", False, "缺 frontend/node_modules 或 node，先 npm install", skipped=True)

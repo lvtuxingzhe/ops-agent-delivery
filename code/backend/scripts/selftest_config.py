@@ -136,7 +136,7 @@ def main() -> int:
     record("数据源响应字段在白名单内", not extra,
            "没有多余字段（也没有密码列）" if not extra else f"多出来的字段：{extra}")
     record("新建数据源默认只读", prom["readonly"] is True,
-           "readonly=true（第一期强制）" if prom["readonly"] else "竟然可写")
+           "readonly=true（当前版本强制）" if prom["readonly"] else "竟然可写")
 
     # 坏地址进不来：格式校验在服务层，本地检查、零连接
     resp = client.post("/api/config/datasources", json={

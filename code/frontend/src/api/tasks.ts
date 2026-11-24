@@ -1,9 +1,9 @@
 /**
  * 排查任务接口封装（提交是异步的）。
  *
- * 只有三个动作：提交、查状态、查报告。**提交返回 202 不代表完成**，
+ * 只有三个动作：提交、查状态、查报告。**提交返回 202 只表示已入队**，
  * 真正跑完要看 `status` 到 `report_ready`（报告完成）或 `closed`（已结束）。
- * 所以调用方必须轮询 `fetchTask`，不能把 202 当成功页直接用。
+ * 调用方通过 `fetchTask` 轮询结果，不把 202 当成功页。
  */
 
 import { del, get, getBlob, post, postForm, put } from './http'
@@ -337,7 +337,7 @@ export interface TaskList {
   size: number
 }
 
-/** 一条待批准命令：argv 是数组，scope 只能是 read / dangerous。 */
+/** 一条待批准命令：argv 是数组，scope 取值范围是 read / dangerous。 */
 export interface ExecOperation {
   argv: string[]
   scope: 'read' | 'dangerous'
@@ -492,7 +492,7 @@ export function terminateExecution(
   }>(`/tasks/${taskId}/terminate`, { reason })
 }
 
-/** 报告完成后提交处置方案：命令必须先由人填好，审批只审方案。 */
+/** 报告完成后提交处置方案：命令由人填写，审批查看方案。 */
 export function requestExecution(
   taskId: string,
   reason: string,

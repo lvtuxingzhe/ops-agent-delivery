@@ -60,7 +60,7 @@ def _read(conn, namespace: str) -> dict | None:
 def verify(settings) -> int:
     """跑一遍完成标志实测，逐条打印 PASS/FAIL 与汇总。"""
     print("=" * 68)
-    print("v1.1 第 ④ 步：出网网关配置初始化实测（只连本机开发库）")
+    print("出网网关配置初始化实测（只连本机数据库）")
     print("=" * 68)
 
     seeds = seed_values()

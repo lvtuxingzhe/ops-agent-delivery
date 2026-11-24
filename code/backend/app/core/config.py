@@ -10,7 +10,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class Settings:
-    """一次启动期间固定不变的配置快照。frozen=True 表示运行中禁止修改。"""
+    """一次启动期间固定不变的配置快照。frozen=True 表示运行中不可修改。"""
 
     app_name: str
     host: str
@@ -48,7 +48,7 @@ class Settings:
     mq_user: str
     mq_password: str
     mq_queue_investigation: str  # 根因排查队列
-    mq_queue_deployment: str     # 部署队列（两条队列分开，不能混）
+    mq_queue_deployment: str     # 部署队列（两条队列分开使用）
     minio_endpoint: str
     minio_user: str
     minio_password: str
@@ -56,12 +56,12 @@ class Settings:
     # 排查截图原图单独一个私有桶；数据库只留元数据、对象键和缩略图。
     minio_screenshot_bucket: str
     # 审计归档单独一个桶：这个桶要开对象锁（COMPLIANCE），
-    # 不能和报告/证据的普通桶混用，否则上传会被锁住。
+    # 与报告/证据的普通桶分开，否则上传会被锁住。
     minio_audit_bucket: str
     audit_retention_days: int
 
     # ---- 接口限流 ----
-    # 进程内固定窗口计数。单实例够用；多副本部署必须换成 Redis 共享计数，
+    # 进程内固定窗口计数。单实例够用；多副本部署使用 Redis 共享计数，
     # 否则每个副本各给一份配额，等于把校验放大 N 倍。
     rate_limit_enabled: bool
     rate_limit_login_per_min: int
@@ -76,7 +76,7 @@ class Settings:
 
     # ---- 登录与权限 ----
     # 认证表专属数据库账号：只用来校验密码 / TOTP / 短信码。
-    # 应用主账号 ops_app 对认证表零权限，所以这里必须是第四条独立连接串。
+    # 应用主账号 ops_app 对认证表零权限，所以这里使用第四条独立连接串。
     db_auth_url: str
     db_auth_role: str
     db_auth_password: str
@@ -84,7 +84,7 @@ class Settings:
     db_user_admin_url: str
     db_user_admin_role: str
     db_user_admin_password: str
-    # 会话令牌（JWT）签名密钥与有效期。密钥只在环境变量里，开发期是假值。
+    # 会话令牌（JWT）签名密钥与有效期。密钥只在环境变量里，默认是假值。
     auth_token_secret: str
     auth_token_ttl_minutes: int
     # TOTP：发行方名称（二维码里显示「哪个系统的口令」）+ 密钥加密 key
@@ -92,7 +92,7 @@ class Settings:
     totp_encryption_key: str
     # 数据库加密凭据专用的对称密钥。与 TOTP 密钥分开，避免一把钥匙开两套锁。
     credential_encryption_key: str
-    # 短信通道：test = 开发期测试通道（码会回显），上线前换真实通道
+    # 短信通道：test = 测试通道（码会回显），上线前换真实通道
     sms_channel: str
     sms_code_ttl_seconds: int
     # 连续登录失败几次锁账号、锁多久（防爆破）
@@ -140,14 +140,14 @@ def _runtime_environment() -> str:
 
 
 def _get(name: str, default: str) -> str:
-    """读一个环境变量；没配就用开发期默认值。"""
+    """读一个环境变量；没配就用默认值。"""
     value = os.environ.get(name)
     # 空字符串当作没配，避免 .env 里留了个空值把默认值顶掉
     return value if value else default
 
 
 def _get_bool(name: str, default: bool) -> bool:
-    """读布尔配置：true/1/yes 为真，其余（含拼错）一律按默认值处理。"""
+    """读布尔配置：true/1/yes 为真，其余（含拼错）按默认值处理。"""
     value = os.environ.get(name)
     if not value:
         return default
@@ -201,7 +201,7 @@ def load_sops_values(path: str | None = None) -> dict[str, str]:
     用 SOPS 解密 age 加密的 dotenv，返回键值。
 
     设计约束：
-    * 文件不存在/未配置时返回空，不把「没配」当成错误 —— 开发机可以继续用
+    * 文件不存在/未配置时返回空，不把「没配」当成错误 —— 本机可以继续用
       环境变量跑测试；
     * 文件存在但解密失败时抛 RuntimeError，绝不回落到 .env 里的旧明文值；
     * 不回显 sops 的 stderr，避免把文件路径或片段带进日志。
@@ -231,9 +231,9 @@ def load_sops_values(path: str | None = None) -> dict[str, str]:
 
 def load_dotenv(path: Path | None = None) -> int:
     """
-    开发期便利函数：把 code/.env 里的 KEY=VALUE 读进当前进程环境。
+    便利函数：把 code/.env 里的 KEY=VALUE 读进当前进程环境。
 
-    只由【本地脚本】和 main.py 的开发期便利调用（后者见 create_app 的注释：
+    只由【本地脚本】和 main.py 的便利调用（后者见 create_app 的注释：
     文件不存在直接跳过、已有环境变量优先不覆盖，生产环境零影响）。
     已有环境变量优先，不覆盖；文件不存在就静默跳过，返回读进来的条数。
 
@@ -269,10 +269,10 @@ def load_settings() -> Settings:
 
     哪些有默认值：本机监听、端口、日志级别、队列名这类跟业务无关的东西。
     哪些没有默认值：所有连接串与密码（默认空串）。故意不给默认值 ——
-    没配就是没配，绝不能因为「忘了配」就悄悄连去某个地方。
+    没配就报错，不使用隐式连接目标。
     """
     # CORS 白名单支持逗号分隔多个地址。网页端和桌面端加载的是同一份前端，
-    # 所以共用这个白名单 —— 不给「我在本机运行」开任何后门。
+    # 所以共用这个白名单 —— 本机运行也走同一份白名单。
     raw_origins = _get("CORS_ORIGINS", "http://127.0.0.1:5173")
     origins = tuple(item.strip() for item in raw_origins.split(",") if item.strip())
 
@@ -288,7 +288,7 @@ def load_settings() -> Settings:
         alert_webhook_max_bytes=int(_get("ALERT_WEBHOOK_MAX_BYTES", "65536")),
         ssh_known_hosts_file=_get("SSH_KNOWN_HOSTS_FILE", "var/ssh/known_hosts"),
         ssh_host_key_policy=_get("SSH_HOST_KEY_POLICY", "prompt"),
-        # ↓ 连接串一律不给默认值：漏配就报错，不误连
+        # ↓ 连接串不设默认值：漏配就报错，不误连
         database_url=_get("DATABASE_URL", ""),
         db_admin_url=_get("DB_ADMIN_URL", ""),
         db_audit_reader_url=_get("DB_AUDIT_READER_URL", ""),
@@ -301,7 +301,7 @@ def load_settings() -> Settings:
         mq_management_url=_get("MQ_MANAGEMENT_URL", ""),
         mq_user=_get("MQ_USER", ""),
         mq_password=_get("MQ_PASSWORD", ""),
-        # 两条队列分开是定稿要求：根因排查和部署不能共用一个通道
+        # 两条队列分开：根因排查和部署使用不同通道
         mq_queue_investigation=_get("MQ_QUEUE_INVESTIGATION", "ops.investigation"),
         mq_queue_deployment=_get("MQ_QUEUE_DEPLOYMENT", "ops.deployment"),
         minio_endpoint=_get("MINIO_ENDPOINT", ""),
@@ -354,11 +354,11 @@ def require_database(settings: Settings) -> str:
 
 def validate_runtime(settings: Settings) -> None:
     """
-    启动期的一致性校验：宁可起不来，也不要带着危险配置静默运行。
+    启动期的一致性校验：配置不完整时直接拒绝启动。
 
-    production 有三条硬约束：不能用测试短信通道、必须配置 Redis、
+    production 有三条约束：短信通道需为真实通道、需要配置 Redis、
     环境值不能拼错。测试通道会回显验证码，Redis 决定执行许可 nonce
-    能否跨 worker 去重；任何一条缺失都直接拒绝启动，而不是只打警告。
+    能否跨 worker 去重；缺少任一项时拒绝启动，不只打警告。
     """
     if settings.environment not in ("production", "test"):
         raise RuntimeError(
@@ -369,7 +369,7 @@ def validate_runtime(settings: Settings) -> None:
             "production 环境不允许使用测试短信通道：测试通道会回显验证码。"
             "请换成真实通道，或把 APP_ENV 改成 test。"
         )
-    # 执行许可的一次性 nonce 必须跨 worker 共享：没有 Redis 时进程内集合
+    # 执行许可的一次性 nonce 需要跨 worker 共享：没有 Redis 时进程内集合
     # 只能保证单 worker 内不重放，多副本会各跑一次，属于安全降级。
     if settings.environment == "production" and not str(settings.redis_url or "").strip():
         raise RuntimeError(

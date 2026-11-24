@@ -22,8 +22,7 @@ from typing import Any
 
 from agentscope.tool import FunctionTool
 
-# 工具数量的合理区间：自动发现是开发便利，不是上线免审。
-# 明显跑偏（少一个/多出一堆）说明注册表被改坏了，宁可启动失败。
+# 工具数量落在 3～12 之间；数量异常说明注册表被改坏，启动阶段直接失败。
 MIN_EXPECTED_TOOLS = 3
 MAX_EXPECTED_TOOLS = 12
 

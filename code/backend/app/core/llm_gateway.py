@@ -219,7 +219,7 @@ def seed_values() -> dict[str, dict]:
             "max_chars_per_item": 400,
             "fallback_to_rules": True,
             "note": (
-                "出网能力已全开但三道默认关保留；本轮只验本机回环假端点，"
+                "出网能力已全开但三道默认关保留；本次只验本机回环假端点，"
                 "真实公有云调用需 API Key + 出网审批，未连公网。"
             ),
         },

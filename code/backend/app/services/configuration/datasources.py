@@ -38,7 +38,7 @@ from .core import (
 
 def _validate_endpoint(kind: str, endpoint: str) -> str:
     """
-    地址校验（只看格式，不连接 —— 第一期不连任何外部系统）。
+    地址校验（只看格式，不连接 —— 当前版本不连任何外部系统）。
 
     网络类数据源必须是 http/https URL；obsidian 必须是目录路径（不允许
     塞个 URL 进来糊弄）。这里不判断「地址通不通」——那是健康检查的事。
@@ -87,7 +87,7 @@ def _ds_to_dict(key: str, value: Any, credential_ref: str, enabled: bool,
     一行 v3_configs → 页面要的形状。
 
     `id` 保留成 key 的别名（值就是 key 本身），前端既有的 `item.id` 拼接不用改；
-    新代码请用 `key`。两者永远相等，不存在「两套身份」。
+    新代码使用 `key`。两者值相同，不存在「两套身份」。
     """
     stored = value if isinstance(value, dict) else {}
     return {
@@ -196,7 +196,7 @@ def save_datasource_credential(
     """
     把数据源密码写进 OpenBao，改完立即生效，不重启服务。
 
-    只支持 openbao 后端：env 后端写的是进程环境变量，Docker 下改完必须
+    只支持 openbao 后端：env 后端写的是进程环境变量，Docker 下改完后需要
     重建容器，这正是要避免的动作，因此明确拒绝，提示切到 OpenBao。
     """
     ds = get_datasource(settings, key)
@@ -361,9 +361,9 @@ def create_datasource(
     """
     建一个数据源。
 
-    只读标记第一期【强制为 true】并拒绝 false：铁律写着排查范围全只读，
-    这个字段保留在表里是为了将来部署链路真正需要时再放开，现在谁配
-    「可写」都是要在闸口（第⑥步）前就掐掉的信号。
+    只读标记固定为 true，传入 false 会被拒绝：排查范围保持只读。
+    该字段保留在表里，为后续部署链路需要时再放开；当前配置「可写」
+    会在校验阶段被拒绝。
     """
     fields = _validate_common(
         name=name, kind=kind, adapter=adapter,
@@ -589,7 +589,7 @@ def health_check_datasource(
                 settings, ds["kind"], ds["endpoint"], ds["credential_ref"],
             )
         else:
-            status, detail = "no_data", "该类型第一期不连外部系统，健康检查只做本地校验，未实际探测"
+            status, detail = "no_data", "该类型在当前版本不连外部系统，健康检查只做本地校验，未实际探测"
     except ConfigError as exc:
         status, detail = "failed", str(exc)
 

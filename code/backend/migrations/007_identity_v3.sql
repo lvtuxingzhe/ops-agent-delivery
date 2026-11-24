@@ -1,14 +1,14 @@
 -- 007_identity_v3.sql
--- 阶段 2 第一步：把认证类数据收敛到 v3_users 体系。
+-- 把认证类数据收敛到 v3_users 体系。
 --
--- 这个文件【只做新增与拷贝】，不 DROP、不改旧表。删旧表是 008 的事，
+-- 这个文件【只做新增与拷贝】，不 DROP、不改旧表。删旧表由 008 迁移负责，
 -- 必须等后端代码切到 v3_* 之后才允许执行。
 --
 -- 为什么保留「凭据与资料分离」：
 --   v3_users 是资料（名字、角色、是否启用），凭据单独一张表。
 --   查询用户列表时不触碰密码哈希，也不会因为一次 JOIN 把密钥带进日志。
 --
--- id 对齐的前提（已在库中核对）：users.id 与 v3_users.id 均为 1/2，
+-- id 对齐的前提：users.id 与 v3_users.id 均为 1/2，
 -- username 一一对应，v3_users.roles 与 user_roles 一致。若换成别的环境，
 -- 这里的 JOIN 依然按 username 匹配，不假设 id 相同。
 
@@ -92,7 +92,7 @@ INSERT INTO v3_auth_credentials (
 )
 SELECT
     v.id,
-    COALESCE(a.password_hash, ''),            -- 旧占位串已在阶段 0 清掉，这里原样搬
+    COALESCE(a.password_hash, ''),            -- 旧占位串已清掉，这里原样搬
     a.totp_secret_enc,
     COALESCE(a.totp_enabled, false),
     a.totp_bound_at,

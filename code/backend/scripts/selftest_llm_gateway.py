@@ -616,7 +616,7 @@ def main() -> int:
     """按顺序跑完所有检查，打印汇总并返回退出码。"""
     os.environ[FAKE_ENV] = FAKE_KEY
     print("=" * 70)
-    print("v1.1 第 ④ 步完成标志实测 · 云端模型脱敏出网（零真凭据 / 零公网调用）")
+    print("完成标志实测 · 云端模型脱敏出网（零真凭据 / 零公网调用）")
     print("=" * 70)
     try:
         group_default_gate()
@@ -631,9 +631,9 @@ def main() -> int:
         os.environ.pop(FAKE_ENV, None)
 
     skip("真实公有云调用链路",
-         "缺厂商 API Key + 出网审批未确认；本轮只用本机回环假端点验链路与脱敏，真连标 SKIP")
+         "缺厂商 API Key + 出网审批未确认；本次只用本机回环假端点验链路与脱敏，真连标 SKIP")
     skip("模型归纳质量 / 幻觉率 / 真实延迟与费用",
-         "本轮无真实模型，不评测；上线前用真实样本建评测集")
+         "本次无真实模型，不评测；上线前用真实样本建评测集")
 
     passed = sum(1 for tag, _, _ in RESULTS if tag == "PASS")
     failed = sum(1 for tag, _, _ in RESULTS if tag == "FAIL")

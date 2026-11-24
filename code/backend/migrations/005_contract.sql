@@ -1,32 +1,30 @@
 -- =============================================================================
--- 运维 Agent 平台 · v1.1 改造第 ① 步：数据契约层（五态 + 4 张表）
+-- 运维 Agent 平台 · 数据契约层（五态 + 4 张表）
 --
--- 对应《运维Agent平台-落地架构设计说明书》第 5 章（已采纳方案）。
---
--- 为什么用 v3_ 前缀（过渡期设计，不是长期命名）
+-- 为什么用 v3_ 前缀（过渡期命名）
 -- --------------------------------------------
--- 旧 ①～⑤ 步已验收的代码还在用那 20 张表（tasks / reports / audit_events ...），
+-- 旧版业务表（tasks / reports / audit_events ...）仍在使用，
 -- 直接改名或删表会把已通过的实测全打断，属于不可逆动作。
 -- 所以过渡期【新旧并存】：本文件新建 4 张 v3_ 表，迁移脚本把旧数据映射进来，
--- 后面的步骤逐个把读写切到 v3 表。等全部切换完成、玉龙单独确认后，
+-- 后面的迁移逐个把读写切到 v3 表。等全部切换完成并确认后，
 -- 再归档旧表并把 v3_ 前缀去掉。删旧表这一步本文件【不做】。
 --
--- 四条设计取舍（反过度设计）
+-- 四条设计取舍
 -- --------------------------
 -- 1. 不加外键：任务历史不该因为删个用户被级联删掉，迁移也不该被插入顺序绑死；
 --    引用完整性由应用层保证。
--- 2. 方案 / 证据 / 报告 / 确认信息全折进 tasks 的 JSONB：它们生命周期跟着任务走，
+-- 2. 处置方案 / 证据 / 报告 / 确认信息全折进 tasks 的 JSONB：它们生命周期跟着任务走，
 --    单独建表只带来 JOIN 和状态不一致。
 -- 3. 状态只有五个，成败/驳回/取消放 outcome，不各占一个状态。
 -- 4. no_data / unknown 是「数据质量标签」，不是状态，不进 CHECK。
---    铁律：无数据要能如实显示为「无数据」，不能显示成「正常」。
+--    显示规则：无数据如实显示为「无数据」，不显示为「正常」。
 --
 -- 授权提醒：新建表不会自动继承 init_db.py 的 GRANT（那条只覆盖当时已存在的表），
--- 必须由 scripts/init_contract.py 显式给 ops_app 授权，否则接口报 permission denied。
+-- 由 scripts/init_contract.py 显式给 ops_app 授权；未授权时接口报 permission denied。
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- 表 1：用户（谁在用）。密码哈希 / TOTP / 短信码不落这里（见方案 5.2）
+-- 表 1：用户（谁在用）。密码哈希 / TOTP / 短信码不落这里
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS v3_users (
     id            BIGSERIAL   PRIMARY KEY,
@@ -69,7 +67,7 @@ CREATE TABLE IF NOT EXISTS v3_tasks (
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     closed_at      TIMESTAMPTZ,
-    -- 终态必须有结果；非终态不许提前写结果（避免"还在跑就标失败"）
+    -- 终态带结果；非终态不带结果（避免"还在跑就标失败"）
     CONSTRAINT ck_v3_tasks_outcome CHECK (
         (status = 'closed' AND outcome IS NOT NULL)
         OR (status <> 'closed' AND outcome IS NULL)
@@ -79,7 +77,7 @@ CREATE INDEX IF NOT EXISTS idx_v3_tasks_status_created ON v3_tasks (status, crea
 CREATE INDEX IF NOT EXISTS idx_v3_tasks_trace ON v3_tasks (trace_id);
 COMMENT ON TABLE v3_tasks IS '4 张表之一。五态 + outcome，方案/证据/报告/确认全折在 JSONB';
 COMMENT ON COLUMN v3_tasks.status IS '五态之一；成败驳回取消看 outcome，不再各占状态';
-COMMENT ON COLUMN v3_tasks.evidences IS 'data_status 的 no_data 是数据质量标签，必须显示为「无数据」不是「正常」';
+COMMENT ON COLUMN v3_tasks.evidences IS 'data_status 的 no_data 是数据质量标签，显示为「无数据」而不是「正常」';
 
 -- -----------------------------------------------------------------------------
 -- 表 3：配置（所有可变配置一张 KV 表）

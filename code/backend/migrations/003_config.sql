@@ -8,14 +8,14 @@
 --   datasource_configs.health_status   健康检查结果
 --   datasource_configs.health_detail   结果说明（给页面看的一句人话）
 --
--- health_status 的取值（和第 ⑦ 步证据的 data_status 同一套词汇）：
+-- health_status 的取值（和证据的 data_status 同一套词汇）：
 --   unknown   还没做过健康检查（新数据源的初始状态）
---   ok        真的连上过并且通（第一期不会出现这个值，见下）
---   no_data   第一期不连外部系统 —— 诚实登记「没去连」，不许写成「正常」
+--   ok        真的连上过并且通（当前版本不会出现这个值，见下）
+--   no_data   当前版本不连外部系统，结果记为「无数据」，不记为「正常」
 --   failed    做过的检查不通过（比如地址格式本身不合法）
 --
--- 铁律落地：报告/页面里「无数据」必须显示为「无数据」，不显示为「正常」。
--- 健康检查第一期【不实际连接】任何外部系统（不连真实环境、不连公网），
+-- 显示规则：报告/页面里「无数据」显示为「无数据」，不显示为「正常」。
+-- 健康检查当前版本【不实际连接】任何外部系统（不连真实环境、不连公网），
 -- 所以合法的最好结果就是 no_data，这是有意的，不是没写完。
 --
 -- 为什么 platform_settings 不在这里加「网段」键：键值对表加键不用改表
@@ -29,6 +29,6 @@ ALTER TABLE public.datasource_configs
     ADD COLUMN IF NOT EXISTS health_detail TEXT NOT NULL DEFAULT '';
 
 COMMENT ON COLUMN datasource_configs.health_status IS
-    '健康检查结果：unknown=没查过，ok=真连上过，no_data=第一期不连外部（诚实登记），failed=检查不通过';
+    '健康检查结果：unknown=没查过，ok=真连上过，no_data=当前版本不连外部（诚实登记），failed=检查不通过';
 COMMENT ON COLUMN datasource_configs.health_detail IS
     '健康检查的一句人话说明，直接显示在配置页上';

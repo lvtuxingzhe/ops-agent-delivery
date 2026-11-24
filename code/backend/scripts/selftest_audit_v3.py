@@ -290,7 +290,7 @@ def check_boundaries() -> None:
 def main() -> int:
     """按顺序跑完所有检查，打印汇总并返回退出码。"""
     print("=" * 66)
-    print("v1.1 第 ② 步完成标志实测（无哈希链审计 + 对象锁归档链路）")
+    print("完成标志实测（无哈希链审计 + 对象锁归档链路）")
     print("=" * 66)
     check_strong_consistency()
     check_investigation_degradation()

@@ -1,21 +1,21 @@
 -- =============================================================================
--- 运维 Agent 平台 · 第 ② 步：核心表 + 审计记录（只追加、带哈希链）
+-- 运维 Agent 平台 · 核心表 + 审计记录（只追加、带哈希链）
 --
--- 这个文件只负责「建表 / 建索引 / 建触发器」。
--- 【建角色和授权不在这里】因为角色名、密码都是配置项，不能写死在 SQL 里，
---   由 backend/scripts/init_db.py 从环境变量读进来、用 psycopg.sql 安全拼装。
+-- 这个文件负责「建表 / 建索引 / 建触发器」。
+-- 角色名和密码都是配置项，不在 SQL 里写死；
+-- 由 backend/scripts/init_db.py 从环境变量读取，并用 psycopg.sql 安全拼装。
 --
--- 设计上守住的三条铁律
---   1. 审计记录改不了：audit_events 只有 INSERT 权限（见 init_db.py 授权），
---      再加一层数据库触发器，UPDATE / DELETE / TRUNCATE 一律直接报错；
---      每条记录带 prev_hash + hash，前后串成链，事后能发现被人动过。
---   2. 审计写不进去就不执行：写入、状态推进、执行许可必须在【同一个事务】里，
---      封装在 backend/app/core/audit.py，第 ⑥ 步闸口会调它。本步先建表并实测回滚。
---   3. 命令返回 0 不算成功：task_steps 里同时留 exit_code 和 business_check_passed，
---      只有业务检查过了才算完成（判断逻辑在第 ⑥ 步，这里先把位置占好）。
+-- 设计上的三条约束
+--   1. 审计记录只追加：audit_events 只有 INSERT 权限（见 init_db.py 授权），
+--      数据库触发器让 UPDATE / DELETE / TRUNCATE 直接报错；
+--      每条记录带 prev_hash + hash，前后串成链，事后能发现被改动。
+--   2. 审计写入、状态推进、执行许可放在【同一个事务】里；写入失败时不执行。
+--      逻辑封装在 backend/app/core/audit.py。
+--   3. 命令返回 0 不等于业务成功：task_steps 同时记录 exit_code 和
+--      business_check_passed，两者都满足才算完成。
 --
--- 【本步不实现业务逻辑】表里的很多字段是为 ③～⑧ 步预留的，注释里都标了。
---   提前把字段留出来，是为了以后加功能不用改表结构、更不用迁移历史数据。
+-- 表里部分字段为后续功能预留，注释中已标注。
+--   提前保留字段，后续加功能不必改表结构，也不必迁移历史数据。
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -24,14 +24,14 @@
 -- pgcrypto 提供 digest()，审计哈希链要用。没有它整个审计记录表就串不起来，必须成功。
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- pgvector 是第 ⑧ 步知识库存向量用的，第一期「装上先不用」。
--- 用容错写法：某些内网 PG 镜像没带这个扩展时只提示、不挡开工。
+-- pgvector 供知识库向量检索使用，当前版本先建扩展、不写入向量。
+-- 用容错写法：某些内网 PG 镜像没带这个扩展时只提示、不挡启动。
 DO $$
 BEGIN
     CREATE EXTENSION IF NOT EXISTS vector;
-    RAISE NOTICE 'pgvector 扩展已就绪（第 ⑧ 步才会用到）';
+    RAISE NOTICE 'pgvector 扩展已就绪';
 EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'pgvector 扩展暂不可用，不影响第 ② 步：%', SQLERRM;
+    RAISE NOTICE 'pgvector 扩展暂不可用，不影响其他迁移：%', SQLERRM;
 END
 $$;
 
@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     status        TEXT        NOT NULL DEFAULT 'created'
                   CHECK (status IN ('created','running','waiting_confirm','approved',
                                     'rejected','done','failed','cancelled')),
-    -- 铁律：第一期 mode=real 一律 403 并留痕；那道闸口在第 ⑥ 步，
-    -- 这里先把字段留出来，让每一条任务都能说清自己是演练还是别的模式。
+    -- 历史上的任务模式字段；036 迁移会删除。
+    -- 新环境按顺序执行迁移，最终表结构不含此列。
     mode          TEXT        NOT NULL DEFAULT 'dry-run',
     submitted_by  BIGINT      REFERENCES users(id),
     confirmed_by  BIGINT      REFERENCES users(id),
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS task_steps (
     step_no                 INTEGER     NOT NULL,
     kind                    TEXT        NOT NULL,
     status                  TEXT        NOT NULL DEFAULT 'pending',
-    -- 命令返回 0 不算成功：两个字段都得有，业务检查没过就不许标 done（第⑥步判断）
+    -- 命令返回 0 不算成功：两个字段都要有，业务检查未通过不标记 done
     exit_code               INTEGER,
     business_check_passed   BOOLEAN,
     payload                 JSONB       NOT NULL DEFAULT '{}'::jsonb,
@@ -120,9 +120,9 @@ CREATE TABLE IF NOT EXISTS confirmation_tokens (
     plan_id          BIGINT      NOT NULL REFERENCES plans(id),
     -- 只存令牌的哈希，不存明文。一次性：used_at 有值就作废。
     token_hash       TEXT        NOT NULL UNIQUE,
-    -- 二次认证方式：登录过了 ≠ 这次变更授权了（第③步实现）
+    -- 二次认证方式：登录通过不等于本次变更授权
     step_up_method   TEXT,
-    -- 定稿：管理员自审批每次必须打标、可检索、可导出成「自审批清单」
+    -- 管理员的每次自审批都打标、可检索、可导出成「自审批清单」
     is_self_approval BOOLEAN     NOT NULL DEFAULT FALSE,
     expires_at       TIMESTAMPTZ NOT NULL,
     used_at          TIMESTAMPTZ,
@@ -149,10 +149,10 @@ CREATE TABLE IF NOT EXISTS execution_permits (
     issued_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_permits_task ON execution_permits(task_id, issued_at);
-COMMENT ON TABLE execution_permits IS '执行许可：和审计事件、任务状态推进同事务产生；审计写失败则本表也不许有记录';
+COMMENT ON TABLE execution_permits IS '执行许可：和审计事件、任务状态推进同事务产生；审计写失败时本表不产生记录';
 
 -- -----------------------------------------------------------------------------
--- 报告与证据（第 ⑦ 步）
+-- 报告与证据
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS reports (
     id         BIGSERIAL   PRIMARY KEY,
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS evidences (
     -- 报告里每条结论都要挂证据，这个字段指向那条结论
     conclusion_ref TEXT        NOT NULL DEFAULT '',
     source         TEXT        NOT NULL,          -- prometheus / elk / k8s / docker
-    -- 铁律：「无数据」必须显示为「无数据」，不许显示成「正常」
+    -- 显示规则：「无数据」显示为「无数据」，不显示为「正常」
     data_status    TEXT        NOT NULL DEFAULT 'ok'
                    CHECK (data_status IN ('ok','no_data','unknown')),
     payload        JSONB       NOT NULL DEFAULT '{}'::jsonb,
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS skills (
     id           BIGSERIAL   PRIMARY KEY,
     name         TEXT        NOT NULL,
     version      INTEGER     NOT NULL DEFAULT 1,
-    -- 没审过的 Skill 不能被调用（第⑧步实现），版本只增不改
+    -- 未审核的 Skill 不进入可调用状态，版本只增不改
     status       TEXT        NOT NULL DEFAULT 'draft'
                  CHECK (status IN ('draft','approved','enabled','disabled')),
     reviewed_by  BIGINT      REFERENCES users(id),
@@ -221,11 +221,11 @@ CREATE TABLE IF NOT EXISTS audit_events (
     event_type    TEXT        NOT NULL,
     actor         TEXT        NOT NULL DEFAULT '',
     actor_role    TEXT        NOT NULL DEFAULT '',
-    -- 来自网页还是桌面，由后台判定，不信任前端自报（第③步接来源标记）
+    -- 来自网页还是桌面，由后台判定，不信任前端自报
     client_source TEXT        NOT NULL DEFAULT '',
     payload       JSONB       NOT NULL DEFAULT '{}'::jsonb,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
-    -- 下面两个字段【由触发器强制计算】，应用传什么都不算数，也不许事后改
+    -- 下面两个字段【由触发器强制计算】，应用传入值会被覆盖，事后不可修改
     prev_hash     TEXT        NOT NULL DEFAULT repeat('0', 64),
     hash          TEXT        NOT NULL DEFAULT repeat('0', 64)
 );
@@ -281,8 +281,8 @@ CREATE TRIGGER trg_audit_chain
 BEFORE INSERT ON audit_events
 FOR EACH ROW EXECUTE FUNCTION audit_chain_before_insert();
 
--- 防篡改双保险：就算哪天有人误授权，数据库这一层也不许改。
--- 注意 TRUNCATE 是表级操作，必须用语句级触发器。
+-- 防篡改双保险：即使误授权，数据库这一层也阻止修改。
+-- TRUNCATE 是表级操作，使用语句级触发器。
 CREATE OR REPLACE FUNCTION audit_chain_guard()
 RETURNS trigger
 LANGUAGE plpgsql

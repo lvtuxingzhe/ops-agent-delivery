@@ -1,7 +1,7 @@
 # 生产编排。所有密码/令牌来自 .env.production，首次启动时由 migrate
 # 一次性容器建表、建角色、建管理员；镜像本身不含业务数据。
 #
-# 启动入口只用 ops/deploy/deploy.sh；不要直接 up，否则可能绕过 .env 校验。
+# 启动入口使用 ops/deploy/deploy.sh；直接 up 会绕过 .env 校验。
 
 name: ops-agent
 
@@ -116,7 +116,7 @@ services:
         mc mb --ignore-existing "local/$${MINIO_SCREENSHOT_BUCKET}"
         mc mb --ignore-existing --with-lock "local/$${MINIO_AUDIT_BUCKET}"
         mc retention set --default COMPLIANCE "$${AUDIT_RETENTION_DAYS}d" "local/$${MINIO_AUDIT_BUCKET}"
-        # 应用使用独立 MinIO 账号，不能让后端拿 root 凭据。
+        # 应用使用独立 MinIO 账号，后端不共用 root 凭据。
         if [ "$${MINIO_USER}" != "$${MINIO_ROOT_USER}" ]; then
           mc admin user add local "$${MINIO_USER}" "$${MINIO_PASSWORD}" || true
           mc admin policy attach local readwrite --user "$${MINIO_USER}"
@@ -158,6 +158,8 @@ services:
       - ./var/models:/srv/var/models:ro
       # 主机公钥登记文件由平台写入；backend 需要可写，worker 只读。
       - ./var/ssh/known_hosts:/srv/ssh/known_hosts:rw
+      # 审计维护状态文件；容器重建后仍需保留，巡检脚本会读取。
+      - ./var/audit-archive:/srv/var/audit-archive:rw
     depends_on:
       migrate:
         condition: service_completed_successfully

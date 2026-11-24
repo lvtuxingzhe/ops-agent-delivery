@@ -53,7 +53,7 @@ class ArchiveConfigError(RuntimeError):
 
 
 class Transport(Protocol):
-    """上传/下载的最小接口。真实现是 MinIO；本地目录实现用于开发与自检。"""
+    """上传/下载的最小接口。真实现是 MinIO；本地目录实现用于测试与自检。"""
 
     name: str
 
@@ -66,7 +66,7 @@ class Transport(Protocol):
 class FileTransport:
     """
     写本地目录。用途有两个：
-      * 没有对象存储的开发环境里，先把归档产物落盘；
+      * 没有对象存储的本地环境里，先把归档产物落盘；
       * 自检里给「上传 — 校验」全链路一个不依赖网络的实现。
     `retain_until` 落成旁挂的 `.lock.json`，用来表达「本来应该锁多久」。
     """
@@ -137,7 +137,7 @@ class MinioTransport:
             endpoint.replace("https://", "").replace("http://", ""),
             access_key=settings.minio_user,
             secret_key=settings.minio_password,
-            # 明文 http 只允许出现在本机开发；生产给 https 地址
+            # 明文 http 只允许出现在本机；生产给 https 地址
             secure=endpoint.startswith("https://"),
         )
 
@@ -190,7 +190,7 @@ def default_transport(settings) -> Transport:
     """
     选归档落地方式，优先级从高到低：
 
-    1. 显式配了 `AUDIT_ARCHIVE_DIR` → 写本地目录（开发/离线环境的明确选择）；
+    1. 显式配了 `AUDIT_ARCHIVE_DIR` → 写本地目录（本地/离线环境的明确选择）；
     2. 配了 `MINIO_ENDPOINT` → 真上传到对象锁桶（生产）；
     3. 都没配 → 默认 `code/var/audit-archive`。
 

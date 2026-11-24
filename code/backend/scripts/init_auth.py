@@ -185,7 +185,7 @@ def grant_v3_identity_grants(admin, settings) -> None:
 def init_seed(settings) -> None:
     """种入六角色、管理员、开关默认值。幂等：重复跑只同步不重复插。"""
     if not settings.admin_password:
-        raise RuntimeError("缺少 ADMIN_PASSWORD（开发期假值），拒绝建无密码管理员")
+        raise RuntimeError("缺少 ADMIN_PASSWORD（默认假值），拒绝建无密码管理员")
 
     with connect_admin(settings) as admin:
         # 008 之后旧身份表已删：旧种子整段跳过，v3 种子由 sync_v3_identity 负责
@@ -274,10 +274,10 @@ def init_seed(settings) -> None:
 def verify(settings) -> int:
     """验证权限版图：谁该有什么、谁该没什么，都用真连接试一遍。"""
     print("=" * 66)
-    print("第 ③ 步权限版图实测（只连本机开发库）")
+    print("权限版图实测（只连本机数据库）")
     print("=" * 66)
 
-    # 1) 应用主账号读不到认证表（铁律：密码独立权限）。v3 与旧表都要测：
+    # 1) 应用主账号读不到认证表（密码独立权限）。v3 与旧表都要测：
     #    只测一边的话，切表那天才发现新表没锁死。
     for label, statement in (
         ("SELECT 密码哈希", "SELECT password_hash FROM v3_auth_credentials LIMIT 1"),
@@ -368,7 +368,7 @@ def sync_v3_identity(settings) -> None:
     用户不存在而插不进去。
     """
     if not settings.admin_password:
-        raise RuntimeError("缺少 ADMIN_PASSWORD（开发期假值），拒绝建无密码管理员")
+        raise RuntimeError("缺少 ADMIN_PASSWORD（默认假值），拒绝建无密码管理员")
 
     pw_hash = hash_password(settings.admin_password, rounds=settings.pbkdf2_rounds)
     with connect_admin(settings) as admin:

@@ -20,7 +20,7 @@ TEMPLATE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{2,63}$")
 
 # 这些字符会改变执行语义（管道、重定向、串联、子命令）。执行器按 argv
 # 直接 exec，不做 shell 展开；模板里出现它们，到了执行端只会变成普通参数，
-# 一线工程师会以为命令生效了，实际没有 —— 必须在保存时拒绝，不能默默吞掉。
+# 一线工程师会以为命令生效了，实际没有 —— 保存阶段就拒绝，不静默接受。
 _SHELL_META = ("|", ">", "<", "&", ";", "`", "$(", "${")
 _SCOPE_DEFAULT = {stage: scope_for_stage(stage) for stage in STAGES}
 _READ_ROLES = READ_STAGES
@@ -246,8 +246,8 @@ def normalize_template_payload(
     risk = str(payload.get("risk") or "").strip().lower()
     if risk not in ("low", "medium", "high"):
         risk = _infer_risk(precheck, operations, verify, rollback, post_rollback)
-    # 有 dangerous 命令就不可能标 low/medium：页面和 AI 都不许把高危动作
-    # 写成低风险，审批人看到的风险级别必须至少是 high。
+    # 含 dangerous 命令时风险级别为 high：页面和 AI 输出使用这个下限，
+    # 审批人看到的风险级别至少是 high。
     if "dangerous" in {op.get("scope") for op in precheck + operations + verify + rollback + post_rollback}:
         risk = "high"
     visibility = str(payload.get("visibility") or ("team" if status == "published" else "private"))

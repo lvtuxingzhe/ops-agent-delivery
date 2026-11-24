@@ -51,7 +51,7 @@ def create_datasource(
     user: dict = Depends(get_current_user),
     source: str = Depends(client_kind),
 ):
-    """新建数据源（管理员）。readonly 第一期强制只读，代码里压根没有可写入口。"""
+    """新建数据源（管理员）。readonly 在当前版本强制只读，代码里压根没有可写入口。"""
     require_roles(user, {"admin"})
     try:
         item = config_service.create_datasource(

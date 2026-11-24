@@ -114,7 +114,7 @@ def main() -> int:
     load_dotenv()
     settings = load_settings()
     print("=" * 66)
-    print("第 ② 步基础设施检查（只连本机 127.0.0.1 的开发容器）")
+    print("基础设施检查（只连本机 127.0.0.1 的容器）")
     print("=" * 66)
     check_redis(settings)
     check_rabbitmq(settings)

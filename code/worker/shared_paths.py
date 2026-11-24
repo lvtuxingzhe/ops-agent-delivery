@@ -3,7 +3,7 @@
 
 为什么单独一个文件
 ----------------
-这两个包在本地开发时位于 `code/packages`，容器里位于 `/srv/packages`，
+这两个包在本地运行时位于 `code/packages`，容器里位于 `/srv/packages`，
 位置不同但都要能 import。把「往上找 packages」这件事收在一处，
 比在每个模块里各写一遍 sys.path.insert 可控。
 

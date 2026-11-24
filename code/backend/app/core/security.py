@@ -47,7 +47,7 @@ def verify_password(plain: str, stored: str) -> bool:
         )
         return hmac.compare_digest(digest.hex(), hash_hex)
     except (ValueError, TypeError):
-        # 存储串格式不对 = 校验失败，不算异常，别把内部格式细节抛给外面
+        # 存储串格式不对 = 校验失败，不算异常，内部格式细节不抛给调用方
         return False
 
 
@@ -124,7 +124,7 @@ def build_otpauth_uri(secret_b32: str, username: str, issuer: str) -> str:
 
 class SecretBox:
     """
-    Fernet 加密的小盒子。key 来自环境变量（开发期假值），32 字节 base64。
+    Fernet 加密的小盒子。key 来自环境变量（默认假值），32 字节 base64。
 
     为什么用 Fernet 不自己写加密：自己写的一定错。Fernet = AES-128-CBC +
     HMAC + 时间戳，cryptography 库的成品，拿来就用。

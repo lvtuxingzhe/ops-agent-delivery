@@ -85,7 +85,7 @@ def main() -> int:
     demo_samples = "--demo-samples" in argv
     if demo_samples:
         # 人工启动的演示 worker：只在本进程和它拉起的 Agent 子进程里开放样例数据。
-        # 生产编排、测试流水线和普通开发启动都不带这个参数。
+        # 生产编排、测试流水线和普通本地启动都不带这个参数。
         os.environ["OPS_AGENT_DEMO_SAMPLES"] = "1"
     interval = 5
     kinds: tuple[str, ...] | None = None

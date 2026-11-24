@@ -65,7 +65,7 @@ async def _lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     """把应用装配起来。以后加功能 = 在这里多挂一个 router。"""
-    # 开发期便利：code/.env 存在就读它（已有环境变量优先，绝不覆盖）。
+    # 便利：code/.env 存在就读它（已有环境变量优先，绝不覆盖）。
     # 生产环境由部署平台注入环境变量、机器上没有 .env 文件，
     # load_dotenv 会直接跳过 —— 所以这行对生产零影响。
     load_dotenv()
@@ -94,11 +94,11 @@ def create_app() -> FastAPI:
     # 未处理异常统一回 500（只给通用文案，堆栈只进服务端日志）。
     web.install(app, logger)
 
-    # 限流：登录与任务提交各一档。必须在 CORS 之前挂 ——
+    # 限流：登录与任务提交各一档。先挂限流，再挂 CORS ——
     # 后加的中间件在外层，CORS 在最外层才能给 429 补上跨域头。
     ratelimit.install(app, settings, logger)
 
-    # 只放行配置里写的前端地址，别用 "*" 通配。
+    # 只放行配置里的前端地址，不使用 "*" 通配。
     # 桌面端加载的是同一份前端，同样走这个白名单。
     app.add_middleware(
         CORSMiddleware,
@@ -109,7 +109,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(health.router, prefix="/api")
-    # 登录页公开配置：不要令牌，只返回背景图/应用名/运行模式。
+    # 登录页公开配置：不需要令牌，只返回背景图/应用名/运行模式。
     app.include_router(public.router, prefix="/api")
     # 登录、TOTP 绑定、短信与自审批清单。router 自带 /auth 前缀。
     app.include_router(auth.router, prefix="/api")

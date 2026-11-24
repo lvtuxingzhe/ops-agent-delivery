@@ -63,7 +63,7 @@ def make_fake_agent_result() -> dict:
 
 
 def login(client: TestClient) -> dict | None:
-    """用开发期管理员账号登录，拿一个令牌；失败如实返回 None。"""
+    """用管理员账号登录，拿一个令牌；失败如实返回 None。"""
     username = os.environ.get("ADMIN_USERNAME", "admin")
     password = os.environ.get("ADMIN_PASSWORD", "")
     response = client.post("/api/auth/login", json={
@@ -220,7 +220,7 @@ def check_validator() -> None:
 
 
 def check_zero_ddl() -> None:
-    """本轮零 DDL：表集合与列集合都没变。"""
+    """本次校验不执行 DDL：表集合与列集合都没变。"""
     with connect_admin(SETTINGS) as connection:
         tables = {row[0] for row in connection.execute(
             "SELECT table_name FROM information_schema.tables "
@@ -399,7 +399,7 @@ def main() -> int:
         with TestClient(application) as client:
             headers = login(client)
             if not headers:
-                print("[SKIP] 开发期账号登录失败，接口类检查跳过（写明缺什么：ADMIN_PASSWORD）")
+                print("[SKIP] 管理员账号登录失败，接口类检查跳过（写明缺什么：ADMIN_PASSWORD）")
             else:
                 check_submit_and_report(client, headers)
                 check_permissions(client, headers)

@@ -58,7 +58,7 @@ def init_seed(settings) -> None:
 def verify(settings) -> int:
     """跑一遍完成标志实测，逐条打印 PASS/FAIL 与汇总。"""
     print("=" * 66)
-    print("第 ④ 步权限版图实测（只连本机开发库）")
+    print("权限版图实测（只连本机数据库）")
     print("=" * 66)
 
     # 1) 迁移生效：新列存在且取值受约束（旧表已删时跳过这条检查）

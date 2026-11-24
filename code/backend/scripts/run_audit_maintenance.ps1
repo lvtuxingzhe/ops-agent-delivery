@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$code = 'D:\workbudy\work\ops-agent-delivery\code'
+$code = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
 $log = Join-Path $code 'var\logs\audit-maintenance.log'
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $log) | Out-Null
 $stamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'

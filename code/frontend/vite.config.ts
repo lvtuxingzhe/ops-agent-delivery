@@ -3,7 +3,7 @@
  *
  * 一份配置同时服务两个端，这是「桌面复用前端」的关键：
  *   网页版：浏览器打开 http://127.0.0.1:5173
- *   桌面版：Electron 开发期加载同一个地址；打包期加载 dist/index.html
+ *   桌面版：Electron 本地运行加载同一个地址；打包期加载 dist/index.html
  * 两边是同一份源码、同一份构建产物，不维护第二套 UI。
  */
 
@@ -11,7 +11,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 // 后台地址从环境变量读，没配就用本机默认。
-// 这是「本机开发地址」，不是任何生产监控 / 生产主机地址，也不含账号密码。
+// 这是「本机运行地址」，不是任何生产监控 / 生产主机地址，也不含账号密码。
 // 第 ④ 步做配置页之后，真实地址由部署时填，代码这边一个字都不用改。
 const backendTarget = process.env.BACKEND_TARGET || 'http://127.0.0.1:8000'
 

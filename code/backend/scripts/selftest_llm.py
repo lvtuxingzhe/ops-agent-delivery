@@ -50,7 +50,7 @@ _TPL_BASE_URL = "https://" + "api.deepseek.com" + "/v1"
 
 
 def _set_task_switch(admin, value: str) -> None:
-    """改平台总开关。阶段 2 起开关在 v3_configs 的 setting/llm_enabled_by_task。"""
+    """改平台总开关。开关在 v3_configs 的 setting/llm_enabled_by_task。"""
     admin.execute(
         "UPDATE v3_configs SET value = %s, updated_at = now() "
         "WHERE namespace = 'setting' AND key = 'llm_enabled_by_task'",
@@ -328,7 +328,7 @@ def main() -> int:
 
     # 运行期再核一次：记录所有 connect 目标，断言【没有一处是非回环地址】。
     #
-    # 为什么不直接把 connect 一律抛异常：这些接口本来就要连本机开发库
+    # 为什么不直接把 connect 抛异常：这些接口本来就要连本机数据库
     # （127.0.0.1:5432，项目边界里允许的本机访问），一刀切会把自己的数据库
     # 也误判成「外部连接」。真正要证明的是「没有连出本机」，所以只记录、
     # 不阻断，最后看目标地址。

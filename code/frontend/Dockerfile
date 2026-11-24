@@ -1,4 +1,4 @@
-# 前端开发服务器镜像（第 ① 步：跑 Vite dev server）
+# 前端服务镜像（Vite dev server）
 #
 # 打包成桌面安装包时不用这个镜像，是在本机 npm run build 出 dist/，
 # 由 Electron 直接 loadFile。两条路用的是同一份源码和同一份 vite.config.ts。

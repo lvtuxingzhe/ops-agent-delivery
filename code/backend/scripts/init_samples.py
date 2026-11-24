@@ -33,7 +33,7 @@ from legacy_guard import legacy_present, retired
 
 RESULTS: list[tuple[str, bool, str]] = []
 
-# 四类样例数据源的配置。地址全是本机假地址 —— 第一期取证走本地 JSON，
+# 四类样例数据源的配置。地址全是本机假地址 —— 当前版本取证走本地 JSON，
 # 不会真的去连这些端口（见 samples/README.md）。
 SAMPLE_ROWS = [
     ("样例-Prometheus", "prometheus", "http://127.0.0.1:9090", "CRED_PROM_SAMPLE"),
@@ -99,7 +99,7 @@ def verify(settings) -> int:
            "injection" in available_scenarios("elk"),
            "elk/injection 单独样本")
 
-    # 3) 配置页里四类样例都在，且都只读（铁律：排查范围全只读）
+    # 3) 配置页里四类样例都在，且都只读（排查范围全只读）
     rows = {value["name"]: value for value in config_service.list_datasources(settings)}
     for name, kind, _, _ in SAMPLE_ROWS:
         item = rows.get(name)

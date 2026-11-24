@@ -3,7 +3,7 @@
 
 为什么单独一个文件
 ----------------
-本地开发时共享包在 `code/packages`，容器里在 `/srv/packages`（compose 只读挂载）。
+本地运行时共享包在 `code/packages`，容器里在 `/srv/packages`（compose 只读挂载）。
 两处都要能 import，而「逐级向上找 packages」这段逻辑如果散在每个模块里，
 迟早有人漏写一次、静默退化成「不脱敏 / 不校验」。
 

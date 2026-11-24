@@ -36,7 +36,7 @@ SEED_VALUE = {
     "openbao_path_prefix": "",
     "sops_file": os.getenv("SOPS_SECRETS_FILE", ""),
     "note": (
-        "开发期默认 db 后端：凭据密文存 v3_credential_secrets，密钥来自 CREDENTIAL_ENCRYPTION_KEY。"
+        "默认 db 后端：凭据密文存 v3_credential_secrets，密钥来自 CREDENTIAL_ENCRYPTION_KEY。"
         "openbao 保留为回滚入口，不再作为新装默认。"
         "不用动态租约、不做续期与自动吊销。"
     ),
@@ -71,7 +71,7 @@ def _read_config(conn) -> dict | None:
 def verify(settings) -> int:
     """跑一遍完成标志实测，逐条打印 PASS/FAIL 与汇总。"""
     print("=" * 66)
-    print("v1.1 第 ③ 步：凭据配置初始化实测（只连本机开发库）")
+    print("凭据配置初始化实测（只连本机数据库）")
     print("=" * 66)
 
     # 1) 配置行在，而且【整行】字段都在（不能只验一个 backend 就说配置齐了）

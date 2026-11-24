@@ -100,6 +100,11 @@ fi
 chmod 0777 "$ROOT/var/ssh"
 chmod 0666 "$known_hosts"
 
+# 审计维护状态文件由容器内非 root 用户写入，宿主机目录需要可写。
+audit_status_dir="$ROOT/var/audit-archive"
+mkdir -p "$audit_status_dir"
+chmod 0777 "$audit_status_dir"
+
 "$DOCKER_BIN" compose version >/dev/null 2>&1 \
   || die "找不到 docker compose 插件"
 "$DOCKER_BIN" compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null \
@@ -158,6 +163,18 @@ if [[ "$healthy" -ne 1 ]]; then
   "$DOCKER_BIN" compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" ps >&2 || true
   "$DOCKER_BIN" compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" logs --tail=80 backend frontend >&2 || true
   die "入口未在 180 秒内变健康"
+fi
+
+if [[ "${OPS_INSTALL_AUDIT_CRON:-1}" == "1" ]]; then
+  if [[ "$(id -u)" -eq 0 ]]; then
+    echo "[deploy] 安装审计维护定时任务 ..."
+    if ! bash "$ROOT/ops/deploy/install-audit-maintenance.sh"; then
+      echo "[deploy] 提示：审计维护定时任务未安装；部署完成后可用 root 重跑 $ROOT/ops/deploy/install-audit-maintenance.sh" >&2
+    fi
+  else
+    echo "[deploy] 提示：当前不是 root，跳过审计维护定时任务安装。" >&2
+    echo "[deploy] 部署完成后执行：sudo bash $ROOT/ops/deploy/install-audit-maintenance.sh" >&2
+  fi
 fi
 
 echo "[deploy] 完成：http://<宿主机IP>:${edge_port}/"

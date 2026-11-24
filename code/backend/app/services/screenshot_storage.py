@@ -1,7 +1,7 @@
 """排查截图原图的 MinIO 存储。
 
 数据库只保存元数据、对象键和缩略图；原图放独立私有桶。
-没有配置 MinIO 时退回数据库 bytea，保证本地开发和离线环境仍可用。
+没有配置 MinIO 时退回数据库 bytea，保证本地和离线环境仍可用。
 """
 
 from __future__ import annotations

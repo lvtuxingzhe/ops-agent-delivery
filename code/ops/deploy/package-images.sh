@@ -69,10 +69,11 @@ echo "[package] 目标机导入：docker load -i $(basename "$TAR")"
 echo "[package] 需要语义检索时：tar -xzf $(basename "$MODEL_TAR") -C <部署根>/var/models"
 
 DEPLOY_TAR="$DIST/ops-agent-deploy-${TAG}.tar.gz"
-echo "[package] 打包部署骨架（compose + deploy.sh + env 模板）..."
+echo "[package] 打包部署骨架（compose + 部署脚本 + 审计定时任务安装脚本 + env 模板）..."
 tar -C "$ROOT" -czf "$DEPLOY_TAR" \
   docker-compose.prod.yml .env.production.example \
-  ops/deploy/deploy.sh ops/deploy/clean-platform.sh ops/deploy/README.md ops/deploy/nginx-edge.conf
+  ops/deploy/deploy.sh ops/deploy/clean-platform.sh ops/deploy/README.md ops/deploy/nginx-edge.conf \
+  ops/deploy/install-audit-maintenance.sh
 if command -v sha256sum >/dev/null 2>&1; then
   sha256sum "$DEPLOY_TAR" | awk -v n="$(basename "$DEPLOY_TAR")" '{print $1"  "n}' > "$DEPLOY_TAR.sha256"
 else

@@ -1,5 +1,8 @@
 # 审计维护定时任务（Linux cron 版）
 #
+# 镜像部署使用 ops/deploy/install-audit-maintenance.sh 生成 cron；
+# 本文件用于源码部署。
+#
 # 安装（root 或部署账号）：
 #   sudo cp audit-maintenance.cron /etc/cron.d/ops-agent-audit
 #   sudo chmod 644 /etc/cron.d/ops-agent-audit

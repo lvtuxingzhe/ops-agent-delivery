@@ -270,7 +270,7 @@ def migrate(settings) -> None:
 def verify(settings) -> int:
     """跑一遍完成标志实测，逐条打印 PASS/FAIL 与汇总。"""
     print("=" * 66)
-    print("v1.1 第 ① 步：数据契约层实测（只连本机开发库）")
+    print("数据契约层实测（只连本机数据库）")
     print("=" * 66)
 
     # 1) 4 张表都在，旧表也还在（并存过渡）

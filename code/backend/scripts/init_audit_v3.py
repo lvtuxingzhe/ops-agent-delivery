@@ -104,7 +104,7 @@ def init_archive_config(settings) -> None:
 def verify(settings) -> int:
     """跑一遍完成标志实测，逐条打印 PASS/FAIL 与汇总。"""
     print("=" * 66)
-    print("v1.1 第 ② 步：无哈希链审计层权限实测（只连本机开发库）")
+    print("无哈希链审计层权限实测（只连本机数据库）")
     print("=" * 66)
 
     # 1) 两张新表在，旧审计记录还在

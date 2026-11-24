@@ -1,13 +1,12 @@
-# 本机开发环境编排（第 ① 步应用进程 + 第 ② 步基础设施）
+# 本机运行环境编排（应用进程 + 基础设施）
 #
-# 【项目名必须显式写】默认会按目录名取项目名，本目录叫 code，
-# 而 D:\code 那套 Milvus 编排的项目名也是 code —— 同名项目 + 同名 service(minio)
-# 会被 Compose 当成同一个东西，`up` 时直接把对方的 milvus-minio 容器替换掉。
-# 显式起名叫 ops-agent，两边互不干扰。
+# 显式写项目名：默认按目录名取项目名，本目录叫 code，可能与其他项目重名。
+# 同名项目 + 同名 service(minio) 会被 Compose 当成同一个东西，
+# `up` 时会互相替换容器。起名 ops-agent，避免冲突。
 name: ops-agent
 
 #
-# 默认只起三个应用进程：后台、前端开发服务器、AgentScope worker。
+# 默认只起三个应用进程：后台、前端服务、AgentScope worker。
 # 数据库 / 缓存 / 队列 / 对象存储挂在 infra profile 下，第 ② 步这样起：
 #   docker compose --profile infra up -d
 # 桌面 Electron 是 GUI 程序，在本机单独 npm start，不放进容器。
@@ -39,7 +38,7 @@ services:
       DATABASE_URL: postgresql://${DB_APP_ROLE}:${DB_APP_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DB_ADMIN_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DB_AUDIT_READER_URL: postgresql://${DB_AUDIT_READER_ROLE}:${DB_AUDIT_READER_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      # 认证专属连接串：少了它登录接口直接 500，这里必须显式传
+      # 认证专属连接串：这里显式传入；缺少时登录接口返回 500
       DB_AUTH_URL: postgresql://${DB_AUTH_ROLE}:${DB_AUTH_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DB_APP_ROLE: ${DB_APP_ROLE}
       DB_AUDIT_READER_ROLE: ${DB_AUDIT_READER_ROLE}
@@ -61,7 +60,7 @@ services:
       DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-}
       DEEPSEEK_LIVE_KEY: ${DEEPSEEK_LIVE_KEY:-}
       REDIS_URL: redis://redis:6379/0
-      # 执行许可的共享 HMAC 密钥：后台签发、worker 验签，两边必须是同一个值
+      # 执行许可的共享 HMAC 密钥：后台签发、worker 验签，两边使用同一个值
       EXEC_PERMIT_SECRET: ${EXEC_PERMIT_SECRET}
       MQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
       MINIO_ENDPOINT: http://minio:9000
@@ -69,7 +68,7 @@ services:
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     # 排查子进程要能找到 worker 脚本；后台自己的脱敏也用 packages/ops_guard。
-    # 两处都只读挂载，不写进后台镜像 —— 既是开发期便利，也明确
+    # 两处都只读挂载，不写进后台镜像，既是本地运行便利，也明确
     # 「后台镜像本身不含排查代码，共享包只有一份」这条隔离。
     volumes:
       - ./worker:/srv/worker:ro
@@ -81,7 +80,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ---------- 前端：网页版直接看，桌面版开发期也加载它 ----------
+  # ---------- 前端：网页版直接看，桌面版本地运行也加载它 ----------
   frontend:
     build: ./frontend
     environment:
@@ -212,8 +211,8 @@ services:
           echo "等待 MinIO 就绪..."; sleep 2
         done
         mc mb --ignore-existing "local/$${MINIO_BUCKET}"
-        # 审计桶必须开对象锁：--with-lock 只能建桶时给，
-        # 已经存在的普通桶无法事后开启，所以这里让失败直接暴露出来，不吞掉。
+        # 审计桶使用对象锁：--with-lock 只在建桶时生效，
+        # 已经存在的普通桶无法事后开启，所以构建脚本让失败直接暴露，不吞掉。
         mc mb --ignore-existing --with-lock "local/$${MINIO_AUDIT_BUCKET}"
         mc retention set --default COMPLIANCE "$${AUDIT_RETENTION_DAYS}d" "local/$${MINIO_AUDIT_BUCKET}"
         mc ls local

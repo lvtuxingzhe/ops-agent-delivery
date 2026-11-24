@@ -79,7 +79,7 @@ export interface DeployTemplate {
   updated_at?: string | null
   can_edit?: boolean
   can_publish?: boolean
-  /** 管理员可删任意模板；排查员只能删自己的草稿。 */
+  /** 删除权限：管理员可删任意模板；排查员仅限自己的草稿。 */
   can_delete?: boolean
   usage_count?: number
   success_count?: number
@@ -433,8 +433,8 @@ function parseTraceFrame(block: string, handlers: DeploymentTraceStreamHandlers)
 /**
  * 读取部署 trace 的 SSE 长连接。
  *
- * 不使用原生 EventSource：当前令牌在 sessionStorage，请求必须带
- * Authorization 头，只有 fetch 能携带。调用方负责在切换任务时 abort。
+ * 不使用原生 EventSource：当前令牌在 sessionStorage，请求需要带
+ * Authorization 头，只有 fetch 支持。调用方负责在切换任务时 abort。
  */
 export async function streamDeploymentTrace(
   taskId: string,

@@ -3,19 +3,18 @@
  *
  * 统一约束：
  *
- * 1. 只认相对路径 /api。开发期由 Vite 代理转发到后台，
+ * 1. 只认相对路径 /api。本地运行时由 Vite 代理转发到后台，
  *    打包进 Electron 后同样走这个前缀，网页和桌面不用各写一套地址。
- * 2. 这里【不提供任意地址请求】。不开放填完整 URL 的入口，
- *    否则「桌面端不能直连生产」这条就守不住了。
- * 3. 登录令牌：存在 sessionStorage —— 关掉窗口/标签页自动消失，
- *    退出登录立刻清掉。不写 localStorage、不写文件：
- *    这就是「桌面端不能本地存长期凭据」的前端落法。
+ * 2. 这里不提供任意地址请求；页面请求都指向同一个后台。
+ * 3. 登录令牌存在 sessionStorage —— 关掉窗口/标签页自动消失，
+ *    退出登录立刻清掉。这里不写 localStorage、不写文件，
+ *    桌面端不保留长期登录态。
  * 4. 密码类字段只随请求发出去一次，本文件不做任何缓存。
  * 5. 统一在这一层带 X-Client-Kind 来源标记（web / desktop），
  *    供审计记录用。它不参与任何权限判断（后台也不信它做权限）。
  */
 
-/** 后端接口统一前缀，别在组件里另写完整地址。 */
+/** 后端接口统一前缀，组件里统一使用这个前缀。 */
 const API_PREFIX = '/api'
 
 /** 会话令牌在 sessionStorage 里的键名。集中一处，退出时好清理。 */
@@ -76,7 +75,7 @@ async function parseError(response: Response): Promise<never> {
       if (typeof body.detail.code === 'string') code = body.detail.code
     }
   } catch {
-    // 响应不是 JSON 就用默认话术，别把原文吐出去
+    // 响应不是 JSON 就用默认话术，不返回原文
   }
   throw new ApiError(response.status, detail, code)
 }
@@ -95,7 +94,7 @@ export async function get<T>(path: string): Promise<T> {
 /**
  * 打开 SSE 长连接。
  *
- * 原生 EventSource 不能带 Authorization 头，所以这里仍走 fetch，
+ * 原生 EventSource 不带 Authorization 头，所以这里仍走 fetch，
  * 由调用方读取 response.body 并解析 `text/event-stream`。
  */
 export async function getEventStream(path: string, signal?: AbortSignal): Promise<Response> {
