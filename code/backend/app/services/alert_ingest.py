@@ -5,7 +5,8 @@
 --------
 * 本模块只处理 Prometheus 拉取；Alertmanager Webhook 以后复用同一入口。
 * 通知和任务创建都在这里，脚本只负责定时触发。
-* 自动建单默认关闭；空主机/告警名白名单表示不建单，不是不限。
+* 自动建单默认开启但只接 critical；空主机/告警名白名单表示不建单，
+  "*" 才表示全部；限流和风暴判断仍然生效。
 * 只建只读 investigation 任务；不产生部署计划、不申请执行许可。
 * 告警正文是不可信文本，只作为描述字段，不进入系统指令或工具选择。
 """
@@ -35,6 +36,26 @@ _SEVERITY_LEVELS = {
     "info": "P3",
 }
 
+# 预检结果给人看的说明；页面直接显示，不把内部原因码丢给运维。
+GATE_REASON_TEXT = {
+    "disabled": "总开关未开启",
+    "severity_not_allowed": "级别不在允许范围",
+    "host_unmapped": "主机未登记，且主机白名单没有写 *",
+    "host_not_allowlisted": "主机不在白名单",
+    "alertname_missing": "告警名为空",
+    "alertname_not_allowlisted": "告警名不在白名单",
+    "system_account_missing": "缺少启用的 system-alert 账号",
+    "storm_cooldown": "告警风暴冷却中",
+    "too_short": "告警持续时间太短",
+    "flapping": "告警反复波动，暂时不建单",
+    "group_suppressed": "同组告警仍在冷却期",
+    "existing_task": "同组已有未关闭的排查任务",
+    "min_interval": "距上次同组建单时间太近",
+    "hourly_limit": "达到每小时建单上限",
+    "daily_limit": "达到每天建单上限",
+    "concurrency_limit": "达到同时排查任务上限",
+}
+
 
 def _clip(value: Any, limit: int) -> str:
     """告警字段进库前截断，避免一条超长 annotation 撑大任务。"""
@@ -49,8 +70,8 @@ def _split(value: str) -> list[str]:
 
 def _group_key(alertname: str, host: str) -> str:
     """稳定去重键：告警名 + 主机，不把 activeAt 混进来。"""
-    raw = f"{alertname.strip().lower()}|{host.strip().lower()}"
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
+    raw_value = f"{alertname.strip().lower()}|{host.strip().lower()}"
+    return hashlib.sha256(raw_value.encode("utf-8")).hexdigest()[:24]
 
 
 def _severity_level(severity: str) -> str:
@@ -88,6 +109,7 @@ def _load_policy(settings: Settings) -> dict:
     """一次读取本轮告警决策需要的开关，避免每条告警都开一次连接。"""
     with connect_app(settings) as conn:
         def value(key: str) -> str:
+            """执行 value。"""
             return config_service.get_setting(conn, key)
 
         return {
@@ -349,11 +371,11 @@ def _system_actor(settings: Settings) -> int | None:
 
 def _active_age_seconds(item: dict, now: datetime) -> float | None:
     """activeAt 到现在的秒数；无法解析时返回 None，不因此误杀。"""
-    raw = str(item.get("active_at") or "").strip()
-    if not raw:
+    raw_value = str(item.get("active_at") or "").strip()
+    if not raw_value:
         return None
     try:
-        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(raw_value.replace("Z", "+00:00"))
     except ValueError:
         return None
     if parsed.tzinfo is None:
@@ -400,7 +422,7 @@ def _match_host(settings: Settings, item: dict) -> tuple[str, str]:
 def _gate_reason(settings: Settings, policy: dict, item: dict, group_key: str,
                  host_id: str, host_token: str, level: str,
                  actor_id: int | None, now: datetime,
-                 storm_active: bool) -> str:
+                 storm_active: bool, *, preview: bool = False) -> str:
     """返回拒绝原因；空字符串表示可以建单。"""
     if not policy["enabled"]:
         return "disabled"
@@ -418,9 +440,10 @@ def _gate_reason(settings: Settings, policy: dict, item: dict, group_key: str,
             (host_token or "").lower() not in allowed_hosts:
         return "host_not_allowlisted"
     alertname = _clip(item.get("alertname"), 120)
-    if not alertname or alertname.lower() not in {
-        value.lower() for value in policy["allow_alertnames"]
-    }:
+    allowed_alertnames = {value.lower() for value in policy["allow_alertnames"]}
+    if not alertname:
+        return "alertname_missing"
+    if "*" not in allowed_alertnames and alertname.lower() not in allowed_alertnames:
         return "alertname_not_allowlisted"
     if actor_id is None:
         return "system_account_missing"
@@ -431,6 +454,8 @@ def _gate_reason(settings: Settings, policy: dict, item: dict, group_key: str,
         return "too_short"
     if _group_start_count(settings, group_key, policy["flap_window_minutes"]) >= \
             policy["flap_transitions"]:
+        if preview:
+            return "flapping"
         _suppress_group(settings, group_key, policy["flap_cooldown_minutes"])
         return "flapping"
     until = _suppressed_until(settings, group_key)
@@ -546,6 +571,41 @@ def _maybe_create_task(settings: Settings, policy: dict, item: dict,
     return _create_task(settings, item, group_key, level, host_id, host_token, actor_id)
 
 
+def preview_gate(settings: Settings, *, host: str, alertname: str,
+                 severity: str) -> dict:
+    """只回答“这条告警会不会建单”，不写库、不建任务、不发通知。"""
+    name = _clip(alertname, 120)
+    item = {
+        "alertname": name,
+        "host": _clip(host, 200),
+        "severity": str(severity or "critical").strip().lower(),
+        "labels": {},
+        "annotations": {},
+    }
+    policy = _load_policy(settings)
+    host_id, host_token = _match_host(settings, item)
+    actor_id = _system_actor(settings)
+    group_key = _group_key(name, host_token or item["host"] or "unknown")
+    level = _severity_level(item["severity"])
+    reason = _gate_reason(
+        settings, policy, item, group_key, host_id, host_token,
+        level, actor_id, datetime.now(UTC), False, preview=True,
+    )
+    return {
+        "would_create": not reason,
+        "reason": reason or "ok",
+        "reason_text": (
+            GATE_REASON_TEXT.get(reason, f"未识别的拦截原因：{reason}")
+            if reason else "会建单"
+        ),
+        "host_registered": bool(host_id),
+        "host_token": host_token,
+        "enabled": bool(policy["enabled"]),
+        "allow_hosts": sorted(policy["allow_hosts"]),
+        "allow_alertnames": sorted(policy["allow_alertnames"]),
+    }
+
+
 def sync_once(settings: Settings, *, limit: int = MAX_ALERTS_PER_SOURCE) -> dict:
     """
     同步一轮所有启用中的真实 Prometheus 数据源。
@@ -592,9 +652,9 @@ def sync_once(settings: Settings, *, limit: int = MAX_ALERTS_PER_SOURCE) -> dict
 
         visible_keys: set[str] = set()
         items: list[dict] = []
-        for raw in payload.get("items", []):
+        for raw_value in payload.get("items", []):
             result["alerts"] += 1
-            item = dict(raw)
+            item = dict(raw_value)
             key = str(item.get("key") or "")
             if key:
                 visible_keys.add(key)
@@ -781,11 +841,11 @@ def ingest_webhook(settings: Settings, payload: dict[str, Any]) -> dict:
         if storm_until and storm_until > now:
             storm_active = True
 
-    for raw in alerts:
-        if not isinstance(raw, dict):
+    for raw_value in alerts:
+        if not isinstance(raw_value, dict):
             result["skipped"] += 1
             continue
-        item = _webhook_item(raw)
+        item = _webhook_item(raw_value)
         group_key = _group_key(item["alertname"], item["host"])
         item["group_key"] = group_key
         level = _severity_level(item["severity"])

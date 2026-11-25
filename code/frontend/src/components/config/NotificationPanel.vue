@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
- * 通知渠道面板：飞书群机器人 webhook + SMTP 邮件。
+ * 通知渠道面板：SMTP 邮件。
  *
- * 秘密字段只写不读：保存后后台只返回「已配置」，页面不再回显 webhook URL
- * 或 SMTP 密码。输入框留空 = 保留原值，方便只改启停或只测连通。
+ * 飞书通知统一走下面的「飞书应用（卡片审批）」，旧群机器人 webhook 入口已删除。
+ * 密码只写不读：保存后后台只返回「已配置」，页面不再回显密码。
+ * 输入框留空 = 保留原值，方便只改启停或只测连通。
  */
 
 import { onMounted, reactive, ref } from 'vue'
@@ -11,11 +12,14 @@ import { onMounted, reactive, ref } from 'vue'
 import {
   fetchNotificationChannels,
   saveEmailChannel,
-  saveFeishuChannel,
   testNotificationChannel,
 } from '../../api/notifications'
 import { useAsyncAction } from '../../composables/useAsyncAction'
 import ResizableTable from '../ResizableTable.vue'
+import AlertAutoPanel from './AlertAutoPanel.vue'
+import FeishuAppPanel from './FeishuAppPanel.vue'
+import FoldToggle from './FoldToggle.vue'
+import OnCallPanel from './OnCallPanel.vue'
 
 const columns = [
   { key: 'channel', label: '渠道', minWidth: 150 },
@@ -25,11 +29,6 @@ const columns = [
   { key: 'actions', label: '操作', minWidth: 210, headClass: 'config-sticky-actions' },
 ]
 
-const feishu = reactive({
-  enabled: false,
-  configured: false,
-  webhook_url: '',
-})
 const email = reactive({
   enabled: false,
   configured: false,
@@ -43,18 +42,16 @@ const email = reactive({
   use_tls: true,
 })
 const loaded = ref(false)
+const channelsCollapsed = ref(false)
 const table = ref<{ reset: () => void } | null>(null)
 const customWidths = ref(false)
-const editingChannel = ref<'feishu' | 'email' | null>(null)
+const editingChannel = ref<'email' | null>(null)
 
 const { busy, error, message, run } = useAsyncAction(reload)
 
 async function reload() {
   try {
     const { channels } = await fetchNotificationChannels()
-    feishu.enabled = channels.feishu.enabled
-    feishu.configured = channels.feishu.configured
-    feishu.webhook_url = ''
     email.enabled = channels.email.enabled
     email.configured = channels.email.configured
     email.smtp_host = channels.email.smtp_host
@@ -72,17 +69,6 @@ async function reload() {
 }
 
 onMounted(reload)
-
-async function saveFeishu() {
-  const ok = await run(async () => {
-    await saveFeishuChannel({
-      enabled: feishu.enabled,
-      webhook_url: feishu.webhook_url.trim(),
-    })
-    await reload()
-  }, '飞书渠道已保存')
-  if (ok) editingChannel.value = null
-}
 
 async function saveEmail() {
   const ok = await run(async () => {
@@ -103,18 +89,6 @@ async function saveEmail() {
 
 function closeEditor() {
   if (!busy.value) editingChannel.value = null
-}
-
-function testFeishu() {
-  void run(async () => {
-    await saveFeishuChannel({
-      enabled: feishu.enabled,
-      webhook_url: feishu.webhook_url.trim(),
-    })
-    await reload()
-    const result = await testNotificationChannel('feishu')
-    if (!result.ok) throw new Error(`飞书测试失败：${result.detail}`)
-  }, '飞书测试消息已发送')
 }
 
 function testEmail() {
@@ -146,9 +120,15 @@ function testEmail() {
         <h2>通知渠道</h2>
       </div>
       <div class="card-actions">
+        <FoldToggle
+          :expanded="!channelsCollapsed"
+          controls="notification-channels-body"
+          @toggle="channelsCollapsed = !channelsCollapsed"
+        />
         <button v-if="customWidths" type="button" class="plain" @click="table?.reset()">重置列宽</button>
       </div>
     </div>
+    <div v-show="!channelsCollapsed" id="notification-channels-body">
     <ResizableTable
       ref="table"
       :columns="columns"
@@ -160,20 +140,6 @@ function testEmail() {
       head-class="config-rt-head"
       @custom-change="customWidths = $event"
     >
-      <div class="record-row notification-row">
-        <div class="record-main">
-          <strong>飞书通知</strong>
-        </div>
-        <div><span :class="['tag', feishu.enabled ? 'tag-on' : 'tag-off']">{{ feishu.enabled ? '启用' : '停用' }}</span></div>
-        <div class="record-endpoint">
-          <span class="mono">open.feishu.cn / bot webhook</span>
-        </div>
-        <div><span :class="['tag', feishu.configured ? 'tag-on' : 'tag-off']">{{ feishu.configured ? '可发送' : '未配置' }}</span></div>
-        <div class="record-actions config-sticky-actions">
-          <button type="button" class="plain" :disabled="busy" @click="editingChannel = 'feishu'">编辑</button>
-          <button type="button" class="plain" :disabled="busy || !feishu.configured" @click="testFeishu">测试</button>
-        </div>
-      </div>
       <div class="record-row notification-row">
         <div class="record-main">
           <strong>邮件通知</strong>
@@ -189,39 +155,12 @@ function testEmail() {
         </div>
       </div>
     </ResizableTable>
+    </div>
   </section>
 
-  <div v-if="editingChannel === 'feishu'" class="config-modal" @click.self="closeEditor">
-    <section class="config-editor" role="dialog" aria-modal="true">
-      <header class="config-editor-head">
-        <div><p class="kicker">FEISHU</p><h2>编辑飞书通知</h2></div>
-        <button type="button" class="plain" :disabled="busy" @click="closeEditor">关闭</button>
-      </header>
-      <div class="form-grid">
-        <label class="check">
-          <input v-model="feishu.enabled" type="checkbox" />
-          启用飞书通知
-        </label>
-        <label class="wide">
-          webhook 地址
-          <input
-            v-model="feishu.webhook_url"
-            type="password"
-            autocomplete="off"
-            :placeholder="feishu.configured ? '已配置，留空表示不修改' : 'https://open.feishu.cn/open-apis/bot/v2/hook/...'"
-          />
-        </label>
-      </div>
-      <p class="desc">
-        当前状态：{{ feishu.configured ? 'webhook 已配置' : 'webhook 未配置' }}；
-        {{ feishu.enabled ? '通知已启用' : '通知已停用' }}。
-      </p>
-      <footer class="config-editor-foot">
-        <button type="button" class="plain" :disabled="busy" @click="closeEditor">取消</button>
-        <button type="button" class="primary" :disabled="busy" @click="saveFeishu">保存</button>
-      </footer>
-    </section>
-  </div>
+  <AlertAutoPanel />
+  <FeishuAppPanel />
+  <OnCallPanel />
 
   <div v-if="editingChannel === 'email'" class="config-modal" @click.self="closeEditor">
     <section class="config-editor" role="dialog" aria-modal="true">

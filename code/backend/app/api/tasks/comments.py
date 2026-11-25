@@ -15,6 +15,7 @@ router = APIRouter()
 
 class CommentBody(BaseModel):
     body: str = Field(default="", max_length=task_comments.MAX_BODY_LENGTH)
+    kind: str = "discussion"
 
 
 @router.get("/{task_id}/comments")
@@ -54,7 +55,9 @@ def create_task_comment(
     if not task:
         raise HTTPException(status_code=404, detail="没有这条任务")
     try:
-        comment = task_comments.add_comment(settings, task_id, user, body.body)
+        comment = task_comments.add_comment(
+            settings, task_id, user, body.body, kind=body.kind,
+        )
     except task_comments.CommentError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     write_investigation_event(settings, AuditEvent(
@@ -63,6 +66,7 @@ def create_task_comment(
         payload={
             "task_id": task_id,
             "comment_id": comment["id"],
+            "kind": comment.get("kind") or "discussion",
             "actor_id": int(user["id"]),
             "body_chars": len(comment["body"]),
             "mention_count": len(comment.get("mentions") or []),

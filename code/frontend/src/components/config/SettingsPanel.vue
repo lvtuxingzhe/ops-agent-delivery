@@ -15,6 +15,7 @@ import {
 } from '../../api/config'
 import { useAsyncAction } from '../../composables/useAsyncAction'
 import ResizableTable from '../ResizableTable.vue'
+import FoldToggle from './FoldToggle.vue'
 
 const columns = [
   { key: 'setting', label: '配置项', minWidth: 160 },
@@ -26,6 +27,9 @@ const columns = [
 const settings = ref<PlatformSettings>({})
 const table = ref<{ reset: () => void } | null>(null)
 const customWidths = ref(false)
+const platformCollapsed = ref(false)
+const hostKeyCollapsed = ref(true)
+const accessCollapsed = ref(true)
 const cidrsInput = ref('')
 const editing = ref<'cidrs' | 'policy' | 'readonly' | null>(null)
 const hostKeyPolicy = ref<'strict' | 'prompt' | 'off'>('prompt')
@@ -134,7 +138,17 @@ function closeEditor() {
   <p v-if="message" class="message">{{ message }}</p>
 
   <section class="card">
-    <h2>平台开关</h2>
+    <div class="card-head">
+      <h2>平台开关</h2>
+      <div class="card-actions">
+        <FoldToggle
+          :expanded="!platformCollapsed"
+          controls="platform-switches-body"
+          @toggle="platformCollapsed = !platformCollapsed"
+        />
+      </div>
+    </div>
+    <div v-show="!platformCollapsed" id="platform-switches-body">
     <ul class="switches">
       <li v-for="(label, key) in switchLabels" :key="key">
         <span>{{ label }}</span>
@@ -149,10 +163,21 @@ function closeEditor() {
         </button>
       </li>
     </ul>
+    </div>
   </section>
 
   <section class="card">
-    <h2>主机公钥校验</h2>
+    <div class="card-head">
+      <h2>主机公钥校验</h2>
+      <div class="card-actions">
+        <FoldToggle
+          :expanded="!hostKeyCollapsed"
+          controls="host-key-body"
+          @toggle="hostKeyCollapsed = !hostKeyCollapsed"
+        />
+      </div>
+    </div>
+    <div v-show="!hostKeyCollapsed" id="host-key-body">
     <ul class="switches">
       <li v-for="policy in (['prompt', 'strict', 'off'] as const)" :key="policy">
         <span>{{ hostKeyPolicyLabels[policy] }}</span>
@@ -170,15 +195,22 @@ function closeEditor() {
     <p v-if="hostKeyPolicy === 'off'" class="error">
       主机公钥校验已关闭：worker 会接受任何主机公钥，只在测试环境使用。
     </p>
+    </div>
   </section>
 
   <section class="card">
     <div class="card-head">
       <h2>登录与访问</h2>
       <div class="card-actions">
+        <FoldToggle
+          :expanded="!accessCollapsed"
+          controls="login-access-body"
+          @toggle="accessCollapsed = !accessCollapsed"
+        />
         <button v-if="customWidths" type="button" class="plain" @click="table?.reset()">重置列宽</button>
       </div>
     </div>
+    <div v-show="!accessCollapsed" id="login-access-body">
     <ResizableTable
       ref="table"
       :columns="columns"
@@ -255,6 +287,7 @@ function closeEditor() {
         </div>
       </div>
     </ResizableTable>
+    </div>
   </section>
 
   <div v-if="editing === 'cidrs'" class="config-modal" @click.self="closeEditor">

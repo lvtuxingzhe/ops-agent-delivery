@@ -251,6 +251,8 @@ export interface TaskComment {
   created_at: string
   /** 写入时解析出的被 @ 用户 ID。 */
   mentions: number[]
+  /** discussion=讨论；clue=排查线索，会进入 Agent 上下文。 */
+  kind: 'discussion' | 'clue'
 }
 
 export interface TaskCommentCursor {
@@ -281,9 +283,13 @@ export function fetchTaskComments(
   return get<TaskCommentList>(`/tasks/${taskId}/comments?${params.toString()}`)
 }
 
-/** 追加一条讨论；空白和超长正文由后端拒绝。 */
-export function addTaskComment(taskId: string, body: string): Promise<TaskComment> {
-  return post<TaskComment>(`/tasks/${taskId}/comments`, { body })
+/** 追加一条讨论或排查线索；空白和超长正文由后端拒绝。 */
+export function addTaskComment(
+  taskId: string,
+  body: string,
+  kind: 'discussion' | 'clue' = 'discussion',
+): Promise<TaskComment> {
+  return post<TaskComment>(`/tasks/${taskId}/comments`, { body, kind })
 }
 
 /** 把当前用户在这条任务下的讨论标为已读。 */
@@ -303,6 +309,51 @@ export function deleteTaskComment(
   return del<{ id: string; deleted: boolean; already: boolean }>(
     `/tasks/${taskId}/comments/${commentId}`,
   )
+}
+
+export type ReportFeedbackTarget = 'root_cause' | 'conclusion'
+export type ReportFeedbackVerdict = 'confirm' | 'reject' | 'correct'
+
+/** 一条逐条反馈：同一个人对同一目标位置只保留最新一条。 */
+export interface ReportFeedback {
+  id: string
+  task_id: string
+  target_type: ReportFeedbackTarget
+  target_index: number
+  target_text: string
+  report_hash: string
+  verdict: ReportFeedbackVerdict
+  corrected_text: string
+  note: string
+  created_by: number
+  created_by_name: string
+  created_at: string
+  updated_at: string
+}
+
+/** 读这份报告已有的逐条反馈。 */
+export async function fetchReportFeedback(
+  taskId: string,
+): Promise<{ items: ReportFeedback[] }> {
+  return get<{ items: ReportFeedback[] }>(`/tasks/${taskId}/report/feedback`)
+}
+
+/** 对根因或某条结论写反馈；同一人同一位置覆盖旧判断。 */
+export function submitReportFeedback(
+  taskId: string,
+  targetType: ReportFeedbackTarget,
+  targetIndex: number,
+  verdict: ReportFeedbackVerdict,
+  correctedText = '',
+  note = '',
+): Promise<ReportFeedback> {
+  return post<ReportFeedback>(`/tasks/${taskId}/report/feedback`, {
+    target_type: targetType,
+    target_index: targetIndex,
+    verdict,
+    corrected_text: correctedText,
+    note,
+  })
 }
 
 export interface AssignableUser {

@@ -1,9 +1,9 @@
-"""飞书 / 邮件通知渠道配置与发送。
+"""邮件通知渠道配置与发送。
 
 配置存在 `v3_configs`（namespace='notify_channel'），不新建表：
-* 飞书 webhook URL 和 SMTP 密码用 Fernet 加密后再落 JSONB；
+* SMTP 密码用 Fernet 加密后再落 JSONB；
 * 对外响应只返回 `*_set` / 主机 / 收件人等非秘密字段，绝不回显秘密；
-* 发送超时 5 秒，失败只记安全错误类型，不把带 token 的 URL 写进日志。
+* 发送超时 5 秒，失败只记安全错误类型，不把密码写进日志。
 """
 
 from __future__ import annotations
@@ -14,8 +14,6 @@ import os
 import smtplib
 import ssl
 import urllib.error
-import urllib.parse
-import urllib.request
 import uuid
 from email.message import EmailMessage
 from typing import Any
@@ -30,12 +28,12 @@ from ..core.security import SecretBox
 
 logger = logging.getLogger(__name__)
 NAMESPACE = "notify_channel"
-CHANNELS = ("feishu", "email")
+CHANNELS = ("email",)
 TIMEOUT_SECONDS = 5
 
 
 class ChannelError(Exception):
-    """渠道配置错误；消息不含 webhook/password。"""
+    """渠道配置错误；消息不含 password。"""
 
 
 def _box(settings: Settings) -> SecretBox:
@@ -83,9 +81,9 @@ def _save(conn: Any, *, channel: str, value: dict, enabled: bool,
     ))
 
 
-def _split_addrs(raw: str | list[str]) -> list[str]:
+def _split_addrs(raw_value: str | list[str]) -> list[str]:
     """收件人支持逗号/分号；返回去空列表。"""
-    parts = raw if isinstance(raw, list) else raw.replace(";", ",").split(",")
+    parts = raw_value if isinstance(raw_value, list) else raw_value.replace(";", ",").split(",")
     return [str(part).strip() for part in parts if str(part).strip()]
 
 
@@ -97,25 +95,11 @@ def _safe_host(value: str, *, field: str) -> str:
     return value
 
 
-def _validate_webhook(url: str) -> str:
-    """webhook 只允许 http/https；不在错误消息里回显 URL。"""
-    url = url.strip()
-    parsed = urllib.parse.urlparse(url)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        raise ChannelError("webhook_invalid")
-    return url
-
-
 def get_channels(settings: Settings) -> dict:
     """给管理页看的脱敏配置。"""
     with connect_app(settings) as conn:
-        feishu_value, feishu_enabled = _load_raw(conn, "feishu")
         email_value, email_enabled = _load_raw(conn, "email")
     return {
-        "feishu": {
-            "enabled": feishu_enabled,
-            "configured": bool(feishu_value.get("webhook_url_enc")),
-        },
         "email": {
             "enabled": email_enabled,
             "configured": bool(email_value.get("smtp_host")
@@ -130,28 +114,6 @@ def get_channels(settings: Settings) -> dict:
             "password_set": bool(email_value.get("smtp_password_enc")),
         },
     }
-
-
-def update_feishu(settings: Settings, *, actor_id: int, enabled: bool,
-                  webhook_url: str = "") -> dict:
-    """保存飞书渠道；空 webhook 表示保留原值，支持只改启停。"""
-    box = _box(settings)
-    with connect_app(settings) as conn:
-        with conn.transaction():
-            current, _ = _load_raw(conn, "feishu")
-            if webhook_url.strip():
-                encrypted = box.encrypt(_validate_webhook(webhook_url))
-            else:
-                encrypted = str(current.get("webhook_url_enc", ""))
-            if enabled and not encrypted:
-                raise ChannelError("feishu_webhook_required")
-            value = {"webhook_url_enc": encrypted}
-            _save(
-                conn, channel="feishu", value=value, enabled=enabled,
-                actor_id=actor_id, trace_id=f"notify-config-{uuid.uuid4()}",
-                event_type="notify.channel.updated",
-            )
-    return get_channels(settings)["feishu"]
 
 
 def update_email(settings: Settings, *, actor_id: int, enabled: bool,
@@ -201,43 +163,10 @@ def update_email(settings: Settings, *, actor_id: int, enabled: bool,
 
 
 def _safe_error(exc: Exception) -> str:
-    """只回错误类型，绝不把 webhook URL / SMTP 密码拼进错误消息。"""
+    """只回错误类型，绝不把 SMTP 密码拼进错误消息。"""
     if isinstance(exc, urllib.error.HTTPError):
         return f"http_{exc.code}"
     return type(exc).__name__
-
-
-def _feishu_payload(text: str) -> dict:
-    """飞书群机器人文本消息体；不包含任何 HTML。"""
-    return {"msg_type": "text", "content": {"text": text[:1800]}}
-
-
-def _post_json(url: str, payload: dict) -> tuple[bool, str]:
-    """统一 HTTP POST；不把 URL 写进异常消息。"""
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    request = urllib.request.Request(
-        url,
-        data=body,
-        headers={"Content-Type": "application/json; charset=utf-8"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
-            raw = response.read(2048).decode("utf-8", "replace")
-            if response.status != 200:
-                return False, f"http_{response.status}"
-    except Exception as exc:
-        return False, _safe_error(exc)
-
-    # 飞书返回 code=0 表示成功；本地假服务或其它 webhook 允许空/非 JSON 200。
-    try:
-        data = json.loads(raw) if raw.strip() else {}
-    except json.JSONDecodeError:
-        return True, "ok"
-    code = data.get("code")
-    if code is not None and code != 0:
-        return False, f"feishu_code_{code}"
-    return True, "ok"
 
 
 def _send_with_settings(settings: Settings, channel: str, text: str,
@@ -248,60 +177,46 @@ def _send_with_settings(settings: Settings, channel: str, text: str,
         value, enabled = _load_raw(conn, channel)
     if not force and not enabled:
         return False, "disabled"
-    if channel == "feishu":
-        encrypted = str(value.get("webhook_url_enc", ""))
-        if not encrypted:
-            return False, "not_configured"
+    if channel != "email":
+        return False, "unknown_channel"
+
+    host = str(value.get("smtp_host", ""))
+    recipients = _split_addrs(value.get("to_addrs", []))
+    if not host or not recipients:
+        return False, "not_configured"
+    message = EmailMessage()
+    message["Subject"] = "运维 Agent 通知"
+    message["From"] = str(value.get("from_addr", ""))
+    message["To"] = ", ".join(recipients)
+    message.set_content(text[:5000])
+    user = str(value.get("smtp_user", ""))
+    password = ""
+    encrypted = str(value.get("smtp_password_enc", ""))
+    if encrypted:
         try:
-            url = box.decrypt(encrypted)
+            password = box.decrypt(encrypted)
         except Exception:
             return False, "decrypt_failed"
-        return _post_json(url, _feishu_payload(text))
-
-    if channel == "email":
-        host = str(value.get("smtp_host", ""))
-        recipients = _split_addrs(value.get("to_addrs", []))
-        if not host or not recipients:
-            return False, "not_configured"
-        message = EmailMessage()
-        message["Subject"] = "运维 Agent 通知"
-        message["From"] = str(value.get("from_addr", ""))
-        message["To"] = ", ".join(recipients)
-        message.set_content(text[:5000])
-        user = str(value.get("smtp_user", ""))
-        password = ""
-        encrypted = str(value.get("smtp_password_enc", ""))
-        if encrypted:
-            try:
-                password = box.decrypt(encrypted)
-            except Exception:
-                return False, "decrypt_failed"
-        port = int(value.get("smtp_port", 587))
-        try:
-            if port == 465:
-                smtp = smtplib.SMTP_SSL(
-                    host, port, timeout=TIMEOUT_SECONDS,
-                    context=ssl.create_default_context(),
-                )
-            else:
-                smtp = smtplib.SMTP(host, port, timeout=TIMEOUT_SECONDS)
-            with smtp:
+    port = int(value.get("smtp_port", 587))
+    try:
+        if port == 465:
+            smtp = smtplib.SMTP_SSL(
+                host, port, timeout=TIMEOUT_SECONDS,
+                context=ssl.create_default_context(),
+            )
+        else:
+            smtp = smtplib.SMTP(host, port, timeout=TIMEOUT_SECONDS)
+        with smtp:
+            smtp.ehlo()
+            if value.get("use_tls", True) and port != 465:
+                smtp.starttls(context=ssl.create_default_context())
                 smtp.ehlo()
-                if value.get("use_tls", True) and port != 465:
-                    smtp.starttls(context=ssl.create_default_context())
-                    smtp.ehlo()
-                if user and password:
-                    smtp.login(user, password)
-                smtp.send_message(message)
-        except Exception as exc:
-            return False, _safe_error(exc)
-        return True, "ok"
-    return False, "unknown_channel"
-
-
-def send_feishu(settings: Settings, text: str) -> tuple[bool, str]:
-    """按当前配置发飞书消息；未启用直接返回 disabled。"""
-    return _send_with_settings(settings, "feishu", text)
+            if user and password:
+                smtp.login(user, password)
+            smtp.send_message(message)
+    except Exception as exc:
+        return False, _safe_error(exc)
+    return True, "ok"
 
 
 def send_email(settings: Settings, text: str) -> tuple[bool, str]:

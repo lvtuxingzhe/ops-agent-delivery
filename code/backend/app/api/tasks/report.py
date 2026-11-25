@@ -7,14 +7,29 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import PlainTextResponse, Response
+from pydantic import BaseModel, Field
 
 from ...core.audit import AuditEvent
 from ...core.audit_v3 import write_investigation_event
-from ...services import investigation_service, report_export, screenshot_storage, task_access
+from ...services import (
+    investigation_service,
+    report_export,
+    report_feedback,
+    screenshot_storage,
+    task_access,
+)
 from ...services.screenshot_storage import ScreenshotStorageError
 from ..auth import get_current_user, require_roles
 
 router = APIRouter()
+
+
+class FeedbackBody(BaseModel):
+    target_type: str = Field(default="", max_length=32)
+    target_index: int = Field(default=-1, ge=-1, le=1000)
+    verdict: str = Field(default="", max_length=16)
+    corrected_text: str = Field(default="", max_length=report_feedback.MAX_CORRECTED_LENGTH)
+    note: str = Field(default="", max_length=report_feedback.MAX_NOTE_LENGTH)
 
 @router.get("/{task_id}/report")
 def read_report(
@@ -32,6 +47,63 @@ def read_report(
     if not report:
         raise HTTPException(status_code=404, detail="没有这份报告")
     return report
+
+
+@router.get("/{task_id}/report/feedback")
+def read_report_feedback(
+    task_id: str,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """读这份报告的逐条反馈；前端按当前用户高亮自己的判断。"""
+    require_roles(user, {"admin", "investigator", "auditor", "oncall"})
+    settings = request.app.state.settings
+    if not task_access.load_visible_task(settings, task_id, user):
+        raise HTTPException(status_code=404, detail="没有这条任务")
+    return {"items": report_feedback.list_feedback(settings, task_id)}
+
+
+@router.post("/{task_id}/report/feedback", status_code=201)
+def create_report_feedback(
+    task_id: str,
+    body: FeedbackBody,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """对根因或某条结论写反馈；同一人同一位置覆盖为最新判断。"""
+    require_roles(user, {"admin", "investigator", "auditor", "oncall"})
+    settings = request.app.state.settings
+    task = task_access.load_visible_task(settings, task_id, user)
+    if not task:
+        raise HTTPException(status_code=404, detail="没有这条任务")
+    report = investigation_service.get_report(settings, task_id, viewer=user)
+    if not report:
+        raise HTTPException(status_code=404, detail="没有这份报告")
+    try:
+        item = report_feedback.submit_feedback(
+            settings, task_id, user, report,
+            target_type=body.target_type,
+            target_index=body.target_index,
+            verdict=body.verdict,
+            corrected_text=body.corrected_text,
+            note=body.note,
+        )
+    except report_feedback.FeedbackError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    write_investigation_event(settings, AuditEvent(
+        trace_id=str(task.get("trace_id") or f"feedback-{task_id}"),
+        event_type="task.report_feedback_submitted",
+        payload={
+            "task_id": task_id,
+            "actor_id": int(user["id"]),
+            "target_type": item["target_type"],
+            "target_index": item["target_index"],
+            "verdict": item["verdict"],
+            "corrected_chars": len(item["corrected_text"]),
+            "note_chars": len(item["note"]),
+        },
+    ))
+    return item
 
 
 @router.get("/{task_id}/screenshots/{screenshot_id}")

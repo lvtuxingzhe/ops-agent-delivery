@@ -21,10 +21,15 @@ import {
   fetchTaskComments,
   fetchTaskReport,
   fetchTaskTrace,
+  fetchReportFeedback,
   markTaskCommentsRead,
+  submitReportFeedback,
   terminateExecution,
   type AssignableUser,
   type ExecutionView,
+  type ReportFeedback,
+  type ReportFeedbackTarget,
+  type ReportFeedbackVerdict,
   type TaskComment,
   type TaskCommentCursor,
   type TaskInfo,
@@ -78,11 +83,15 @@ export function useTaskDetail() {
   const commentsCursor = ref<TaskCommentCursor | null>(null)
   const commentUnreadNotice = ref(0)
   const commentBody = ref('')
+  const commentKind = ref<'discussion' | 'clue'>('discussion')
   const commentLoading = ref(false)
   const commentSaving = ref(false)
   const commentDeletingId = ref('')
   const commentError = ref('')
   let commentSeq = 0
+  const reportFeedback = ref<ReportFeedback[]>([])
+  const feedbackSaving = ref('')
+  const feedbackError = ref('')
   const assignableUsers = ref<AssignableUser[]>([])
   const selectedAssigneeId = ref<number | null>(null)
   const assigning = ref(false)
@@ -442,8 +451,66 @@ export function useTaskDetail() {
     }
   }
 
-  async function loadComments(appendOlder = false): Promise<void> {
-    const requestedId = taskId.value
+  function myReportFeedback(
+    target: ReportFeedbackTarget,
+    index: number,
+  ): ReportFeedback | undefined {
+    const uid = me.value?.id
+    if (!uid) return undefined
+    return reportFeedback.value.find((item) => (
+      item.target_type === target
+      && Number(item.target_index) === index
+      && Number(item.created_by) === Number(uid)
+    ))
+  }
+
+  async function loadReportFeedback(id: string): Promise<void> {
+    try {
+      const loaded = await fetchReportFeedback(id)
+      if (taskId.value === id) reportFeedback.value = loaded.items
+    } catch {
+      // 反馈是报告阅读的辅助信息；接口失败不影响正文。
+    }
+  }
+
+  async function sendReportFeedback(payload: {
+    targetType: ReportFeedbackTarget
+    targetIndex: number
+    verdict: ReportFeedbackVerdict
+    correctedText: string
+    note: string
+  }): Promise<void> {
+    const id = taskId.value
+    if (!id || feedbackSaving.value) return
+    const key = `${payload.targetType}-${payload.targetIndex}`
+    feedbackSaving.value = key
+    feedbackError.value = ''
+    try {
+      const saved = await submitReportFeedback(
+        id,
+        payload.targetType,
+        payload.targetIndex,
+        payload.verdict,
+        payload.correctedText,
+        payload.note,
+      )
+      if (taskId.value !== id) return
+      reportFeedback.value = [
+        ...reportFeedback.value.filter((item) => !(
+          Number(item.created_by) === Number(saved.created_by)
+          && item.target_type === saved.target_type
+          && Number(item.target_index) === Number(saved.target_index)
+        )),
+        saved,
+      ]
+    } catch (err) {
+      feedbackError.value = err instanceof Error ? err.message : '反馈保存失败'
+    } finally {
+      if (taskId.value === id) feedbackSaving.value = ''
+    }
+  }
+
+  async function loadComments(appendOlder = false): Promise<void> {    const requestedId = taskId.value
     const seq = ++commentSeq
     if (!requestedId) return
     commentLoading.value = true
@@ -548,10 +615,11 @@ export function useTaskDetail() {
     commentSaving.value = true
     commentError.value = ''
     try {
-      const created = await addTaskComment(requestedId, text)
+      const created = await addTaskComment(requestedId, text, commentKind.value)
       if (taskId.value !== requestedId) return
       comments.value.push(created)
       commentBody.value = ''
+      commentKind.value = 'discussion'
     } catch (err) {
       commentError.value = err instanceof ApiError ? err.message : '评论提交失败'
     } finally {
@@ -616,6 +684,9 @@ export function useTaskDetail() {
       execution.value = null
       liveTrace.value = []
       liveTraceCursor = 0
+      reportFeedback.value = []
+      feedbackSaving.value = ''
+      feedbackError.value = ''
       comments.value = []
       commentsTruncated.value = false
       commentsHasMore.value = false
@@ -656,6 +727,7 @@ export function useTaskDetail() {
       const loadedReport = await fetchTaskReport(requestedId)
       if (seq !== loadSeq || taskId.value !== requestedId) return
       report.value = loadedReport
+      void loadReportFeedback(requestedId)
     } catch (err) {
       if (!(err instanceof ApiError && err.status === 404)) {
         if (seq === loadSeq && !silent) {
@@ -710,10 +782,16 @@ export function useTaskDetail() {
     commentsHasMore,
     commentUnreadNotice,
     commentBody,
+    commentKind,
     commentLoading,
     commentSaving,
     commentDeletingId,
     commentError,
+    reportFeedback,
+    feedbackSaving,
+    feedbackError,
+    myReportFeedback,
+    sendReportFeedback,
     canComment,
     canAssign,
     canDeleteComment,

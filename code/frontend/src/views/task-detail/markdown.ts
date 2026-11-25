@@ -145,8 +145,13 @@ export function formatSolutionMarkdown(source: string): string {
 }
 
 export function formatRootCauseMarkdown(source: string): string {
-  const trimmed = source.trim()
+  let trimmed = source.trim()
   if (!trimmed) return ''
+  // 模型有时把换行写成字面量 "\n"；只有出现 "\n2." 这类编号列表时才还原，
+  // 避免误伤 Windows 路径里的 "\n"（例如 C:\nginx）。
+  if (/\\n\s*\d+[.、]/.test(trimmed)) {
+    trimmed = trimmed.replace(/\\r\\n|\\n/g, '\n').trim()
+  }
   // 已经是编号列表的报告不再重排，避免破坏模型给出的因果顺序。
   if (/^\s*\d+[.、]\s*/m.test(trimmed)) return trimmed
 

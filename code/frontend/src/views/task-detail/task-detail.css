@@ -2323,6 +2323,29 @@
   font-size: calc(11px * var(--font-scale, 1));
 }
 
+.comment-clue {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--accent, #2563eb);
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 600;
+}
+
+.comment-clue-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 10px;
+  color: var(--ink-2);
+  font-size: calc(12px * var(--font-scale, 1));
+  line-height: 1.5;
+}
+
+.comment-clue-toggle input {
+  margin-top: 2px;
+}
+
 .comment-delete {
   padding: 2px 8px;
   color: var(--muted);

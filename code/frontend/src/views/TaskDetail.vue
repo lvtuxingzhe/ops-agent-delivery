@@ -16,10 +16,14 @@ import { evidenceProbeLabel, evidenceTargetLabel } from './task-detail/evidenceP
 import { useTaskDetail } from './task-detail/useTaskDetail'
 import { useAnswerPresentation } from './task-detail/useAnswerPresentation'
 import ConclusionPointsCard from './task-detail/components/ConclusionPointsCard.vue'
+import ReportFeedback from './task-detail/components/ReportFeedback.vue'
 import EvidenceRefs from './task-detail/components/EvidenceRefs.vue'
 import IncidentalFindingsCard from './task-detail/components/IncidentalFindingsCard.vue'
 import LiveProcessCard from './task-detail/components/LiveProcessCard.vue'
 import ServiceInventoryCard from './task-detail/components/ServiceInventoryCard.vue'
+import TaskCommentsCard from './task-detail/components/TaskCommentsCard.vue'
+import TaskDetailHeader from './task-detail/components/TaskDetailHeader.vue'
+import TaskDetailOverview from './task-detail/components/TaskDetailOverview.vue'
 
 const {
   DETAIL_TABS,
@@ -36,6 +40,7 @@ const {
   commentsHasMore,
   commentUnreadNotice,
   commentBody,
+  commentKind,
   commentLoading,
   commentSaving,
   commentDeletingId,
@@ -75,6 +80,11 @@ const {
   statusBadge,
   aiLabel,
   conclusions,
+  reportFeedback,
+  feedbackSaving,
+  feedbackError,
+  myReportFeedback,
+  sendReportFeedback,
   knowledge,
   knowledgeScore,
   knowledgeVerdictLabel,
@@ -143,257 +153,56 @@ const {
   <div class="page-stack">
     <p v-if="error" class="error">{{ error }}</p>
 
-    <section class="card detail-head">
-      <div class="detail-title">
-        <h2>
-          {{ task?.title || '排查详情' }}
-          <span v-if="task" class="badge" :class="statusBadge.tone">{{ statusBadge.label }}</span>
-        </h2>
-        <p class="desc mono">{{ taskId }}</p>
-        <p v-if="task?.assignee" class="assignee-line">
-          处理人：{{ assigneeLabel }}
-        </p>
-        <div v-if="task && canAssign" class="assign-bar">
-          <label for="task-assignee">转派给</label>
-          <select id="task-assignee" v-model.number="selectedAssigneeId">
-            <option :value="null">选择处理人</option>
-            <option v-for="item in assignableUsers" :key="item.id" :value="item.id">
-              {{ item.display_name || item.username }}
-            </option>
-          </select>
-          <button
-            type="button"
-            class="ghost"
-            :disabled="assigning || !selectedAssigneeId"
-            @click="assignSelected"
-          >
-            {{ assigning ? '转派中…' : '转派' }}
-          </button>
-          <span v-if="assignError" class="action-error">{{ assignError }}</span>
-        </div>
-      </div>
-      <div v-if="task" class="meta-line">
-        <span class="meta-item">
-          <span class="meta-label">提交人</span>
-          <span class="meta-value">{{ task.submitted_by_name || task.submitted_by }}</span>
-        </span>
-        <span class="meta-sep" aria-hidden="true">|</span>
-        <span class="meta-item">
-          <span class="meta-label">提交时间</span>
-          <span class="meta-value">{{ formatTime(task.created_at) }}</span>
-        </span>
-        <span class="meta-sep" aria-hidden="true">|</span>
-        <span class="meta-item">
-          <span class="meta-label">结束时间</span>
-          <span class="meta-value">{{ formatTime(task.closed_at) }}</span>
-        </span>
-        <template v-if="task.outcome">
-          <span class="meta-sep" aria-hidden="true">|</span>
-          <span class="meta-item">
-            <span class="meta-label">执行结果</span>
-            <span class="meta-value" :class="{ 'meta-danger': task.outcome === 'failed' }">{{ outcomeLabel }}</span>
-          </span>
-        </template>
-      </div>
-
-      <p v-if="task" class="next-action-line">
-        <span class="next-action-label">下一步</span>
-        <strong v-if="nextAction.title !== statusBadge.label">{{ nextAction.title }}</strong>
-        <span class="next-action-text">{{ nextAction.text }}</span>
-        <button
-          v-if="nextAction.cta"
-          class="secondary next-action-cta"
-          type="button"
-          @click="handleNextAction"
-        >
-          {{ nextAction.cta }}
-        </button>
-      </p>
-
-      <div class="head-toolbar">
-        <div class="head-links">
-          <router-link
-            v-if="task"
-            class="back-link"
-            :to="{ name: 'audit', query: { trace_id: task.trace_id } }"
-          >
-            查审计
-          </router-link>
-          <router-link class="back-link" to="/tasks">返回排查</router-link>
-          <router-link
-            v-if="task?.status === 'report_ready' && canDispose"
-            class="disposition-link"
-            :to="{ name: 'task-disposition', params: { id: taskId } }"
-          >
-            创建处置方案
-          </router-link>
-        </div>
-
-        <div v-if="report && hasReportContent" class="head-export">
-          <span class="head-export-label">报告导出</span>
-          <button class="ghost" type="button" :disabled="Boolean(exporting)" @click="downloadReport('md')">
-            {{ exporting === 'md' ? '导出中…' : 'Markdown' }}
-          </button>
-          <button class="ghost" type="button" :disabled="Boolean(exporting)" @click="downloadReport('pdf')">
-            {{ exporting === 'pdf' ? '导出中…' : 'PDF' }}
-          </button>
-          <button class="ghost" type="button" :disabled="Boolean(exporting)" @click="downloadReport('docx')">
-            {{ exporting === 'docx' ? '导出中…' : 'Word' }}
-          </button>
-        </div>
-
-        <div v-if="task?.status === 'executing' && isAdmin" class="head-danger">
-          <button
-            class="danger"
-            type="button"
-            :disabled="terminating"
-            @click="terminateRun"
-          >
-            {{ terminating ? '终止中…' : confirmingTerminate ? '确认终止' : '终止执行' }}
-          </button>
-          <button
-            v-if="confirmingTerminate"
-            class="muted-text"
-            type="button"
-            :disabled="terminating"
-            @click="confirmingTerminate = false"
-          >
-            取消
-          </button>
-        </div>
-
-        <div v-if="task?.status === 'awaiting_approval'" class="head-danger">
-          <span v-if="confirmingWithdraw" class="secondary-hint">确认后本次排查结束，不会执行任何命令。</span>
-          <button
-            class="danger-text"
-            type="button"
-            :disabled="canceling"
-            @click="withdrawTask"
-          >
-            {{ canceling ? '取消中…' : confirmingWithdraw ? '确认取消' : '取消本次排查' }}
-          </button>
-          <button
-            v-if="confirmingWithdraw"
-            class="muted-text"
-            type="button"
-            :disabled="canceling"
-            @click="confirmingWithdraw = false"
-          >
-            取消
-          </button>
-        </div>
-      </div>
-
-      <p v-if="exportError" class="export-error">{{ exportError }}</p>
-      <p v-if="actionNotice" class="action-notice">{{ actionNotice }}</p>
-      <p v-if="actionError" class="action-error">{{ actionError }}</p>
-    </section>
+    <TaskDetailHeader
+      :task="task"
+      :task-id="taskId"
+      :status-badge="statusBadge"
+      :assignee-label="assigneeLabel"
+      :can-assign="canAssign"
+      :assignable-users="assignableUsers"
+      v-model:selectedAssigneeId="selectedAssigneeId"
+      :assigning="assigning"
+      :assign-error="assignError"
+      :format-time="formatTime"
+      :outcome-label="outcomeLabel"
+      :next-action="nextAction"
+      :can-dispose="canDispose"
+      :report="report"
+      :has-report-content="hasReportContent"
+      :exporting="exporting"
+      :export-error="exportError"
+      :action-notice="actionNotice"
+      :action-error="actionError"
+      :is-admin="isAdmin"
+      :terminating="terminating"
+      v-model:confirmingTerminate="confirmingTerminate"
+      v-model:confirmingWithdraw="confirmingWithdraw"
+      :canceling="canceling"
+      @assign-selected="assignSelected"
+      @handle-next-action="handleNextAction"
+      @download-report="downloadReport"
+      @terminate-run="terminateRun"
+      @withdraw-task="withdrawTask"
+    />
 
     <div class="detail-layout">
       <div class="detail-main">
 
-    <section v-if="loading" class="card"><p class="desc">加载中…</p></section>
-
-    <section v-else-if="isDeployment" class="card deployment-bridge">
-      <h2>这是一条部署任务</h2>
-      <p class="desc">
-        部署执行结果和逐条命令回显已从排查报告里拆出，统一放在「部署 → 执行报告」。
-        排查报告只描述主机事实与判断依据，不再和部署结果混在同一页。
-      </p>
-      <router-link
-        class="primary inline-link"
-        :to="{ name: 'deployments', query: { tab: 'records', task: taskId } }"
-      >
-        查看部署执行报告 →
-      </router-link>
-    </section>
-
-    <section v-else-if="!showDetailTabs" class="card report-empty">
-      <div class="empty-state">
-        <span class="empty-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M6 3h9l3 3v15H6z" />
-            <path d="M15 3v3h3M9 10h6M9 14h6M9 18h4" />
-          </svg>
-        </span>
-        <h2>
-          {{
-            task?.status === 'running' || task?.status === 'draft'
-              ? 'Agent 正在排查'
-              : report
-                ? '这份报告还没有结论与证据'
-                : '报告与证据还没有生成'
-          }}
-        </h2>
-        <p v-if="task?.status === 'running' || task?.status === 'draft'">
-          Agent 正在执行；过程事件到达后会实时显示在「过程与参考」标签页。报告完成后，结论、证据快照和完整轨迹会一起归档。
-        </p>
-        <p v-else-if="report">
-          报告已生成，但当前没有可用的结论和证据快照。建议补充数据源后重新排查，不要直接批准执行。
-        </p>
-        <p v-else>
-          Agent 完成排查后，结论和证据快照会自动出现在这里。可以稍后刷新，或先回排查列表查看进度。
-        </p>
-        <p v-if="report && task?.status === 'awaiting_approval'" class="empty-risk">
-          当前报告没有结论与证据，不建议直接批准执行。
-        </p>
-      </div>
-    </section>
-
-    <nav v-if="showDetailTabs" class="detail-tabs" role="tablist" aria-label="排查详情分区">
-      <button
-        id="tab-btn-summary"
-        type="button"
-        class="detail-tab"
-        :class="{ 'is-active': activeTab === 'summary' }"
-        role="tab"
-        :aria-selected="activeTab === 'summary'"
-        aria-controls="tab-summary"
-        @click="selectDetailTab('summary')"
-      >
-        结论
-      </button>
-      <button
-        id="tab-btn-solution"
-        type="button"
-        class="detail-tab"
-        :class="{ 'is-active': activeTab === 'solution' }"
-        role="tab"
-        :aria-selected="activeTab === 'solution'"
-        aria-controls="tab-solution"
-        @click="selectDetailTab('solution')"
-      >
-        方案
-        <span v-if="solutionCount" class="tab-count">{{ solutionCount }}</span>
-      </button>
-      <button
-        id="tab-btn-evidence"
-        type="button"
-        class="detail-tab"
-        :class="{ 'is-active': activeTab === 'evidence' }"
-        role="tab"
-        :aria-selected="activeTab === 'evidence'"
-        aria-controls="tab-evidence"
-        @click="selectDetailTab('evidence')"
-      >
-        证据
-        <span v-if="evidenceCount" class="tab-count">{{ evidenceCount }}/{{ realEvidences.length }}</span>
-      </button>
-      <button
-        id="tab-btn-process"
-        type="button"
-        class="detail-tab"
-        :class="{ 'is-active': activeTab === 'process' }"
-        role="tab"
-        :aria-selected="activeTab === 'process'"
-        aria-controls="tab-process"
-        @click="selectDetailTab('process')"
-      >
-        过程与参考
-        <span v-if="trace.length" class="tab-count">{{ trace.length }}</span>
-        <span v-if="knowledge.length" class="tab-count">+{{ knowledge.length }}</span>
-      </button>
-    </nav>
+    <TaskDetailOverview
+      :loading="loading"
+      :is-deployment="isDeployment"
+      :task-id="taskId"
+      :task="task"
+      :show-detail-tabs="showDetailTabs"
+      :report="report"
+      :active-tab="activeTab"
+      :solution-count="solutionCount"
+      :evidence-count="evidenceCount"
+      :real-evidence-count="realEvidences.length"
+      :trace-count="trace.length"
+      :knowledge-count="knowledge.length"
+      @select-detail-tab="selectDetailTab"
+    />
 
     <section v-if="showDetailTabs && activeTab === 'summary'" id="tab-summary" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-summary">
       <LiveProcessCard
@@ -517,6 +326,15 @@ const {
             </div>
           </div>
         </div>
+
+        <ReportFeedback
+          v-if="report.root_cause && !rootCauseIsIncidentalFallback"
+          target-type="root_cause"
+          :target-index="0"
+          :feedback="myReportFeedback('root_cause', 0)"
+          :saving="feedbackSaving === 'root_cause-0'"
+          @submit="sendReportFeedback"
+        />
 
         <div v-if="report.next_step" class="ai-next-step">
           <span class="section-kicker">建议下一步</span>
@@ -693,9 +511,17 @@ const {
                 />
                 <span v-if="!item.evidence_ids?.length" class="desc">未关联证据</span>
               </div>
+              <ReportFeedback
+                target-type="conclusion"
+                :target-index="item.index"
+                :feedback="myReportFeedback('conclusion', item.index)"
+                :saving="feedbackSaving === `conclusion-${item.index}`"
+                @submit="sendReportFeedback"
+              />
             </article>
           </div>
         </section>
+        <p v-if="feedbackError" class="error report-feedback-error">{{ feedbackError }}</p>
         <p v-if="untrustedCount" class="excluded-line">
           另有 {{ untrustedCount }} 条 AI 结论基于演练/示例数据，已排除，不参与判断。
         </p>
@@ -909,74 +735,24 @@ const {
     >
       <p class="desc">这次排查没有过程轨迹、执行结果或历史参考。</p>
     </section>
-    <section v-if="!isDeployment && !loading" class="card comment-card">
-      <div class="card-head">
-        <div>
-          <h2>协作讨论</h2>
-          <p class="desc">
-            围绕这条任务留结论、补充现场信息或交接说明；支持 @用户名 提醒，评论可撤回，正文不做编辑。
-          </p>
-        </div>
-        <span class="badge badge-muted">{{ comments.length }} 条</span>
-      </div>
-
-      <p v-if="commentLoading" class="desc">正在读取讨论…</p>
-      <p v-else-if="!comments.length" class="desc">还没有讨论，可以先补充一条现场信息。</p>
-      <p v-if="commentUnreadNotice" class="comment-note">
-        本次进入前有 {{ commentUnreadNotice }} 条未读，已自动标记为已读。
-      </p>
-      <p v-if="commentsHasMore" class="comment-note">
-        <button type="button" class="ghost comment-more" :disabled="commentLoading" @click="loadComments(true)">
-          加载更早的讨论
-        </button>
-      </p>
-      <ol v-if="comments.length" class="comment-list">
-        <li v-for="item in comments" :key="item.id" class="comment-item">
-          <div class="comment-head">
-            <strong>{{ item.author_name || `用户 ${item.author_id}` }}</strong>
-            <span v-if="item.mentions?.length" class="comment-mention">
-              提到 {{ item.mentions.length }} 人
-            </span>
-            <span class="comment-time">{{ formatTime(item.created_at) }}</span>
-            <button
-              v-if="canDeleteComment(item)"
-              type="button"
-              class="ghost comment-delete"
-              :disabled="commentDeletingId === item.id"
-              @click="removeComment(item)"
-            >
-              {{ commentDeletingId === item.id ? '撤回中…' : '撤回' }}
-            </button>
-          </div>
-          <p class="comment-body">{{ item.body }}</p>
-        </li>
-      </ol>
-
-      <p v-if="commentError" class="action-error">{{ commentError }}</p>
-      <div v-if="canComment" class="comment-compose">
-        <label class="comment-label" for="task-comment-body">写一条讨论</label>
-        <textarea
-          id="task-comment-body"
-          v-model="commentBody"
-          maxlength="2000"
-          rows="3"
-          placeholder="例如：已核对 host-150 的磁盘增长，建议先清理 /var/log。"
-          @keydown.ctrl.enter.prevent="submitComment"
-        />
-        <div class="comment-actions">
-          <span class="comment-count">{{ commentBody.trim().length }}/2000</span>
-          <button
-            type="button"
-            class="primary"
-            :disabled="commentSaving || !commentBody.trim()"
-            @click="submitComment"
-          >
-            {{ commentSaving ? '提交中…' : '提交讨论' }}
-          </button>
-        </div>
-      </div>
-      <p v-else class="desc">当前账号只能查看讨论，不能发言。</p>
-    </section>
+    <TaskCommentsCard
+      v-if="!isDeployment && !loading"
+      :comments="comments"
+      :comment-loading="commentLoading"
+      :comment-unread-notice="commentUnreadNotice"
+      :comments-has-more="commentsHasMore"
+      :comment-deleting-id="commentDeletingId"
+      :comment-error="commentError"
+      :can-comment="canComment"
+      v-model:comment-body="commentBody"
+      v-model:comment-kind="commentKind"
+      :comment-saving="commentSaving"
+      :format-time="formatTime"
+      :can-delete-comment="canDeleteComment"
+      @load-more="loadComments(true)"
+      @remove-comment="removeComment"
+      @submit-comment="submitComment"
+    />
       </div>
     </div>
   </div>

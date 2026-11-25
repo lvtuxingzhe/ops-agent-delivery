@@ -14,6 +14,7 @@ router = APIRouter()
 
 
 def _bearer_token(request: Request) -> str:
+    """从 Authorization 头提取 Bearer 令牌；格式不对返回空串。"""
     header = request.headers.get("authorization") or ""
     if not header.lower().startswith("bearer "):
         return ""
@@ -35,11 +36,11 @@ async def alertmanager_webhook(request: Request):
     content_length = request.headers.get("content-length")
     if content_length and content_length.isdigit() and int(content_length) > max_bytes:
         raise HTTPException(status_code=413, detail="payload_too_large")
-    raw = await request.body()
-    if len(raw) > max_bytes:
+    raw_body = await request.body()
+    if len(raw_body) > max_bytes:
         raise HTTPException(status_code=413, detail="payload_too_large")
     try:
-        payload = json.loads(raw or b"{}")
+        payload = json.loads(raw_body or b"{}")
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=400, detail="invalid json") from exc
     if not isinstance(payload, dict):

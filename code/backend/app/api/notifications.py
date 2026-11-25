@@ -11,15 +11,17 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 
-from ..services import alert_sync, notification_channels, notifications
+from ..services import (
+    alert_ingest,
+    alert_sync,
+    feishu_app,
+    notification_channels,
+    notifications,
+    oncall,
+)
 from .auth import get_current_user, require_roles
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
-
-
-class FeishuChannelBody(BaseModel):
-    enabled: bool
-    webhook_url: str = ""
 
 
 class EmailChannelBody(BaseModel):
@@ -31,6 +33,37 @@ class EmailChannelBody(BaseModel):
     from_addr: str = ""
     to_addrs: str = ""
     use_tls: bool = True
+
+
+class FeishuAppBody(BaseModel):
+    enabled: bool
+    app_id: str = ""
+    app_secret: str = ""
+    mode: str = "long_connection"
+    chat_id: str = ""
+    chat_ids: list[str] = []
+    verification_token: str = ""
+    encrypt_key: str = ""
+
+
+class FeishuIdentityBody(BaseModel):
+    open_id: str
+    user_id: int
+    display_name: str = ""
+
+
+class AlertPreviewBody(BaseModel):
+    host: str = ""
+    alertname: str = ""
+    severity: str = "critical"
+
+
+class OnCallBody(BaseModel):
+    user_id: int
+    starts_at: str
+    ends_at: str
+    note: str = ""
+    scope: str = "approval"
 
 
 def _channel_error(exc: notification_channels.ChannelError) -> HTTPException:
@@ -48,24 +81,51 @@ def get_channels(
     return {"channels": notification_channels.get_channels(request.app.state.settings)}
 
 
-@router.put("/channels/feishu")
-def update_feishu_channel(
-    body: FeishuChannelBody,
+@router.get("/oncall")
+def list_oncall_shifts(
     request: Request,
     user: dict = Depends(get_current_user),
 ):
-    """保存飞书渠道；webhook 留空表示保留原值。"""
+    """管理员查看值班表；当前值班会标记出来。"""
+    require_roles(user, {"admin"})
+    return {"items": oncall.list_shifts(request.app.state.settings)}
+
+
+@router.post("/oncall", status_code=201)
+def create_oncall_shift(
+    body: OnCallBody,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """新增一段值班；审批值班只能给管理员，告警值班可给任意启用用户。"""
     require_roles(user, {"admin"})
     try:
-        item = notification_channels.update_feishu(
+        return oncall.create_shift(
             request.app.state.settings,
+            user_id=body.user_id,
+            starts_at=body.starts_at,
+            ends_at=body.ends_at,
+            note=body.note,
+            scope=body.scope,
             actor_id=int(user["id"]),
-            enabled=body.enabled,
-            webhook_url=body.webhook_url,
         )
-    except notification_channels.ChannelError as exc:
-        raise _channel_error(exc) from exc
-    return {"item": item}
+    except oncall.OnCallError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.delete("/oncall/{shift_id}")
+def delete_oncall_shift(
+    shift_id: str,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """软删除一段值班；留着历史，便于追溯当时谁在值班。"""
+    require_roles(user, {"admin"})
+    try:
+        UUID(shift_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="值班编号不合法") from exc
+    return oncall.delete_shift(request.app.state.settings, shift_id)
 
 
 @router.put("/channels/email")
@@ -92,6 +152,131 @@ def update_email_channel(
     except notification_channels.ChannelError as exc:
         raise _channel_error(exc) from exc
     return {"item": item}
+
+
+@router.get("/channels/feishu-app")
+def read_feishu_app(
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """读取飞书应用配置；秘密字段只返回是否已配置。"""
+    require_roles(user, {"admin"})
+    return feishu_app.get_config(request.app.state.settings)
+
+
+@router.put("/channels/feishu-app")
+def update_feishu_app(
+    body: FeishuAppBody,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """保存飞书应用配置；秘密留空表示保留原值。"""
+    require_roles(user, {"admin"})
+    try:
+        item = feishu_app.update_config(
+            request.app.state.settings,
+            actor_id=int(user["id"]),
+            enabled=body.enabled,
+            app_id=body.app_id,
+            app_secret=body.app_secret,
+            mode=body.mode,
+            chat_id=body.chat_id,
+            chat_ids=body.chat_ids,
+            verification_token=body.verification_token,
+            encrypt_key=body.encrypt_key,
+        )
+    except feishu_app.FeishuAppError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"item": item}
+
+
+@router.get("/channels/feishu-app/chats")
+def read_feishu_app_chats(
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """列出机器人所在群，供配置页选择目标群。"""
+    require_roles(user, {"admin"})
+    try:
+        return {"items": feishu_app.list_chats(request.app.state.settings)}
+    except feishu_app.FeishuAppError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/channels/feishu-app/members")
+def read_feishu_app_members(
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """列出目标群成员和已绑定账号，供管理员手工绑定。"""
+    require_roles(user, {"admin"})
+    try:
+        return {"items": feishu_app.list_members(request.app.state.settings)}
+    except feishu_app.FeishuAppError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/channels/feishu-app/identities")
+def read_feishu_app_identities(
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """当前有效的飞书成员绑定。"""
+    require_roles(user, {"admin"})
+    return {"items": feishu_app.list_identities(request.app.state.settings)}
+
+
+@router.post("/channels/feishu-app/identities", status_code=201)
+def bind_feishu_identity(
+    body: FeishuIdentityBody,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """把群成员 open_id 绑定到平台管理员账号。"""
+    require_roles(user, {"admin"})
+    try:
+        return feishu_app.bind_identity(
+            request.app.state.settings,
+            actor_id=int(user["id"]),
+            open_id=body.open_id,
+            user_id=body.user_id,
+            display_name=body.display_name,
+        )
+    except feishu_app.FeishuAppError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.delete("/channels/feishu-app/identities/{identity_id}")
+def unbind_feishu_identity(
+    identity_id: str,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """解绑飞书成员；保留历史记录。"""
+    require_roles(user, {"admin"})
+    try:
+        return feishu_app.unbind_identity(
+            request.app.state.settings,
+            actor_id=int(user["id"]),
+            identity_id=identity_id,
+        )
+    except feishu_app.FeishuAppError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/channels/feishu-app/test")
+def test_feishu_app(
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """给目标群发一张测试卡片；不创建任务、不发审批。"""
+    require_roles(user, {"admin"})
+    try:
+        return feishu_app.test_card(
+            request.app.state.settings, actor_id=int(user["id"]),
+        )
+    except feishu_app.FeishuAppError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/channels/{channel}/test")
@@ -121,6 +306,22 @@ def sync_alerts(
     """管理员手动触发一轮 Prometheus 告警同步；定时入口见 scripts。"""
     require_roles(user, {"admin"})
     return alert_sync.sync_once(request.app.state.settings)
+
+
+@router.post("/alerts/preview")
+def preview_alert(
+    body: AlertPreviewBody,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    """管理员预检一条告警会不会自动建单；只看规则，不真建任务。"""
+    require_roles(user, {"admin"})
+    return alert_ingest.preview_gate(
+        request.app.state.settings,
+        host=body.host,
+        alertname=body.alertname,
+        severity=body.severity,
+    )
 
 
 @router.get("")

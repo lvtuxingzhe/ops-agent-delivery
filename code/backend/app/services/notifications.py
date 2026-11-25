@@ -7,11 +7,14 @@
 
 from __future__ import annotations
 
+import json
 import logging
+import os
+import re
 
 from ..core.config import Settings
 from ..core.db import connect_app
-from . import notification_channels
+from . import feishu_app, notification_channels, oncall
 from .failure_taxonomy import REASON_TEXT, normalize_reason
 
 logger = logging.getLogger(__name__)
@@ -21,6 +24,44 @@ MAX_LIMIT = 50
 def _clip(value: str, limit: int) -> str:
     """通知只存短文本，避免把整份报告复制进通知表。"""
     return (value or "").strip()[:limit]
+
+
+def _plain_text(value: object) -> str:
+    """把报告里的字面量换行和代码围栏还原成纯文本。
+
+    模型有时把换行写成两个字符 `\\n`，直接把这种文本丢进飞书会显示成
+    一行 `\\n`；代码围栏在纯文本里也只是噪音，去掉围栏但保留命令。
+    """
+    text = str(value or "")
+    text = text.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "\t")
+    lines = [
+        line for line in text.splitlines()
+        if not line.strip().startswith("```")
+    ]
+    return "\n".join(lines).strip()
+
+
+def _numbered_items(value: object, limit: int, width: int) -> list[str]:
+    """把编号段落压成短句：每段取第一句和第一条命令，避免通知刷屏。"""
+    text = _plain_text(value)
+    items: list[str] = []
+    for match in re.finditer(r"(?ms)^\s*\d+\.\s*(.*?)(?=^\s*\d+\.\s*|\Z)", text):
+        body = match.group(1).strip()
+        lines = [line.strip() for line in body.splitlines() if line.strip()]
+        if not lines:
+            continue
+        head = lines[0].removeprefix("目的：").rstrip("：。")
+        command = ""
+        for line in lines[1:]:
+            if line.startswith(("预期", "以上")) or line.endswith(("：", "。")):
+                continue
+            command = line
+            break
+        item = f"{head}：{command}" if command else head
+        items.append(_clip(item, width))
+        if len(items) >= limit:
+            break
+    return items
 
 
 def _insert(
@@ -76,7 +117,13 @@ def notify_report_ready(settings: Settings, *, task_id: str) -> int:
                 if not task or task[1] is None:
                     return 0
                 title = task[0] or "排查任务"
-                body = f"排查「{title}」报告已完成，可以查看结论与证据。"
+                report_row = conn.execute(
+                    "SELECT report FROM v3_tasks WHERE id = %s", (task_id,),
+                ).fetchone()
+                digest = _report_digest(report_row[0] if report_row else None)
+                body = f"排查「{title}」报告已完成。"
+                if digest:
+                    body += f"\n\n{digest}"
                 inserted = _insert(
                     conn,
                     user_ids=[int(task[1])],
@@ -90,6 +137,11 @@ def notify_report_ready(settings: Settings, *, task_id: str) -> int:
             notification_channels.deliver_task_event(
                 settings, task_id=task_id,
                 title="排查报告已完成", body=body,
+            )
+            _send_feishu_text(
+                settings, title="排查报告已完成", body=body,
+                user_ids=[int(task[1])] if task[1] is not None else None,
+                task_id=task_id, icon="🔵",
             )
         return inserted
     except Exception:
@@ -148,6 +200,11 @@ def notify_comment_mention(
                 settings, task_id=task_id,
                 title="讨论里有人提到你", body=body,
             )
+            _send_feishu_text(
+                settings, title="讨论里有人提到你", body=body,
+                user_ids=recipients,
+                task_id=task_id, icon="🔔",
+            )
         return inserted
     except Exception:
         logger.exception("写讨论 @ 提醒失败 task_id=%s", task_id)
@@ -192,12 +249,187 @@ def notify_task_assigned(
                 settings, task_id=task_id,
                 title="有任务转派给你", body=body,
             )
+            _send_feishu_text(
+                settings, title="有任务转派给你", body=body,
+                user_ids=[int(assignee_id)],
+                task_id=task_id, icon="📌",
+            )
         return inserted
     except Exception:
         logger.exception(
             "写任务转派通知失败 task_id=%s assignee_id=%s", task_id, assignee_id,
         )
         return 0
+
+
+def _approval_recipients(conn, task_id: str) -> tuple[list[int], str]:
+    """审批通知收件人：当前值班 + 已指派审批人，都没有才群发管理员。
+
+    返回（用户 ID 列表，给正文用的说明）。值班表为空时不阻塞审批，
+    回落到原有全体管理员行为。
+    """
+    recipients: list[int] = []
+    notes: list[str] = []
+    shifts = oncall.current_oncall(conn)
+    for shift in shifts:
+        uid = int(shift["user_id"])
+        if uid not in recipients:
+            recipients.append(uid)
+        name = shift.get("user_name") or f"用户 {uid}"
+        notes.append(name)
+    if notes:
+        notes_text = "当前审批值班：" + "、".join(notes) + "。"
+    else:
+        notes_text = ""
+
+    row = conn.execute(
+        "SELECT approval FROM v3_tasks WHERE id = %s",
+        (task_id,),
+    ).fetchone()
+    approval = row[0] if row and isinstance(row[0], dict) else {}
+    routing = approval.get("routing") if isinstance(approval.get("routing"), dict) else {}
+    assigned = routing.get("assigned_to")
+    try:
+        assigned_id = int(assigned) if assigned is not None else 0
+    except (TypeError, ValueError):
+        assigned_id = 0
+    if assigned_id and assigned_id not in recipients:
+        recipients.append(assigned_id)
+        notes_text += f" 已指派给用户 {assigned_id}。"
+
+    if not recipients:
+        admin_rows = conn.execute(
+            "SELECT id FROM v3_users WHERE is_active "
+            "AND roles @> ARRAY['admin']::text[]"
+        ).fetchall()
+        recipients = [int(item[0]) for item in admin_rows]
+        if not recipients:
+            notes_text = ""
+        elif notes_text:
+            notes_text += " 当前没有值班安排，已发给全部管理员。"
+        else:
+            notes_text = "当前没有值班安排，已发给全部管理员。"
+    return recipients, notes_text
+
+
+def _report_digest(report: object) -> str:
+    """把报告压成飞书可读的结论、根因和处置方案。"""
+    if isinstance(report, str):
+        try:
+            report = json.loads(report)
+        except json.JSONDecodeError:
+            return ""
+    if not isinstance(report, dict):
+        return ""
+    headline = _plain_text(report.get("headline") or report.get("primary_answer") or "")
+    root_cause = _plain_text(report.get("root_cause") or "")
+    solution = _plain_text(report.get("solution") or "")
+    conclusions = report.get("conclusions")
+    if not headline and isinstance(conclusions, list):
+        texts = [
+            _plain_text(item.get("text") or "")
+            for item in conclusions[:3]
+            if isinstance(item, dict)
+        ]
+        headline = "；".join(item for item in texts if item)
+    lines: list[str] = []
+    if headline:
+        lines.append(f"结论：{_clip(headline, 220)}")
+    if root_cause:
+        root_items = _numbered_items(root_cause, 1, 180)
+        root_text = "；".join(root_items) if root_items else _clip(root_cause, 260)
+        lines.append(f"根因：{root_text}")
+    if solution:
+        steps = _numbered_items(solution, 3, 220)
+        if steps:
+            numbered = "\n".join(
+                f"{index}. {item}" for index, item in enumerate(steps, start=1)
+            )
+            lines.append(f"处置方案：\n{numbered}")
+        else:
+            lines.append(f"处置方案：{_clip(solution, 400)}")
+    return "\n".join(lines)
+
+
+def _plan_commands(plan: object) -> str:
+    """只取部署方案的 apply 命令；不碰账号、密码等目标信息。"""
+    if isinstance(plan, str):
+        try:
+            plan = json.loads(plan)
+        except json.JSONDecodeError:
+            return ""
+    if not isinstance(plan, dict):
+        return ""
+    operations = plan.get("operations")
+    if not isinstance(operations, list):
+        return ""
+    lines: list[str] = []
+    for item in operations[:10]:
+        if not isinstance(item, dict):
+            continue
+        command = str(item.get("command") or "").strip()
+        if not command:
+            argv = item.get("argv")
+            command = " ".join(str(part) for part in argv) if isinstance(argv, list) else ""
+        if not command:
+            continue
+        command = _plain_text(command)
+        title = str(item.get("title") or "").strip()
+        scope = str(item.get("scope") or "").strip()
+        suffix = "（高危）" if scope == "dangerous" else ""
+        lines.append(f"{len(lines) + 1}. {title + '：' if title else ''}{_clip(command, 300)}{suffix}")
+    return "\n".join(lines)
+
+
+def _send_feishu_text(
+    settings: Settings,
+    *,
+    title: str,
+    body: str,
+    user_ids: list[int] | None = None,
+    oncall_scope: str = "alert",
+    task_id: str = "",
+    link_path: str = "",
+    icon: str = "",
+) -> None:
+    """飞书应用启用时补一条文本；失败只记日志，不影响站内通知。"""
+    try:
+        if task_id:
+            base = (
+                os.environ.get("NOTIFY_BASE_URL")
+                or os.environ.get("FRONTEND_URL")
+                or "http://127.0.0.1:5173"
+            ).rstrip("/")
+            path = link_path or f"/#/tasks/{task_id}"
+            body = f"{body}\n\n查看：{base}{path}"
+        result = feishu_app.notify_text(
+            settings,
+            title=title,
+            body=body,
+            user_ids=user_ids,
+            oncall_scope=oncall_scope,
+            icon=icon,
+        )
+        if not result.get("ok"):
+            logger.info(
+                "飞书文本通知未发送 title=%s detail=%s",
+                title, result.get("detail") or result.get("items"),
+            )
+    except Exception:
+        logger.exception("飞书文本通知发送失败 title=%s", title)
+
+
+def _send_feishu_approval_card(settings: Settings, *, task_id: str) -> None:
+    """飞书应用启用时补一张可操作卡片；失败只记日志，不影响站内通知。"""
+    try:
+        result = feishu_app.send_approval_card(settings, task_id=task_id)
+        if not result.get("ok"):
+            logger.info(
+                "飞书审批卡片未发送 task_id=%s detail=%s",
+                task_id, result.get("detail"),
+            )
+    except Exception:
+        logger.exception("飞书审批卡片发送失败 task_id=%s", task_id)
 
 
 def notify_approval(settings: Settings, *, task_id: str) -> int:
@@ -212,15 +444,12 @@ def notify_approval(settings: Settings, *, task_id: str) -> int:
                     return 0
                 title = task[0] or "排查任务"
                 body = f"排查「{title}」已进入处置审批，请只审批要执行的命令。"
-                admin_ids = [
-                    int(row[0]) for row in conn.execute(
-                        "SELECT id FROM v3_users WHERE is_active "
-                        "AND roles @> ARRAY['admin']::text[]"
-                    ).fetchall()
-                ]
+                user_ids, route_note = _approval_recipients(conn, task_id)
+                if route_note:
+                    body += f" {route_note}"
                 inserted = _insert(
                     conn,
-                    user_ids=admin_ids,
+                    user_ids=user_ids,
                     type_="task.approval_pending",
                     title="有新的命令待审批",
                     body=body,
@@ -232,6 +461,7 @@ def notify_approval(settings: Settings, *, task_id: str) -> int:
                 settings, task_id=task_id,
                 title="有新的命令待审批", body=body,
             )
+            _send_feishu_approval_card(settings, task_id=task_id)
         return inserted
     except Exception:
         logger.exception("写待审批通知失败 task_id=%s", task_id)
@@ -257,15 +487,12 @@ def notify_approval_timeout(settings: Settings, *, task_id: str,
                 overdue = max(0, int(overdue_minutes))
                 suffix = f"已超过审批时限 {overdue} 分钟" if overdue else "已超过审批时限"
                 body = f"「{title}」{suffix}仍未处理，请管理员接管或驳回。"
-                admin_ids = [
-                    int(row[0]) for row in conn.execute(
-                        "SELECT id FROM v3_users WHERE is_active "
-                        "AND roles @> ARRAY['admin']::text[]"
-                    ).fetchall()
-                ]
+                user_ids, route_note = _approval_recipients(conn, task_id)
+                if route_note:
+                    body += f" {route_note}"
                 inserted = _insert(
                     conn,
-                    user_ids=admin_ids,
+                    user_ids=user_ids,
                     type_="task.approval_timeout",
                     title="审批已超时",
                     body=body,
@@ -321,6 +548,7 @@ def notify_deployment_approver_assigned(
                 title="部署方案待你审批", body=body,
                 link_path=f"/#/deployments?task={task_id}",
             )
+            _send_feishu_approval_card(settings, task_id=task_id)
         return inserted
     except Exception:
         logger.exception("写部署指派通知失败 task_id=%s approver_id=%s", task_id, approver_id)
@@ -341,7 +569,7 @@ def notify_deployment_result(settings: Settings, *, task_id: str) -> int:
         with connect_app(settings) as conn:
             with conn.transaction():
                 row = conn.execute(
-                    "SELECT title, submitted_by, outcome, reason_code, task_type, approval "
+                    "SELECT title, submitted_by, outcome, reason_code, task_type, approval, plan "
                     "FROM v3_tasks WHERE id = %s",
                     (task_id,),
                 ).fetchone()
@@ -352,6 +580,7 @@ def notify_deployment_result(settings: Settings, *, task_id: str) -> int:
                 outcome = str(row[2] or "failed")
                 reason_code = str(row[3] or "")
                 approval = row[5] if isinstance(row[5], dict) else {}
+                plan = row[6] if isinstance(row[6], dict) else {}
                 routing = approval.get("routing") if isinstance(approval.get("routing"), dict) else {}
                 assigned_to = routing.get("assigned_to")
 
@@ -378,6 +607,10 @@ def notify_deployment_result(settings: Settings, *, task_id: str) -> int:
                     )
                     body = f"部署「{title}」执行失败：{reason}。"
 
+                commands = _plan_commands(plan)
+                if commands:
+                    body += f"\n\n部署命令：\n{commands}"
+
                 admin_ids = [
                     int(item[0]) for item in conn.execute(
                         "SELECT id FROM v3_users WHERE is_active "
@@ -403,6 +636,20 @@ def notify_deployment_result(settings: Settings, *, task_id: str) -> int:
                 settings, task_id=task_id,
                 title=notification_title, body=body,
                 link_path=f"/#/deployments?tab=records&task={task_id}",
+            )
+            _send_feishu_text(
+                settings, title=notification_title, body=body,
+                user_ids=[
+                    int(item) for item in (submitted_by, assigned_to)
+                    if item is not None
+                ],
+                task_id=task_id,
+                link_path=f"/#/deployments?tab=records&task={task_id}",
+                icon={
+                    "succeeded": "🟢",
+                    "partial": "🟡",
+                    "rejected": "🚫",
+                }.get(outcome, "🔴"),
             )
         return inserted
     except Exception:
@@ -450,6 +697,11 @@ def notify_monitor_alert(
         if inserted:
             notification_channels.deliver_alert_event(
                 settings, title=title, body=body,
+            )
+            _send_feishu_text(
+                settings, title=title, body=body,
+                oncall_scope="alert",
+                icon="🟢" if resolved else "🔴",
             )
         return inserted
     except Exception:

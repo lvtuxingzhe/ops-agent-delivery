@@ -6,6 +6,7 @@
   不把正文再写一份到审计表。
 * 撤回/清理只写 `deleted_at/deleted_by`，不物理删除；数据库只给
   `ops_app` 这两个列的 UPDATE 权限，正文仍不可改。
+* `kind='clue'` 的评论会进入 Agent 排查上下文；`discussion` 只给人看。
 * @ 提醒在写入时解析成用户 ID，通知只提示“有人在讨论里 @ 你”，
   不把评论正文带到站外渠道。
 """
@@ -23,6 +24,8 @@ MAX_BODY_LENGTH = 2000
 DEFAULT_PAGE_SIZE = 50
 MAX_PAGE_SIZE = 200
 MENTION_LIMIT = 20
+COMMENT_KINDS = ("discussion", "clue")
+CLUE_LIMIT = 10
 
 _MENTION_RE = re.compile(r"@([^\s@,，。:：;；]+)")
 
@@ -33,6 +36,7 @@ class CommentError(Exception):
 
 def _row_to_comment(row) -> dict:
     """数据库行转接口字段；时间统一 ISO 8601，前端按本地时区展示。"""
+    kind = str(row[6] or "discussion") if len(row) > 6 else "discussion"
     return {
         "id": str(row[0]),
         "author_id": int(row[1]),
@@ -40,10 +44,12 @@ def _row_to_comment(row) -> dict:
         "body": str(row[3] or ""),
         "created_at": row[4].isoformat() if row[4] else "",
         "mentions": [int(item) for item in (row[5] or [])],
+        "kind": kind,
     }
 
 
 def _parse_cursor(created_at: str | None, comment_id: str | None) -> tuple[datetime, UUID] | None:
+    """内部辅助：parse cursor。"""
     if not created_at and not comment_id:
         return None
     if not created_at or not comment_id:
@@ -106,7 +112,7 @@ def list_comments(
             params.extend([cursor[0], cursor[1]])
         rows = conn.execute(
             f"""
-            SELECT id, author_id, author_name, body, created_at, mentions
+            SELECT id, author_id, author_name, body, created_at, mentions, kind
             FROM v3_task_comments
             WHERE {clause}
             ORDER BY created_at DESC, id DESC
@@ -153,13 +159,18 @@ def list_comments(
     }
 
 
-def add_comment(settings: Settings, task_id: str, user: dict, body: str) -> dict:
-    """追加一条评论；空白正文、超长正文直接拒绝。"""
+def add_comment(
+    settings: Settings, task_id: str, user: dict, body: str,
+    *, kind: str = "discussion",
+) -> dict:
+    """追加一条评论；空白正文、超长正文、非法类型直接拒绝。"""
     text = (body or "").strip()
     if not text:
         raise CommentError("评论不能为空")
     if len(text) > MAX_BODY_LENGTH:
         raise CommentError(f"评论最多 {MAX_BODY_LENGTH} 字")
+    if kind not in COMMENT_KINDS:
+        raise CommentError("评论类型只能是讨论或排查线索")
 
     author_id = int(user["id"])
     author_name = str(user.get("display_name") or user.get("username") or "未知用户")
@@ -169,15 +180,32 @@ def add_comment(settings: Settings, task_id: str, user: dict, body: str) -> dict
         row = conn.execute(
             """
             INSERT INTO v3_task_comments
-                (id, task_id, author_id, author_name, body, mentions)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            RETURNING id, author_id, author_name, body, created_at, mentions
+                (id, task_id, author_id, author_name, body, mentions, kind)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id, author_id, author_name, body, created_at, mentions, kind
             """,
-            (comment_id, task_id, author_id, author_name, text, mentions),
+            (comment_id, task_id, author_id, author_name, text, mentions, kind),
         ).fetchone()
     if not row:
         raise CommentError("评论写入失败")
     return _row_to_comment(row)
+
+
+def list_clues(settings: Settings, task_id: str, *, limit: int = CLUE_LIMIT) -> list[dict]:
+    """取会进入 Agent 的排查线索；按时间正序，最多 10 条。"""
+    page_size = max(1, min(int(limit), 50))
+    with connect_app(settings) as conn:
+        rows = conn.execute(
+            """
+            SELECT id, author_id, author_name, body, created_at, mentions, kind
+              FROM v3_task_comments
+             WHERE task_id = %s AND deleted_at IS NULL AND kind = 'clue'
+             ORDER BY created_at ASC, id ASC
+             LIMIT %s
+            """,
+            (task_id, page_size),
+        ).fetchall()
+    return [_row_to_comment(row) for row in rows]
 
 
 def mark_read(settings: Settings, task_id: str, user_id: int) -> dict:

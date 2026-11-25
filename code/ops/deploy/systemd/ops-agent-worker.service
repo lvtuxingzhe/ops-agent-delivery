@@ -1,0 +1,22 @@
+[Unit]
+Description=Ops Agent Queue Worker
+After=network-online.target postgresql.service redis.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=opsagent
+Group=opsagent
+WorkingDirectory=/data/ops-agent/code
+EnvironmentFile=/data/ops-agent/code/.env
+ExecStart=/data/ops-agent/code/backend/.venv/bin/python backend/scripts/run_queue_worker.py --interval 5
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=120
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

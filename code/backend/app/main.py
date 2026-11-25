@@ -50,17 +50,30 @@ async def _approval_sla_loop(settings) -> None:
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
-    """应用生命周期：启动时拉起审批 SLA 扫描，停机时取消。"""
+    """应用生命周期：启动审批 SLA 扫描和飞书长连接，停机时一起收掉。"""
     task = asyncio.create_task(
         _approval_sla_loop(app.state.settings),
         name="approval-sla-loop",
     )
+    logger = logging.getLogger(__name__)
     try:
+        from .services import feishu_app
+
+        try:
+            feishu_app.start_worker(app.state.settings)
+        except Exception:
+            logger.exception("飞书长连接启动失败，不阻塞后台启动")
         yield
     finally:
         task.cancel()
         with suppress(asyncio.CancelledError):
             await task
+        try:
+            from .services import feishu_app
+
+            feishu_app.stop_worker()
+        except Exception:
+            logger.exception("飞书长连接停止失败")
 
 
 def create_app() -> FastAPI:
